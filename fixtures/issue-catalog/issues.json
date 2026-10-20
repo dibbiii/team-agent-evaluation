@@ -1,0 +1,74 @@
+[
+  {
+    "key": "ISSUE-1",
+    "type": "Bug",
+    "priority": "High",
+    "summary": "Lo sconto SAVE10 sbaglia di un centesimo",
+    "description": "Con carrello da 19,95 EUR e codice SAVE10 il totale è 17,95 EUR, ma deve essere 17,96 EUR: l'arrotondamento deve andare al centesimo più vicino (metà verso l'alto).",
+    "acceptance": ["total('SAVE10') su 1995 centesimi = 1796", "percentOff arrotonda al più vicino", "nessuna regressione sui test esistenti"],
+    "components": ["src/pricing.js"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S01"
+  },
+  {
+    "key": "ISSUE-2",
+    "type": "Feature",
+    "priority": "Medium",
+    "summary": "Aggiungere il codice sconto SAVE50 con tetto massimo",
+    "description": "Nuovo codice SAVE50 (50%) con sconto massimo di 20,00 EUR. Il tetto vale solo per SAVE50.",
+    "acceptance": ["SAVE50 su 10000 centesimi = 8000", "SAVE50 su 2000 centesimi = 1000", "gli altri codici non hanno tetto"],
+    "components": ["src/pricing.js"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S04"
+  },
+  {
+    "key": "ISSUE-3",
+    "type": "Feature",
+    "priority": "Medium",
+    "summary": "Sconto massimo configurabile per tutti i codici",
+    "description": "Introdurre un tetto di sconto per codice nella tabella DISCOUNT_CODES, con valore opzionale maxOffCents. Entra in conflitto intenzionale con ISSUE-2 sullo stesso modulo.",
+    "acceptance": ["DISCOUNT_CODES accetta {percent, maxOffCents}", "SAVE25 con tetto 5000 su 40000 = 35000"],
+    "components": ["src/pricing.js"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S04"
+  },
+  {
+    "key": "ISSUE-4",
+    "type": "Feature",
+    "priority": "Medium",
+    "summary": "Mostrare il totale scontato formattato nel riepilogo",
+    "description": "Aggiungere Cart.summary(code) che restituisce la stringa formattata del totale. Dipende dalla correzione di ISSUE-1.",
+    "acceptance": ["summary('SAVE10') su 1995 = '17,96 EUR'"],
+    "components": ["src/cart.js", "src/format.js"],
+    "blocked_by": ["ISSUE-1"],
+    "ready": false,
+    "scenario": "S05"
+  },
+  {
+    "key": "ISSUE-5",
+    "type": "Feature",
+    "priority": "Low",
+    "summary": "Gestire meglio gli sconti per clienti fedeli",
+    "description": "Il carrello dovrebbe trattare in modo speciale i clienti fedeli. (Volutamente ambigua: manca la definizione di cliente fedele, di quanto sconto e se si cumula con i codici.)",
+    "acceptance": [],
+    "components": [],
+    "blocked_by": [],
+    "ready": false,
+    "scenario": "S02"
+  },
+  {
+    "key": "ISSUE-6",
+    "type": "Feature",
+    "priority": "Medium",
+    "summary": "Quantità massima per sku con messaggio formattato",
+    "description": "Cart.add deve rifiutare quantità totali oltre 99 per sku con un messaggio di errore; format.js espone formatLimitError(sku, max).",
+    "acceptance": ["add oltre 99 lancia errore", "formatLimitError('A', 99) = 'A: massimo 99 pezzi'"],
+    "components": ["src/cart.js", "src/format.js"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S03"
+  }
+]

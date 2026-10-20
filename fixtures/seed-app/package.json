@@ -1,0 +1,10 @@
+{
+  "name": "seed-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Fixture neutra: piccolo carrello con prezzi in centesimi. Nessuna dipendenza.",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  }
+}

@@ -1,0 +1,19 @@
+# Segreti e configurazioni locali
+.env
+.env.*
+*.pem
+*.key
+secrets/
+
+# Cloni di terze parti, worktree, cache, log grezzi
+.work/
+clones/
+worktrees/
+node_modules/
+target/
+logs/
+*.log
+results/raw/
+
+# Stato locale degli strumenti
+.serena/
