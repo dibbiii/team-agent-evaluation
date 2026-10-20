@@ -27,6 +27,8 @@
 ## M3 — Smoke test (2026-10-20)
 
 - **Non eseguiti** sui candidati: richiedono installazioni globali (Bun, Go, Dolt, tmux), Docker o WSL2 attivi, o credenziali. Tutti `BLOCKED`, istruzioni in `reports/HANDOFF.md`.
+- Ricontrollo ambiente (2026-10-20, secondo passaggio): Docker ancora spento, `gh` non autenticato, RAM libera 1,3 GB, nessuna variabile `ANTHROPIC_*`. Nessuna risposta alle richieste di approvazione.
+- Lavoro non bloccato eseguito nel frattempo: scritti i test held-out di ISSUE-2, 3, 4, 6 in `fixtures/acceptance/`. **TESTED** con `scripts/evaluate.mjs`: ognuno dà FAIL sul baseline e PASS con una soluzione di riferimento scritta in una copia temporanea (non versionata). Questo valida i test, non i candidati.
 
 ## M4/M5 — Prove critiche e integrazione (2026-10-20)
 

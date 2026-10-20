@@ -9,7 +9,7 @@
 | D05 | 2026-10-20 | Il mock Jira è un controller di riferimento, non un candidato | Misura il costo dell'adapter, non le capacità dei prodotti | Applicata |
 | D06 | 2026-10-20 | La rubrica 0–5 non è compilata | Mancano dati sperimentali (istruzioni §10) | Applicata |
 | D07 | 2026-10-20 | Raccomandazione provvisoria: partire da Opzione A, con B come seconda scelta | Vedi `reports/FINAL-RECOMMENDATION.md`; da rivedere dopo i test LIVE | Provvisoria |
-| D08 | 2026-10-20 | Un solo test held-out (ISSUE-1) | Sufficiente per validare l'harness; gli altri vanno scritti prima dei run LIVE | Aperta |
+| D08 | 2026-10-20 | Test held-out per ISSUE-1, 2, 3, 4, 6 | Validati: FAIL sul baseline, PASS con una soluzione di riferimento. ISSUE-5 non ne ha, perché è ambigua per costruzione (S02) | Chiusa |
 
 ## Decisioni aperte del documento (§13) e posizione di questa valutazione
 
