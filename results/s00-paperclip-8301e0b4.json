@@ -1,0 +1,62 @@
+{
+  "run_id": "8301e0b4-36b5-442f-abbb-5b9ac54f51d4",
+  "candidate": "paperclip",
+  "candidate_version": "0.3.1 @ 05f7079ecb2ee28d64715fd18e60b43e2d2fa989 (sorgente); npm paperclipai 2026.1012.0 @ bba6a45f0d364cfd962ac59b3bdf2426a8222adb (quickstart npx)",
+  "scenario_id": "S00",
+  "mode": "MOCK",
+  "model": null,
+  "baseline_commit": null,
+  "status": "PARTIAL",
+  "started_at_utc": "2026-10-20T21:35:00Z",
+  "finished_at_utc": "2026-10-20T22:12:00Z",
+  "duration_seconds": null,
+  "input_tokens": null,
+  "output_tokens": null,
+  "cache_tokens": null,
+  "estimated_cost_usd": null,
+  "retries": 1,
+  "human_interventions": 0,
+  "checks": {
+    "environment": {
+      "host": "Windows 11 + Docker Engine 29.2.0, container Linux x64 non root (uid 1000)",
+      "image": {"ref": "node:24-bookworm", "digest": "sha256:14078204b6bb268c107ceff6d3c43f45a888105e5c2b18b14c32b3409d93a1b0", "node": "v24.22.0", "npm": "11.19.1", "pnpm": "9.15.4 (corepack 0.36.0)", "git": "2.39.5"},
+      "limits": "--memory 2g --memory-swap 2g --cpus 2 --pids-limit 512 --cap-drop ALL --security-opt no-new-privileges --user node --init, Mounts=0, nessun -p, nessun socket Docker",
+      "network_egress": "bridge predefinita, uscita non filtrata (pull immagine, registry npm, nodejs.org per header node-gyp)",
+      "env_vars_set": "PAPERCLIP_TELEMETRY_DISABLED=1, PAPERCLIP_RUNNER_BINARY=/bin/true, SERVE_UI=false, PAPERCLIP_HTTP_ADAPTER_PRIVATE_ENDPOINT_ALLOWLIST=http://127.0.0.1:9099; nessun segreto",
+      "note": "started_at/finished_at sono stime; duration_seconds totale non misurato"
+    },
+    "pnpm_install": {"label": "TESTED", "result": "PARTIAL", "detail": "prova 1: OOM-killed (137) dopo 104 s durante compilazione cpu-features + install parallelo; prova 2 con --child-concurrency=1 --network-concurrency=8: OK 1351 pacchetti in 44.1 s (store caldo), picco campionato 1.92 GiB"},
+    "pnpm_dev_official": {"label": "BLOCKED", "result": "FAIL", "detail": "pnpm dev:once: migrazioni e build TS del runner OK, poi 'cargo: not found' (runner nativo Rust). README cita la toolchain Rust solo dopo il quickstart"},
+    "pnpm_dev_with_dummy_runner_binary": {"label": "TESTED", "result": "FAIL", "detail": "con PAPERCLIP_RUNNER_BINARY=/bin/true il server si avvia ma il Vite dev middleware viene OOM-killed a 2 GiB (exit 137)"},
+    "server_headless_boot": {"label": "TESTED", "result": "PASS", "detail": "tsx src/index.ts, SERVE_UI=false, local_trusted, bind 127.0.0.1:3100, Postgres embedded 127.0.0.1:54329; /api/health 200 in 22.4 s, 14.3 s, 20.5 s (campionamento 2.5-5.6 s); server RSS 825-868 MB, container 1.1-1.3 GiB"},
+    "api_company_agent_issue_run": {"label": "TESTED", "result": "PASS", "detail": "POST companies/agents(http)/keys/issues; run succeeded exit 0 in ~1.3 s; webhook locale ha ricevuto POST ~13 KB; issue in_progress; l'assegnazione fa partire da sola il wakeup"},
+    "http_adapter_ssrf_guard": {"label": "TESTED", "result": "PASS", "detail": "URL loopback rifiutato (harness_test_failed) finche' l'origine non e' in PAPERCLIP_HTTP_ADAPTER_PRIVATE_ENDPOINT_ALLOWLIST"},
+    "budget_unpriced_block": {"label": "TESTED", "result": "INFO", "detail": "run http a 0 centesimi => unpricedUsagePolicy=block => hard_stop su agente e company, entrambi in pausa"},
+    "shutdown_restart_persistence": {"label": "TESTED", "result": "PASS", "detail": "SIGTERM -> exit 240-425 ms; Postgres embedded fermato; riavvio con dati persistiti (company presente). Se il server muore per OOM il Postgres embedded resta orfano"},
+    "quickstart_npx_release": {"label": "TESTED", "result": "PASS", "detail": "npx --yes paperclipai@2026.1012.0 onboard --yes --no-install-service: local_trusted loopback 3100, static UI 200, health dopo ~190-200 s (download+node-gyp+avvio), SIGTERM exit 1.25 s; versione diversa dal commit studiato"},
+    "vitest_subset": {"label": "TESTED", "result": "PASS", "detail": "packages/shared + http adapter: 95 file / 1012 test PASS (47 s); agent-permissions-routes/service + budgets-service: 3 file / 108 test PASS (57 s, picco 1.56 GiB). Suite completa non eseguita"},
+    "typecheck_shared_adapter_utils": {"label": "TESTED", "result": "PASS", "detail": "tsc --noEmit exit 0, 3 s ciascuno"},
+    "typecheck_server": {"label": "BLOCKED", "result": "FAIL", "detail": "prepare:runner-vendor richiede cargo"},
+    "typecheck_db": {"label": "BLOCKED", "result": "FAIL", "detail": "tsc --noEmit OOM-killed a 2 GiB (anche con heap 1.7 GB), 2 prove"},
+    "ui_build": {"label": "BLOCKED", "result": "FAIL", "detail": "vite build: 7968 modules transformed poi OOM-killed a 2 GiB"},
+    "full_test_suite": {"label": "UNVERIFIED", "result": "non eseguita", "detail": "troppo grande per i limiti del laboratorio"},
+    "claude_local_and_real_agents": {"label": "BLOCKED", "result": "non provato", "detail": "richiedono credenziali/LLM; vincolo di sicurezza"},
+    "native_runner_rust": {"label": "BLOCKED", "result": "non verificato", "detail": "sostituito con /bin/true; nessuna toolchain Rust"},
+    "default_auth_local_trusted": {"label": "TESTED", "result": "INFO", "detail": "nessun login/token: /api/auth/get-session restituisce l'utente implicito local-board; ogni mutazione senza credenziali funziona; ascolta solo 127.0.0.1"},
+    "data_location_and_secrets": {"label": "TESTED", "result": "INFO", "detail": "~/.paperclip/instances/default: db 0700, secrets/master.key e decision-signing.key 0600; con onboard anche .env 0600 e config.json 0600; Postgres embedded password fissa 'paperclip' (CODE) su loopback; telemetry.enabled=true e updates.checkEnabled=true di default"},
+    "issue_16935_self_patch": {"label": "TESTED", "result": "REPRODUCED", "detail": "con la sola chiave agente e con permessi azzerati: PATCH /api/agents/<self> budgetMonthlyCents 5000->99999999 (200), PATCH adapterConfig con dangerouslySkipPermissions+extraArgs (200), PATCH budget e adapterConfig di un agente collega (200). Bloccati: nuove chiavi (403), permessi (403), impostazioni company (403). Sia sul commit 05f7079 sia sulla release npm 2026.1012.0. Solo adapter http e local_trusted; per *_local il blocco di extraArgs/command/args/cwd/env e' solo CODE (agents.ts:2601-2659), dangerouslySkipPermissions non e' nella lista"},
+    "cleanup": {"label": "TESTED", "result": "PASS", "detail": "docker ps -a --filter label=tae=1 vuoto; nessuna immagine tae-/node residua; elenco immagini prima/dopo identico (17/17); volumi 9->9, reti 7->7; container utente 9->9, segnalibro-db healthy"}
+  },
+  "artifact_paths": [
+    "reports/s00-paperclip.md",
+    "docs/candidates/paperclip.md"
+  ],
+  "blockers": [
+    "pnpm dev ufficiale richiede una toolchain Rust (cargo) per il runner nativo: assente nell'immagine, installazione via rustup (curl | sh) non ammessa senza ispezione",
+    "limite di 2 GiB: vite build, vite dev middleware e tsc di packages/db vengono OOM-killed; l'install pnpm e' riuscito solo al secondo tentativo con concorrenza ridotta",
+    "typecheck server bloccato da cargo",
+    "adapter claude_local/agenti reali: credenziali e LLM non ammessi",
+    "verifica #16935 con adapter *_local e in modalita' authenticated non eseguita"
+  ],
+  "notes": "S00 in MOCK, PARTIAL. Dal sorgente: install OK (secondo tentativo), server headless OK in local_trusted su loopback, company/agente http/issue/run senza LLM OK (webhook locale), shutdown e persistenza OK, subset test 1120 PASS. Il comando ufficiale pnpm dev non e' riuscito (cargo assente; con runner finto, OOM del Vite dev). Quickstart npx su release 2026.1012.0 OK con UI statica. Issue #16935 riprodotta (auto-PATCH di budget e adapterConfig, e PATCH di altri agenti, senza permessi). Anomalie: budget hard stop dopo un run a 0 centesimi per unpricedUsagePolicy=block; telemetria e update check attivi di default (spenta da me con env). Nessuna credenziale, nessuna chiamata LLM, costo 0."
+}

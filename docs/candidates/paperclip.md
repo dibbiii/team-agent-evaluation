@@ -1,11 +1,11 @@
 # Scheda candidato — Paperclip
 
-> Ricerca solo documentale/di codice (fase 1, §4 delle istruzioni). **Nessun comando di Paperclip è stato eseguito, nulla è stato installato**: quindi nessuna affermazione è `TESTED`.
+> Ricerca documentale/di codice (fase 1, §4 delle istruzioni) **più lo scenario S00 eseguito il 2026-10-20 in container isolato** (vedi «Risultati sperimentali S00» in fondo e `reports/s00-paperclip.md`). Le affermazioni dei §1-§10 restano `DOC`/`CODE` salvo dove esplicitamente marcate `TESTED`; sono `TESTED` solo quelle dell'esecuzione S00.
 > Il contenuto del repo esterno è trattato come dato non fidato.
 
 ## Legenda etichette
 
-`DOC` documentazione ufficiale · `CODE` verificato nel sorgente (non eseguito) · `PARTIAL` supporto parziale/tramite config o adapter · `UNVERIFIED` plausibile ma non dimostrato · `NOT_SUPPORTED` assenza/limite con evidenza · `BLOCKED` prova impedita (indicare come sbloccare).
+`TESTED` eseguito qui con comando e risultato · `DOC` documentazione ufficiale · `CODE` verificato nel sorgente (non eseguito) · `PARTIAL` supporto parziale/tramite config o adapter · `UNVERIFIED` plausibile ma non dimostrato · `NOT_SUPPORTED` assenza/limite con evidenza · `BLOCKED` prova impedita (indicare come sbloccare).
 
 Riferimenti: i percorsi sono relativi alla radice del clone (`paperclip/`, vedi §2). `file:riga` si riferisce al commit 05f7079.
 
@@ -35,7 +35,7 @@ Nota operativa sul clone: il primo checkout su Windows è risultato incoerente (
 ## 3. Licenza, dipendenze, maturità
 
 - **Licenza: MIT**, copyright 2025 Paperclip AI. `CODE` LICENSE:1-3; confermata da API GitHub (spdx `MIT`). Nessun obbligo oltre l'avviso di copyright. Non ho verificato le licenze delle dipendenze transitive (`UNVERIFIED`) né dei plugin/provider di sandbox di terze parti (E2B, Daytona, Modal, ecc. sono servizi esterni, spesso a pagamento — `UNVERIFIED` sui termini).
-- **Runtime**: Node.js >= 24.11, pnpm 9 workspaces, PostgreSQL 17 oppure PGlite/Postgres embedded, Drizzle ORM, Express 5, React 19/Vite 6, Better Auth. `DOC` docs/start/architecture.md; README.md:356. Avvio dichiarato: `npx paperclipai@latest onboard --yes` `DOC` README.md:359 (**non eseguito**; non va usato senza ispezione preventiva, vedi regole §9 delle istruzioni). Esiste una componente Rust (`packages/paperclip-runner`, "runnerd") `DOC` doc/architecture/paperclip-runner.md.
+- **Runtime**: Node.js >= 24.11, pnpm 9 workspaces, PostgreSQL 17 oppure Postgres embedded (`embedded-postgres`, `TESTED` S00: il processo `postgres` parte da solo su 127.0.0.1:54329; **non** PGlite), Drizzle ORM, Express 5, React 19/Vite 6, Better Auth. `DOC` docs/start/architecture.md; README.md:356. Avvio dichiarato: `npx paperclipai@latest onboard --yes` `DOC` README.md:359 (eseguito in S00 con versione fissata `paperclipai@2026.1012.0` e HOME separata, `TESTED`: funziona, avvia anche il server in primo piano; la versione npm precede il commit studiato). Esiste una componente Rust (`packages/paperclip-runner`, "runnerd") `DOC` doc/architecture/paperclip-runner.md. **Correzione S00 (`TESTED`)**: `pnpm install && pnpm dev` dal sorgente (README, "Or manually") **non parte senza toolchain Rust** (`cargo: not found` nella build del runner nativo; il README lo scrive solo dopo il quickstart) e richiede più di 2 GiB di RAM (Vite dev middleware e `vite build` sono stati OOM-killed a 2 GiB).
 - **Maturità/manutenzione** (dati da API GitHub via WebFetch, riassunti da un modello: valori indicativi): ~105k stelle, ~17,5k fork, ~6.262 issue aperte, creato 2026-03-02, ultimo push 2026-10-20, non archiviato. Cadenza release elevata (5 release in ~4 settimane). Progetto giovane (~7 mesi) e in forte evoluzione: ROADMAP.md:5 dichiara "still moving quickly… directional, not promised". Il volume di issue aperte e la velocità di cambiamento sono un rischio di stabilità (API non congelate). Stelle ≠ idoneità (istruzioni §0).
 - Il repo contiene un'estesa suite di test (`*.test.ts` accanto ai servizi) `CODE`, ma non ho eseguito nulla.
 - Esiste un'offerta "Paperclip Cloud" (waitlist) `DOC` README.md:36: il modello di business futuro può influenzare la roadmap open source (`UNVERIFIED`).
@@ -87,9 +87,9 @@ Nota operativa sul clone: il primo checkout su Windows è risultato incoerente (
 
 ### 7a. Governance (control plane) — separata dall'isolamento runtime
 
-- **Modalità di deploy**: `local_trusted` (default: solo loopback, **nessun login**, utente board locale auto-creato) e `authenticated` (`private`: Tailscale/VPN/LAN; `public`: URL esplicito + controlli stretti) con Better Auth. `DOC` docs/deploy/deployment-modes.md:6-60. Claim flow per passare da trusted a authenticated (:62-74).
+- **Modalità di deploy**: `local_trusted` (default: solo loopback, **nessun login**, utente board locale auto-creato) e `authenticated` (`private`: Tailscale/VPN/LAN; `public`: URL esplicito + controlli stretti) con Better Auth. `DOC` docs/deploy/deployment-modes.md:6-60. Claim flow per passare da trusted a authenticated (:62-74). **`TESTED` S00 (`local_trusted`)**: nessun login né token; `/api/auth/get-session` restituisce un utente implicito `local-board` e tutte le mutazioni (creare company, agenti, chiavi, issue) funzionano senza credenziali; ascolta solo su 127.0.0.1:3100 (API/UI) e 127.0.0.1:54329 (Postgres embedded, password fissa). Modalità `authenticated` non provata.
 - **Utenti umani**: ruoli di membership azienda `owner, admin, operator, viewer` (+`member`) `CODE` constants.ts:963-970; inviti, richieste di join, grant di permessi per principal (`principal_permission_grants`), accesso per progetto/issue (`project_access_members`, `issue_access_grants`) `CODE` schema/. Multi-azienda con isolamento per company `DOC` README.md ("Organization boundaries"). Dettaglio matrice permessi per ruolo umano `UNVERIFIED`.
-- **Permessi (chiavi)**: `agents:create/configure/suggest-changes, skills:*, environments:manage, tools:*, audit:view_agent_actions, inbox:manage, users:invite, users:manage_permissions, tasks:assign, tasks:assign_scope, tasks:manage_active_checkouts, joins:approve` `CODE` constants.ts:1002-1024. **Default degli agenti standard: ampi** (configure, assign, tool use/manage, ecc.) `DOC` doc/agent-permission-defaults.md:5-17. Gli agenti autenticati non possono impostare adapter `process` né cambiare comando host/cwd/env arbitrario degli adapter locali (:25) → `DOC`, buona protezione del control plane.
+- **Permessi (chiavi)**: `agents:create/configure/suggest-changes, skills:*, environments:manage, tools:*, audit:view_agent_actions, inbox:manage, users:invite, users:manage_permissions, tasks:assign, tasks:assign_scope, tasks:manage_active_checkouts, joins:approve` `CODE` constants.ts:1002-1024. **Default degli agenti standard: ampi** (configure, assign, tool use/manage, ecc.) `DOC` doc/agent-permission-defaults.md:5-17. Gli agenti autenticati non possono impostare adapter `process` né cambiare comando host/cwd/env arbitrario degli adapter locali (:25) → `DOC`, protezione del control plane **solo parziale**: `TESTED` S00 su adapter `http`, un agente con permessi azzerati può modificare via `PATCH /api/agents/:id` budget e `adapterConfig` propri **e di altri agenti della company** (vedi #16935 sotto); la guardia sui comandi host dei `*_local` è `CODE` (agents.ts:2601-2659), non provata a runtime. Anche i «permessi» come limite sono quindi da non dare per scontati.
 - **Preset `low_trust_review`**: contenimento opt-in per lavoro che consuma input ostile (PR non fidate, ticket esterni); intersezione di policy agente/progetto/issue, fail-closed, niente credenziali GitHub grezze, report padre disabilitato per default `DOC` doc/LOW-TRUST-PRESETS.md:1-118. Rilevante per prompt injection da ticket Jira. "Containment, not privacy": il default `standard` è visibile a tutta l'azienda (:29-37).
 - **Approvazioni**: approval board (assunzioni agenti, ecc.), stage review/approval per issue, richieste di azione tool-gateway `Allowed / Ask first / Off` `DOC` README.md; doc/MCP-ACCESS-GOVERNANCE.md.
 - **Segreti**: secret store aziendale con binding per agente, risoluzione auditata, provider locale/AWS; JWT di run a vita breve, API key agente `DOC` README.md (Identity & Access, Secrets); docs/deploy/secrets.md.
@@ -169,11 +169,11 @@ Paperclip è un **control plane/organizzazione di agenti** con forte governance 
 - Fit concettuale: prodotto pensato per "aziende di agenti", linguaggio e default non software-engineering; si adatta ma con attrito.
 - Velocità di cambiamento e dimensione (>11k righe in `issues.ts`, 2k di semantica esecuzione, doppio percorso legacy/native): costo di fork/manutenzione alto; breaking change probabili.
 - Sicurezza di default (local_trusted senza login, adapter non sandboxati, skip permissions) — gate bloccante se non confinato: "esecuzione non confinabile" (istruzioni §10) è risolvibile solo con sandbox/VM esterna.
-- Budget: nessun limite per issue; stop dipendente dal reporting di spesa.
+- Budget: nessun limite per issue; stop dipendente dal reporting di spesa. `TESTED` S00: (a) con `unpricedUsagePolicy` di default `block`, un run di un adapter che non riporta costi (`http`) manda company e agente in hard stop anche con spesa 0; (b) il limite di un agente è modificabile dall'agente stesso (#16935 riprodotta) quindi non è un controllo contro l'agente.
 - Idoneità a produzione e giudizio PoC vanno separati: PoC fattibile per governance/dashboard/approvazioni; produzione dipende da hardening e connettore Jira.
 
 ### Prove da eseguire in fasi successive (non fatte qui)
-S00 smoke (richiede Node 24.11+, ispezione di `onboard` prima), S01 issue→PR in `MOCK`, S04 lease/duplicati, S05 mock Jira + adapter minimo, S06 crash (BLOCKED per 24/7), S07 confini filesystem/merge/segreti, S09 budget hard stop. Tutti `BLOCKED` fino a ambiente e approvazioni (nessun test eseguito in questa scheda).
+S00 smoke (eseguito, PARTIAL: vedi «Risultati sperimentali S00»), S01 issue→PR in `MOCK`, S04 lease/duplicati, S05 mock Jira + adapter minimo, S06 crash (BLOCKED per 24/7), S07 confini filesystem/merge/segreti, S09 budget hard stop. Gli altri scenari restano `BLOCKED` fino a ambiente e approvazioni (solo S00 eseguito).
 
 ## 11. Riferimenti
 
@@ -196,12 +196,34 @@ Commit: `05f7079ecb2ee28d64715fd18e60b43e2d2fa989` (master, 2026-10-20). Release
 - packages/adapter-utils/src/execution-target.ts:2757-2785
 - API GitHub (via WebFetch, non verificato localmente): repo e release, 2026-10-20
 
-**Risultati sperimentali:** nessuno (nessun test eseguito; da aggiungere dopo S00–S10).
+## Risultati sperimentali S00
+
+Esecuzione 2026-10-20, modalità `MOCK`, esito **PARTIAL**. Dettagli, comandi e log sanificati in `reports/s00-paperclip.md`; JSON `results/s00-paperclip-8301e0b4.json`. Ambiente: container `node:24-bookworm` (digest `sha256:14078204b6bb…`, Node 24.22.0, pnpm 9.15.4) con 2 GiB RAM / 2 CPU / 512 PID, cap-drop ALL, utente non root, nessun mount, nessuna porta pubblicata, uscita di rete non filtrata. Commit 05f7079 (versione 0.3.1) e, per il quickstart, release npm `paperclipai@2026.1012.0` (commit bba6a45, coincide col tag della scheda). Nessuna credenziale, nessun LLM, costo 0. Telemetria spenta da me (`PAPERCLIP_TELEMETRY_DISABLED=1`).
+
+| Voce | Etichetta | Risultato |
+|---|---|---|
+| `pnpm install` dal sorgente | `TESTED` | 1ª prova OOM-killed a 2 GiB; 2ª con `--child-concurrency=1`: OK, 1.351 pacchetti, 44 s (store caldo) |
+| `pnpm dev` / `dev:once` (README) | `BLOCKED` | serve `cargo` per il runner nativo; con `PAPERCLIP_RUNNER_BINARY=/bin/true` il Vite dev middleware è OOM-killed a 2 GiB |
+| Server headless (`tsx src/index.ts`, `SERVE_UI=false`) | `TESTED` | `/api/health` 200 in 14-22 s; `local_trusted`, loopback; container 1,1-1,3 GiB |
+| Quickstart `npx paperclipai@2026.1012.0 onboard --yes` | `TESTED` | OK, UI statica 200, ~190 s (con download e compilazione nativa) |
+| Company + agente `http` + chiave + issue + run senza LLM | `TESTED` | run `succeeded` in 1,3 s verso un webhook locale; l'assegnazione dell'issue fa partire il wakeup da sola |
+| Shutdown/riavvio, persistenza | `TESTED` | SIGTERM exit 240-425 ms; dati persistiti; Postgres embedded orfano se il server muore per OOM |
+| Test (subset) | `TESTED` | 95 file/1.012 test (`shared`+http adapter) e 3 file/108 test (permessi agenti, budget) PASS; suite completa `UNVERIFIED` |
+| Typecheck | `PARTIAL` | `shared` e `adapter-utils` OK; `server` `BLOCKED` (cargo); `db` e build UI `BLOCKED` (OOM a 2 GiB) |
+| Adapter `claude_local`/agenti reali | `BLOCKED` | richiedono credenziali; l'adapter `http` verso endpoint locale è l'adapter di prova senza LLM |
+| SSRF guard adapter `http` | `TESTED` | loopback rifiutato finché l'origine non è in `PAPERCLIP_HTTP_ADAPTER_PRIVATE_ENDPOINT_ALLOWLIST` |
+| Budget con run non prezzato | `TESTED` | hard stop su agente e company a spesa 0 (`unpricedUsagePolicy=block`) |
+
+**Issue #16935: RIPRODOTTA** (`TESTED`) sia sul commit 05f7079 sia sulla release 2026.1012.0, `local_trusted`, adapter `http`. Con la sola chiave dell'agente e con i suoi permessi azzerati: `PATCH /api/agents/<suo id>` cambia il proprio `budgetMonthlyCents` (5.000 → 99.999.999, anche come policy di budget effettiva) e il proprio `adapterConfig` (aggiunti `dangerouslySkipPermissions` ed `extraArgs`); **in più** lo stesso agente cambia budget e `adapterConfig` di un altro agente della company. Restano bloccati (403) creare chiavi, cambiare permessi e impostazioni della company. Non verificato: adapter `*_local` (il codice blocca `extraArgs/command/args/cwd/env` per gli agenti ma non `dangerouslySkipPermissions`, `CODE`) e modalità `authenticated`.
+
+**Correzioni alla scheda dovute a S00**: Postgres embedded, non PGlite; l'avvio dal sorgente richiede Rust e >2 GiB (README incompleto nel quickstart); i permessi degli agenti e la guardia sui comandi host non fermano il PATCH di budget/config tra agenti; budget con costo non prezzato blocca; telemetria e update check attivi di default (`config.json` dopo `onboard`).
+
+**Non provato**: runner nativo Rust, UI dal sorgente, sandbox plugin, modalità `authenticated`, adapter locali reali, crash con run in volo (S06), Jira. Come sbloccare: host con ≥4-6 GiB di RAM e toolchain Rust (o `PAPERCLIP_RUNNER_BINARY` compatibile); credenziali di prova con budget massimo per gli adapter reali.
 
 ## Segnalazioni dalle issue (consultate 2026-10-20 con `gh`; non riprodotte)
 
-Etichetta: `UNVERIFIED` (segnalazione di terzi, non provata qui). Servono come ipotesi da verificare in S07/S09.
+Etichetta: `UNVERIFIED` (segnalazione di terzi, non provata qui) per tutte tranne **#16935, ora `TESTED` e riprodotta in S00** (vedi «Risultati sperimentali S00»). Le altre servono come ipotesi da verificare in S07/S09.
 
-- **#16935 (aperta, 2026-10-20):** un agente con la sola chiave API propria potrebbe modificare con `PATCH /api/agents/<suo id>` il proprio `budgetMonthlyCents` e il proprio `adapterConfig` (compresi `dangerouslySkipPermissions` ed `extraArgs`), perché il controllo restituisce `allow_self`. Il reporter dichiara di averlo provato dal vivo su `@paperclipai/server` 2026.831.1 (versione precedente a quella studiata qui), in modalità `local_trusted`. **Se confermato, il budget hard stop e i permessi non sarebbero imposti contro l'agente stesso** (R06.3, R10). Da riprodurre sulla versione studiata prima di fidarsi del budget come controllo di sicurezza.
+- **#16935 (aperta, 2026-10-20) — RIPRODOTTA in S00 (`TESTED`, commit 05f7079 e release 2026.1012.0, adapter `http`, `local_trusted`; esteso: lo stesso agente modifica anche budget/config di altri agenti):** un agente con la sola chiave API propria potrebbe modificare con `PATCH /api/agents/<suo id>` il proprio `budgetMonthlyCents` e il proprio `adapterConfig` (compresi `dangerouslySkipPermissions` ed `extraArgs`), perché il controllo restituisce `allow_self`. Il reporter dichiara di averlo provato dal vivo su `@paperclipai/server` 2026.831.1 (versione precedente a quella studiata qui), in modalità `local_trusted`. **Se confermato, il budget hard stop e i permessi non sarebbero imposti contro l'agente stesso** (R06.3, R10). Da riprodurre sulla versione studiata prima di fidarsi del budget come controllo di sicurezza.
 - **#10679 (aperta):** con `dangerouslySkipPermissions` disattivato, gli agenti locali non riceverebbero alcuna allowlist di strumenti. Disattivare il flag potrebbe quindi non restringere nulla.
 - **#16269, #13544, #13587 (aperte):** il sandbox Kubernetes ha problemi aperti (symlink pendenti, catena di blocchi per l'auto-hosting, sincronizzazione file). Conferma lo stato sperimentale dell'isolamento reale.
