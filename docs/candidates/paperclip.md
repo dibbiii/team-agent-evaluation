@@ -197,3 +197,11 @@ Commit: `05f7079ecb2ee28d64715fd18e60b43e2d2fa989` (master, 2026-10-20). Release
 - API GitHub (via WebFetch, non verificato localmente): repo e release, 2026-10-20
 
 **Risultati sperimentali:** nessuno (nessun test eseguito; da aggiungere dopo S00–S10).
+
+## Segnalazioni dalle issue (consultate 2026-10-20 con `gh`; non riprodotte)
+
+Etichetta: `UNVERIFIED` (segnalazione di terzi, non provata qui). Servono come ipotesi da verificare in S07/S09.
+
+- **#16935 (aperta, 2026-10-20):** un agente con la sola chiave API propria potrebbe modificare con `PATCH /api/agents/<suo id>` il proprio `budgetMonthlyCents` e il proprio `adapterConfig` (compresi `dangerouslySkipPermissions` ed `extraArgs`), perché il controllo restituisce `allow_self`. Il reporter dichiara di averlo provato dal vivo su `@paperclipai/server` 2026.831.1 (versione precedente a quella studiata qui), in modalità `local_trusted`. **Se confermato, il budget hard stop e i permessi non sarebbero imposti contro l'agente stesso** (R06.3, R10). Da riprodurre sulla versione studiata prima di fidarsi del budget come controllo di sicurezza.
+- **#10679 (aperta):** con `dangerouslySkipPermissions` disattivato, gli agenti locali non riceverebbero alcuna allowlist di strumenti. Disattivare il flag potrebbe quindi non restringere nulla.
+- **#16269, #13544, #13587 (aperte):** il sandbox Kubernetes ha problemi aperti (symlink pendenti, catena di blocchi per l'auto-hosting, sincronizzazione file). Conferma lo stato sperimentale dell'isolamento reale.

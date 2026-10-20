@@ -173,3 +173,12 @@ Fonti primarie (clone al commit `649b832b7672bc7a2dbef26f5983aba6198b819b`, cons
 **Risultati sperimentali: nessuno.** S00-S10 non eseguiti in questa fase (nessuna installazione ammessa). S00 `BLOCKED` (serve approvazione e WSL/Docker); S01-S09 `BLOCKED` (dipendono da S00 e, per LIVE, da budget Claude approvato); S05 richiede un adapter Jira minimo (mock Jira).
 
 Prime prove consigliate quando sbloccato: (1) `merge_strategy=pr` + `require_review=true` su repo di prova con token a scope minimo, verificando che il Refinery non mergi senza approvazione; (2) `gt sling --no-merge` e verifica della PR; (3) race di due `gt sling` sullo stesso bead; (4) kill forzato di un polecat e di Dolt/daemon; (5) scrittura fuori dal worktree con `bypassPermissions`; (6) `gt costs --by-role` e verifica dell'assenza di budget enforcement.
+
+## Segnalazioni dalle issue (consultate 2026-10-20 con `gh`; non riprodotte)
+
+Etichetta: `UNVERIFIED` (segnalazione di terzi, non provata qui).
+
+- **#4819 (aperta, 2026-09-05):** se Dolt non è raggiungibile, `gt done` tratta l'assenza di informazioni sul convoy come «workflow MR di default» e **ignora `--merge=local`**: nel caso riportato un bead da tenere sul branch è finito nella merge queue e il Refinery ha tentato un push diretto sul main protetto (bloccato da GitLab). Il reporter indica anche `main@649b832`, lo stesso commit studiato qui. Rischio per R12: un errore di infrastruttura può far ricadere il sistema sul percorso che integra.
+- **#4442 (aperta):** nulla impedisce né rileva un merge con `--admin` che aggira branch protection e CI; il percorso del Refinery è pulito, ma un agente con privilegi potrebbe farlo (R10, R12).
+- **#4475 (aperta):** `gt scheduler pause` tornerebbe attivo sotto il daemon in esecuzione, quindi la pausa non è durevole (R05.3).
+- **Jira:** nessuna issue trovata sul tema. Conferma, senza dimostrarla, l'assenza di integrazione.

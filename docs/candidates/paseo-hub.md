@@ -145,3 +145,9 @@ Limiti noti della scheda:
 3. Incoerenze nei docs: "Nothing is queued" vs "remains queued" (scheduled-triggers.md riga 117); "Projects are gone" (trigger-migration.md riga 37) vs docs con progetti; Linear nel README Hub ma pagina `triggers/linear` assente dal clone.
 4. self-hosting/index.md, github-app.md, slack-app.md, workflows.md non letti in dettaglio.
 5. Issue del repo Hub e release GitHub non consultate (`gh` non autenticato).
+
+## Segnalazioni dalle issue (consultate 2026-10-20 con `gh`; non riprodotte)
+
+- **Hub #147 (aperta, 2026-10-03):** SIGTERM non completerebbe finché un daemon è connesso (`server.close()` atteso prima). Rilevante per lo stop e il riavvio controllato (R05.3, R08). `UNVERIFIED`.
+- Il conteggio `open_issues_count` di GitHub include le PR: per `getpaseo/paseo` è 1474 al 2026-10-20 (la scheda riportava ~780 issue lette via web: la cifra non è confrontabile).
+- Il repository Hub ha 41 elementi aperti e 56 stelle: adozione molto limitata.
