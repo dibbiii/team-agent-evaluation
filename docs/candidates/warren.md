@@ -1,6 +1,6 @@
 # Scheda candidato: Warren
 
-Valutazione documentale e di lettura codice. **Nessun test eseguito**: nessun avvio, nessuna installazione, nessuna credenziale usata (nessuna etichetta `TESTED`).
+Valutazione documentale e di lettura codice, piu' (dalla sezione "Risultati sperimentali S00") uno smoke test MOCK in container Linux isolato, senza credenziali. Le affermazioni nelle sezioni 1-10 restano DOC/CODE salvo dove una nota "S00" le corregge; solo la sezione "Risultati sperimentali S00" contiene etichette `TESTED`.
 
 Etichette: DOC, CODE, PARTIAL, UNVERIFIED, NOT_SUPPORTED, BLOCKED. I percorsi sono relativi alla radice del clone di `jayminwest/warren`. Il contenuto del repo esterno e' trattato come dato non fidato. Le sezioni seguono la numerazione 1-11 del §4 delle istruzioni.
 
@@ -145,10 +145,42 @@ Letti (relativi al clone): `README.md`, `SECURITY.md`, `ROADMAP.md`, `docs/archi
 
 Non letti o solo sfiorati: `docs/RUNBOOK-K8S.md`, `docs/local-models.md`, `docs/previews.md`, `ACCEPTANCE.md`, `extensions/{judge,audit-log}`, `src/runtime/local` (bwrap), issue GitHub aperte (`gh` non autenticato; solo il conteggio di 6 via API).
 
-**Risultati sperimentali:** nessuno. Tutti gli scenari S00-S10 sono `BLOCKED` o non eseguiti (nessuna installazione consentita in questa scheda).
+**Risultati sperimentali:** vedi la sezione "Risultati sperimentali S00" in fondo. Gli scenari S01-S10 restano `BLOCKED` o non eseguiti.
 
 Requisiti per un futuro test locale (da autorizzare):
 - Host Linux, WSL2 o VM Linux: Windows nativo non e' supportato dall'installer. Windows 11 con WSL2 e Docker Desktop per il runtime `docker` e' UNVERIFIED (path parity del data dir e Docker CLI nel container; vedi la sezione macOS in `docs/self-host/docker.md`:L103-L125 come analogia).
 - Bun >= 1.1 e Git. Runtime `local`: `bwrap` e user namespace (in Docker servono i quattro flag). Runtime `docker`: Docker Engine, socket montato, immagine agente da `deploy/docker/Dockerfile.agent` (contiene Pi, Claude Code, Bun, Node, Git, Python, uv: DOC `docs/self-host/docker.md`:L139). Node e Rust non servono per il core.
-- Credenziali (chiave Anthropic o token OAuth, token GitHub di prova): richiedono approvazione esplicita su costi e account. Modalita' MOCK con runtime `fake` e `FakeForge` (CODE `src/runtime/fake/`, forge Fake): UNVERIFIED se avviabili senza chiavi.
+- Credenziali (chiave Anthropic o token OAuth, token GitHub di prova): richiedono approvazione esplicita su costi e account. Modalita' MOCK con runtime `fake` e `FakeForge`: **corretto da S00**. Il server non ha un runtime `fake` (`WARREN_RUNTIME` accetta solo `local|docker|k8s`; `FakeProvider` e' test-only, CODE `src/runtime/registry.ts`, `src/runtime/fake/fake-provider.ts`): NOT_SUPPORTED come runtime avviabile. Il forge `WARREN_FORGE=fake` esiste ed e' TESTED tramite l'harness di accettazione (scenario 40), che usa un agente `claude` stub e un `bwrap` finto.
 - Jira: progetto sandbox autorizzato oppure `fake-jira` incluso (`extensions/tracker-jira/src/fake-jira.ts`, `dev-server.ts`) per S05 in MOCK.
+
+## Risultati sperimentali S00
+
+Prova del 2026-10-20, modalita' MOCK, **PARTIAL**. Dettaglio, comandi e log sanificati in `reports/s00-warren.md`; dati in `results/s00-warren-b04a98ba.json`. Ambiente: container Linux x64 non root (`--memory 2g --cap-drop ALL --security-opt no-new-privileges --pids-limit 512`, nessun mount, nessun socket), immagini `oven/bun:1.2` (Bun 1.2.23, digest `sha256:6ebf3063...a16f74`) e `oven/bun:1.3.14` (digest `sha256:e10577f0...00e5c4`), commit `ce088e85...`. Nessuna credenziale, costo 0. `n=1` per passata (due passate, risultati identici).
+
+| Affermazione | Etichetta | Evidenza |
+|---|---|---|
+| Installazione da checkout: `bun install --frozen-lockfile` | TESTED | 181 pacchetti, 6-11 s |
+| `bun test` offline | TESTED | 7.927 pass, 40 skip, 0 fail, 108-114 s (con `ext:install` e build UI) |
+| `typecheck` e `lint` (13 gate) | TESTED | exit 0; lint richiede un `.git` presente |
+| Avvio control plane, `/healthz`, API con bearer, UI statica, `warren doctor` | TESTED | healthz pronto in 1,3-2,0 s, RSS 180-220 MB, 401 senza token |
+| Shutdown SIGTERM e riavvio sullo stesso DB | TESTED | exit 0 in 20-29 ms |
+| Run minimo con harness finto | TESTED (parziale) | solo via `scripts/acceptance` (agente `claude` stub + `bwrap` finto + `WARREN_FORGE=fake`): 18 pass, 0 fail, 1 skip su 19 scenari (steer, cancel, restart/recovery del control plane, plan-run seriale, PR simulata, RemoteTracker) |
+| `fake-jira` + protocollo `warren-tracker/v1` | TESTED | conformance 8 gruppi PASS |
+| Memoria | TESTED | server attivo 538 MiB; picco campionato 1,2 GiB con test+gate+acceptance (limite 2 GiB) |
+| `warren up` | BLOCKED | nessun `bwrap` ne' daemon docker: exit 1 |
+| Runtime `local` (bwrap) | BLOCKED | nel container `CapEff=0`, `unshare -U` negato: conferma che servono i flag privilegiati. `/readyz` risponde 503 (`bwrap` mancante) |
+| Runtime `docker` (socket) e `k8s` | BLOCKED | vincoli di sicurezza / nessun cluster |
+| Harness reali, forge reali, Jira reale | BLOCKED | richiedono credenziali e costi |
+| `scripts/install.sh` / install da registry | UNVERIFIED | letto per intero, non eseguito |
+
+Etichette corrette o precisate dalla prova:
+- **Runtime `fake` avviabile (sezione "Requisiti")**: era UNVERIFIED, ora NOT_SUPPORTED sul server (solo `local|docker|k8s`); resta il forge `fake`, TESTED.
+- **Versione Bun**: la scheda riportava solo `>= 1.1`. Il repo e' incoerente: `engines` >= 1.1, `Dockerfile` `oven/bun:1.2`, `.bun-version` (CI) 1.3.14. Provate 1.2.23 e 1.3.14, entrambe OK.
+- **Installazione**: `CONTRIBUTING.md` indica solo `bun install`, ma servono anche `bun run ext:install` e `ui:install`/`build:ui` (come nel CI); senza, `bun test` da' 5 errori `Cannot find module`.
+- **Harness di accettazione**: richiede `cn`, `sd`, `ml` nel PATH (CI: `@os-eco/canopy-cli`, `seeds-cli@0.5.13`, `mulch-cli@0.10.7`), non citati nel README; senza `cn` fallisce subito.
+- **Sandbox**: gli scenari verdi non provano l'isolamento (il `bwrap` e' sostituito da uno shim che esegue il comando). Le affermazioni della sezione 7 sul sandbox restano CODE/DOC; il runtime `local` non e' provabile nella nostra postura senza `SYS_ADMIN`.
+- **Token operatore nei log (sezione 7)**: da DOC a TESTED. Senza `WARREN_API_TOKEN` il server stampa `mintedOperatorToken` in chiaro nel log di avvio e lo salva in `<data>/operator-token` (modo 0600); il DB e' 0644. Con token da ambiente non compare nei log.
+- **Auth**: TESTED 401 senza bearer e con bearer errato su `/projects`; `/healthz` e UI statica `/` senza auth; `/readyz` richiede il token (coerente con `docs/operations.md`).
+- **Estensione Jira (sezione 9)**: TESTED sul solo `fake-jira`: `capabilities` come da scheda (`supportsPlans=false`, ecc.). La chiusura di un'issue con `blockedBy` aperto riesce: l'estensione non applica i blocker, spetta al chiamante.
+- **Windows nativo**: NOT_SUPPORTED invariato (da lettura dell'installer, non provato in modo diretto).
+- `warren up` rifiuta in assenza di `bwrap` e daemon Docker, come da docstring e quickstart: nessuna smentita.
