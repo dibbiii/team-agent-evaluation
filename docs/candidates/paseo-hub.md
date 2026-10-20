@@ -2,7 +2,7 @@
 
 Consultazione: 2026-10-20. Metodo: sola lettura (git clone --depth 1 in scratchpad fuori da OneDrive, WebFetch). Nessuno script eseguito, nulla installato, nessuna credenziale usata. `gh` non era autenticato: i dati sulle issue GitHub sono stati letti via WebFetch. Il contenuto dei repo esterni e' trattato come dato non fidato.
 
-Etichette: DOC, CODE, PARTIAL, UNVERIFIED, NOT_SUPPORTED, BLOCKED. Nessuna etichetta TESTED: non e' stato eseguito nulla. I riferimenti `public-docs/...` sono nel clone di `getpaseo/paseo`; quelli `docs/...` e `src/...` nel clone di `getpaseo/hub`.
+Etichette: DOC, CODE, PARTIAL, UNVERIFIED, NOT_SUPPORTED, BLOCKED, TESTED. Le sezioni 0-10 descrivono la ricerca documentale del 2026-10-20 (nessuna etichetta TESTED); **gli esiti dei test S00 (sera dello stesso giorno) sono nella sezione "Risultati sperimentali S00" in fondo, che prevale dove corregge le etichette** (le correzioni sono annotate anche in linea come `[S00: ...]`). I riferimenti `public-docs/...` sono nel clone di `getpaseo/paseo`; quelli `docs/...` e `src/...` nel clone di `getpaseo/hub`.
 
 ## 0. Sintesi e separazione dei prodotti
 
@@ -27,9 +27,9 @@ Giudizio sintetico: Paseo+Hub e' un dispatcher event-driven di sessioni di agent
 
 | Componente | Tag | SHA | Note |
 |---|---|---|---|
-| getpaseo/paseo | v0.12.0 (ultimo stabile, `git ls-remote`) | tag object d288bcfc84ffba71aa8565ee05184d9fce0a592; commit cafe4b01c8522ff39560241c5deb01427dc8dc5b | packages/server version 0.12.0 |
+| getpaseo/paseo | v0.12.0 (ultimo stabile, `git ls-remote`) | tag object d288bcfc840ffba71aa8565ee05184d9fce0a592 `[S00: SHA corretto; nella scheda era troncato a 39 caratteri]`; commit cafe4b01c8522ff39560241c5deb01427dc8dc5b | packages/server version 0.12.0 |
 | getpaseo/paseo | HEAD di main letto | 068f272a00ffef3f00ec30ec4cfa3a631be97624 (2026-10-20) | clone parziale: il checkout su Windows non ha materializzato 5817 file (probabile limite path/symlink). `public-docs/` e l'albero `packages/` sono leggibili; il sorgente del daemon NON e' stato ispezionato |
-| getpaseo/hub | v0.10.0 | 38bfafd11858c06e1456c96bb17f5867a12d7075 | CHANGELOG 0.10.0 del 2026-09-29 |
+| getpaseo/hub | v0.10.0 | tag object 38bfafd11858c06e1456c96bb17f5867a12d7075; **commit 28f6c78833065fd282f9064f92a9aa61875dd359** `[S00: il tag e' annotato, 38bfafd... non e' un commit]` | CHANGELOG 0.10.0 del 2026-09-29 |
 | getpaseo/hub | HEAD di main letto | 7cbdd52023565eb1dcd940f24f5490e2593d090a (2026-10-17) | package.json 0.10.0; clone completo |
 
 Manutenzione: attiva (HEAD paseo del giorno stesso; ultimo commit hub 3 giorni prima). Issue aperte su paseo: circa 780 (WebFetch https://github.com/getpaseo/paseo/issues). Tra le recenti, bug su sessioni Claude ("reloading a Claude agent during its first turn resumes a session that was never saved") e su figli provider. Issue del repo hub non consultate: UNVERIFIED.
@@ -51,7 +51,7 @@ Manutenzione: attiva (HEAD paseo del giorno stesso; ultimo commit hub 3 giorni p
 - SDK TypeScript (public-docs/sdk, packages/client) e plugin (public-docs/plugins) DOC.
 
 ### Paseo Hub
-- Entita': organization, connection (GitHub/Slack/Discord/Linear), daemon, environment, trigger, workflow, step; "project" compare in hub/concepts.md ma docs/trigger-migration.md riga 37 dice "Projects are gone from the product and configuration model" (incoerenza tra versioni, UNVERIFIED quale sia corretta) DOC.
+- Entita': organization, connection (GitHub/Slack/Discord/Linear), daemon, environment, trigger, workflow, step; "project" compare in hub/concepts.md ma docs/trigger-migration.md riga 37 dice "Projects are gone from the product and configuration model" (incoerenza tra versioni, UNVERIFIED quale sia corretta) DOC `[S00: TESTED su v0.10.0: i "projects" esistono ancora nelle API (/api/v1/projects, /api/v1/configurations/*, progetto default), ma al riavvio Hub li migra in trigger di organizzazione e ritira il progetto legacy; vedi report sez. 5.6]`.
 - Configurazione versionata in `.paseo/hub.yml` e `.paseo/workflows/*.yml`, oppure editor dashboard "manual". Una sola revisione attiva; se la validazione fallisce resta la precedente (concepts.md "Activation") DOC.
 - Storage: PostgreSQL o database embedded; credenziali e lease persistiti nel DB (docs/workflow-authority.md righe 79-94) DOC.
 - API pubblica OpenAPI 3.1 (`/api/openapi.json`, `/api/reference`), credenziali con scope (docs/public-api.md; hub/api.md) DOC. Endpoint di dispatch manuale con `deliveryKey` per deduplica (hub/api.md righe 208-215) DOC.
@@ -79,10 +79,10 @@ Manutenzione: attiva (HEAD paseo del giorno stesso; ultimo commit hub 3 giorni p
 - Remoto: il daemon gira su server/VPS/container indipendente dal client; Hub lo raggiunge dopo `paseo hub connect` (daemons.md) DOC. La continuita' con il PC dello sviluppatore spento richiede daemon e Hub ospitati altrove: BLOCKED (serve una VM remota con daemon, Hub con PostgreSQL e un agent CLI autenticato con credenziali di prova).
 - Worktree: ogni workspace puo' essere un git worktree isolato con hook di setup; in Hub `worktree.mode: branch-off` con `newBranch: trigger-${{ paseo.execution.id }}`, mantenuto su retry/recovery (daemons.md sez. "Reference it from configuration"; hub-yml.md riga 79) DOC. Hub non clona: la directory deve gia' esistere (daemons.md) DOC.
 - Sandbox: Hub "does not sandbox the provider process" e non definisce un'astrazione comune; l'isolamento e' delegato a sandbox provider-native o al SO (hub/security.md riga 11 e "Provider-native controls") DOC. Il container Docker usa utente non-root ma "not a substitute for careful mounts" (security.md) DOC. Gate "esecuzione non confinabile": confinamento solo esterno (container/VM per daemon), PARTIAL.
-- Autorita' del daemon: permesso `hub.execute` separato, default NO, revocabile dalla macchina; consente di creare/continuare agenti, impostare modello e mode (anche bypass delle approvazioni) e archiviare workspace; "not an isolation boundary" (hub/security.md righe 21-27; daemons.md righe 70-80) DOC.
+- Autorita' del daemon: permesso `hub.execute` separato, default NO `[S00: TESTED: dopo paseo hub connect i permessi sono vuoti e senza hub.execute il daemon non e' un target valido]`, revocabile dalla macchina; consente di creare/continuare agenti, impostare modello e mode (anche bypass delle approvazioni) e archiviare workspace; "not an isolation boundary" (hub/security.md righe 21-27; daemons.md righe 70-80) DOC.
 - Credenziali GitHub: blocco `github` per step, token di installazione GitHub App limitato a repository e permessi, durata max 1h, revoca a fine esecuzione, lease persistiti e recuperati al riavvio di Hub (docs/workflow-authority.md) DOC. Senza il blocco nessun token. Per R12: i permessi `contents: write` e `pull_requests: write` non includono un divieto di merge gestito da Hub; la prevenzione del merge va fatta con branch protection su GitHub, UNVERIFIED.
 - Input non fidato: `from_users` obbligatorio e non vuoto sui trigger esterni; filtri per repo/workspace/channel; prompt delimitato. Il classifier e' "defense in depth, not a sandbox" (hub/security.md) DOC. Mitigazione di prompt injection da ticket: solo di prompt/classifier.
-- Auth e RBAC Hub: ruoli organizzazione `owner`, `admin`, `member` (src/auth/organization-contract.ts riga 4) CODE; l'approvazione del login CLI e' riservata a owner/admin (docs/public-api.md riga 16) DOC; API key con scope (es. `configuration:validate`, hub/api.md riga 80) DOC. RBAC per progetto, per ruolo di agente o per issue: nessuna evidenza, UNVERIFIED. Account email/password con verifica via Resend opzionale (README) DOC; moduli GitHub/Discord auth in src/auth/github.ts e discord.ts CODE (non approfonditi).
+- Auth e RBAC Hub: ruoli organizzazione `owner`, `admin`, `member` (src/auth/organization-contract.ts riga 4) CODE `[S00: TESTED in runtime, report sez. 5.1: member 403 su chiavi API, inviti, cambio ruoli, rimozione; admin non puo' toccare gli owner; ultimo owner protetto con 409]`; l'approvazione del login CLI e' riservata a owner/admin (docs/public-api.md riga 16) DOC; API key con scope (es. `configuration:validate`, hub/api.md riga 80) DOC. RBAC per progetto, per ruolo di agente o per issue: nessuna evidenza, UNVERIFIED. Account email/password con verifica via Resend opzionale (README) DOC; moduli GitHub/Discord auth in src/auth/github.ts e discord.ts CODE (non approfonditi).
 - Enrollment daemon-Hub: token monouso, credenziale di relazione propria; il login CLI non e' mai conservato come autorita' del daemon (daemons.md; paseo security.md "Hub identities and credentials") DOC.
 - La configurazione `.paseo` e' autorita': va protetto il push sul branch (hub/security.md "Protect configuration authority") DOC.
 
@@ -91,8 +91,8 @@ Manutenzione: attiva (HEAD paseo del giorno stesso; ultimo commit hub 3 giorni p
 - Timeout espliciti obbligatori: workflow `max_runtime` (max 24h), step `max_runtime` e `idle_timeout`, `startup_timeout` (default 2m, max 24h) (hub-yml.md righe 134, 195-197; configuration/index.md riga 82) DOC.
 - Idempotenza creazione: stesso execution id; un agente chiuso o in errore e' registrato "interrupted" e Hub non ne avvia un secondo in silenzio (daemons.md riga 111) DOC. E' recovery dello stato di esecuzione e dei lease, NON ripresa garantita della sessione conversazionale: per Antigravity, dopo restart del daemon il transcript Paseo riparte (supported-providers.md) DOC; per Claude la ripresa dipende dal provider, UNVERIFIED.
 - Recovery Hub: al riavvio le esecuzioni attive e le credenziali originali sono preservate, l'agente e' riagganciato, le scadenze ripristinate; fermare Hub non termina l'esecuzione (workflow-authority.md righe 79-84) DOC.
-- Retry degli eventi: i docs pubblici dicono "Hub does not queue events", il dispatch fallito resta fallito con `daemon_not_connected` (hub/activity.md riga 53; faq.md riga 47; daemons.md riga 122) DOC. Nota di incoerenza: docs/scheduled-triggers.md righe 117-119 afferma che il lavoro di workflow "remains queued" finche' il processo con la connessione al daemon puo' fare dispatch, entro il max runtime, per tutte le sorgenti. Da verificare nel codice: UNVERIFIED.
-- Deduplicazione: `deliveryKey` sul dispatch manuale, senza garanzia exactly-once (api.md riga 215) DOC. Lock/lease per issue: nessuno (non esiste un claim di issue). Le sessioni di continuita' evitano un secondo agente sulla stessa issue/PR/thread (hub-yml.md righe 259-275): PARTIAL, limitato alle sorgenti con identita' di conversazione.
+- Retry degli eventi: i docs pubblici dicono "Hub does not queue events", il dispatch fallito resta fallito con `daemon_not_connected` (hub/activity.md riga 53; faq.md riga 47; daemons.md riga 122) DOC. Nota di incoerenza: docs/scheduled-triggers.md righe 117-119 afferma che il lavoro di workflow "remains queued" finche' il processo con la connessione al daemon puo' fare dispatch, entro il max runtime, per tutte le sorgenti. `[S00: TESTED con manual.run: la seconda affermazione e' corretta (coda reale, limitata da max_runtime); la prima ("Nothing is queued") e quelle di api.md (409) e daemons.md (daemon_not_connected) non sono riprodotte; altre sorgenti non provate]`.
+- Deduplicazione: `deliveryKey` sul dispatch manuale, senza garanzia exactly-once (api.md riga 215) DOC `[S00: TESTED: stessa chiave => stesso run e una sola esecuzione, anche con 6 richieste concorrenti; la risposta viene riprodotta]`. Lock/lease per issue: nessuno (non esiste un claim di issue). Le sessioni di continuita' evitano un secondo agente sulla stessa issue/PR/thread (hub-yml.md righe 259-275): PARTIAL, limitato alle sorgenti con identita' di conversazione.
 - Cancellazione: revoca dei token a cancellazione (workflow-authority.md) DOC; stop dell'agente via CLI/app: dettaglio UNVERIFIED.
 - Budget: nessun budget di token o costo per task nei docs Hub. Esistono "entitlements" con meter `executions.monthly` per l'offerta commerciale (docs/entitlements.md righe 33-57; src/db/schema.ts riga 1073) CODE/DOC: limite sul numero di esecuzioni per organizzazione, non sulla spesa LLM. `paseo usage` mostra finestre e saldi dei provider (cli.md righe 39-59) DOC (osservazione, non enforcement).
 
@@ -113,7 +113,7 @@ Ruolo plausibile: Execution Plane e/o strato di dispatch su worker remoti, e can
 
 | Req | Esito | Evidenza e lacuna |
 |---|---|---|
-| R01 Jira/queue/lease | Assente: Jira NOT_SUPPORTED; coda: "Nothing is queued" (DOC) | activity.md riga 53; unica traccia di Jira e' un test. Servono Issue Queue Controller, lease, readiness, priorita'. Adapter minimo via dispatch con `deliveryKey`: PARTIAL |
+| R01 Jira/queue/lease | Assente: Jira NOT_SUPPORTED; coda: `[S00: "Nothing is queued" SMENTITO per manual.run: con daemon offline l'evento e' accodato ed eseguito al ritorno, entro max_runtime (TESTED)]` | activity.md riga 53; unica traccia di Jira e' un test. Servono Issue Queue Controller, lease, readiness, priorita'. Adapter minimo via dispatch con `deliveryKey`: PARTIAL |
 | R02 Analyst | Assente | Solo workflow con classifier e `hub.reply` per Slack/Discord. Nessuna intervista strutturata ne' specifica/AC nativa |
 | R03 Planning DAG | Assente nei docs (UNVERIFIED nel codice) | Step ordinati con `if` (concepts.md). Nessun DAG, verification contract, versioning del piano |
 | R04 Team dinamico | PARTIAL | Profili agente, MCP/CLI per subagenti, `send_agent_prompt`, `/paseo-handoff`. Ruoli non imposti dall'infrastruttura |
@@ -137,7 +137,7 @@ Alternativa piu' semplice: solo daemon Paseo con CLI/SDK come runtime remoto, se
 
 Fonti primarie: https://paseo.sh/docs/hub; https://github.com/getpaseo/hub (README, LICENSE, CHANGELOG, docs/*.md, src/auth/organization-contract.ts); https://github.com/getpaseo/paseo (public-docs/*.md, public-docs/hub/*.md, LICENSE, SECURITY.md); https://github.com/getpaseo/paseo/issues (conteggio 2026-10-20).
 
-Risultati sperimentali: nessuno. Scenari S00-S10 per questo candidato: BLOCKED/non eseguiti (fase di sola lettura, nessuna installazione, nessun provider a pagamento). Per sbloccare S00: approvare l'installazione in sandbox isolata di `npx @getpaseo/hub` e `npm i -g @getpaseo/cli` (codice npm non ispezionato), Node installato, un agent CLI con credenziali di prova (MOCK senza costi; LIVE con budget). Per R08/S06 notturno: VM remota.
+Risultati sperimentali: vedi la sezione "Risultati sperimentali S00" in fondo. Scenari S01-S10 non eseguiti. Per R08/S06 notturno resta necessaria una VM remota.
 
 Limiti noti della scheda:
 1. Sorgente del daemon e del dispatcher Hub non letto in profondita': molte affermazioni sono DOC, non CODE.
@@ -148,6 +148,30 @@ Limiti noti della scheda:
 
 ## Segnalazioni dalle issue (consultate 2026-10-20 con `gh`; non riprodotte)
 
-- **Hub #147 (aperta, 2026-10-03):** SIGTERM non completerebbe finché un daemon è connesso (`server.close()` atteso prima). Rilevante per lo stop e il riavvio controllato (R05.3, R08). `UNVERIFIED`.
+- **Hub #147 (aperta, 2026-10-03):** SIGTERM non completerebbe finché un daemon è connesso (`server.close()` atteso prima). Rilevante per lo stop e il riavvio controllato (R05.3, R08). ~~`UNVERIFIED`~~ `[S00: RIPRODOTTA (TESTED): con daemon connesso SIGTERM non termina (>= 90 s); termina 2,3 s dopo lo stop del daemon o con un secondo segnale]`.
 - Il conteggio `open_issues_count` di GitHub include le PR: per `getpaseo/paseo` è 1474 al 2026-10-20 (la scheda riportava ~780 issue lette via web: la cifra non è confrontabile).
 - Il repository Hub ha 41 elementi aperti e 56 stelle: adozione molto limitata.
+
+## Risultati sperimentali S00
+
+Eseguiti il 2026-10-20 (UTC 23:20-23:53), modalita' MOCK, esito complessivo **PARTIAL**, n = 1 salvo diversa indicazione. Dettagli, comandi e output sanificati: `reports/s00-paseo-hub.md`; dati: `results/s00-paseo-hub-5cfde00d.json`. Ambiente: container Linux non root (2 GiB, 2 CPU, `--cap-drop ALL`, nessuna porta, nessun mount host, un container alla volta, uscita di rete non filtrata). Versioni: Hub v0.10.0 (commit 28f6c78833065fd282f9064f92a9aa61875dd359, compilato dal sorgente), daemon Paseo 0.12.0 (immagine `ghcr.io/getpaseo/paseo:0.12.0`, digest sha256:0d17dd75a51c591907a4bbcd505013102048246a0cd6e824de3b38a6057ff862). Nessuna credenziale reale, nessuna chiamata LLM, costo 0. L'agente di prova e' un provider ACP finto con id riservato `hub-e2e` (hook di test del registro del daemon): non dimostra il comportamento con Claude/Codex/OpenCode.
+
+| Affermazione | Etichetta | Evidenza |
+|---|---|---|
+| Il daemon (immagine ufficiale) parte da non root con `--cap-drop ALL`; health 200, SIGTERM exit 0 in 2,6 s | TESTED | report 3.1; senza `PASEO_PASSWORD` il daemon non richiede autenticazione |
+| Il daemon scarica ~814 MB di modelli vocali da GitHub al primo avvio (disattivabile) | TESTED | report 4.2; non presente nella scheda |
+| Hub v0.10.0: `npm ci` 35 s, build 66 s, avvio con DB embedded: cold 9-10 s, warm 3,5-5,6 s, `/health` `{"ok":true}`, RSS ~590 MB | TESTED | report 3.2, 6 |
+| Hub con PostgreSQL / immagine ufficiale Hub / `docker compose` / `npx @getpaseo/hub` | UNVERIFIED | non eseguiti (embedded bastato) |
+| Test del repo: 1.079 test PASS in 149 file; 108 falliti in 3 file solo per assenza di Docker (testcontainers) | TESTED (subset) | report 3.4 |
+| RBAC owner/admin/member in runtime | TESTED | report 5.1 |
+| `hub.execute` assente di default e necessario per essere target | TESTED | report 3.3 |
+| Dispatch manuale idempotente per `deliveryKey` (anche concorrente) | TESTED | report 5.2 |
+| SIGTERM con daemon connesso non termina (#147) | TESTED (riprodotta) | report 5.3 |
+| Hub SIGKILL con run in volo: agente sopravvive, nessun duplicato, completion accettata dopo il riavvio | TESTED (lato agente) | report 5.4; stato finale del run non leggibile dopo il riavvio |
+| Coda con daemon offline | TESTED: accodato, eseguito al ritorno, `timed_out` oltre `max_runtime` | report 5.5; "Nothing is queued" smentito per `manual.run` |
+| Coda attraverso un riavvio di Hub | TESTED (fallimento) | report 5.5, 5.6; causa non isolata |
+| Dopo il riavvio le config legacy vengono migrate e `POST /api/v1/manual-runs` risponde 500 | TESTED (sintomo); causa PARTIAL (CODE) | report 5.6; ipotesi: `daemonId` non risolto dalla migrazione |
+| Trigger nuovi (`/api/v1/triggers/*`, `paseo hub init/deploy`) con agente reale | BLOCKED | accettano solo Claude/Codex/OpenCode disponibili; servono agent CLI e credenziali |
+| Login CLI con approvazione, dashboard nel browser, Windows | UNVERIFIED | non provati |
+
+Discrepanze rispetto alla scheda: (1) "Nothing is queued" e' smentito per `manual.run`; (2) la tabella SHA riportava l'oggetto tag di Hub come commit e uno SHA di Paseo troncato; (3) con daemon offline il dispatch non da' 409 ne' `daemon_not_connected` ma 200 `running`; (4) la risposta al dispatch ripetuto viene riprodotta, la doc dice di non contarci; (5) il daemon scarica ~814 MB di modelli vocali al primo avvio; (6) `/api/v1/triggers/*` e il bundle legacy hanno regole diverse sui provider (solo Claude/Codex/OpenCode contro qualunque).
