@@ -71,7 +71,14 @@ const claude = spawnSync(
     '--tools', 'Read,Edit,Write,Glob,Grep,Bash',
     '--allowedTools', 'Read', 'Edit', 'Write', 'Glob', 'Grep', 'Bash(node:*)', 'Bash(npm test)', 'Bash(npm run test)',
   ],
-  { cwd: ws, encoding: 'utf8', timeout: 15 * 60_000, shell: process.platform === 'win32' ? false : false },
+  {
+    cwd: ws,
+    encoding: 'utf8',
+    timeout: 15 * 60_000,
+    // --setting-sources NON esclude il CLAUDE.md globale dell'utente (provato il 2026-10-20: la regola
+    // "spiega e fermati" fermava le run a metà). Questa variabile lo esclude (verificato con una sonda).
+    env: { ...process.env, CLAUDE_CODE_DISABLE_CLAUDE_MDS: '1' },
+  },
 );
 
 let usage = null;

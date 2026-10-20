@@ -11,7 +11,7 @@ Solo la **baseline single-agent**: Claude Code in modalità non interattiva (`cl
 | Spesa totale (stima a prezzo di listino riportata dalla CLI) | **15,00 USD** |
 | Per singola run | **1,50 USD** (`--max-budget-usd 1.5`) |
 | Turni massimi per run | 25 (`--max-turns 25`) |
-| Run pianificate | 9: ISSUE-1, ISSUE-2, ISSUE-6, n=3 ciascuna |
+| Run pianificate | 9 valide: ISSUE-1, ISSUE-2, ISSUE-6, n=3 ciascuna (più 9 run invalidate per contaminazione, vedi sotto) |
 | Riserva per prove e ripetizioni | 1,50 USD (9 × 1,50 = 13,50 USD di tetto teorico) |
 
 Il tetto per run è molto sopra la stima attesa. Una chiamata minima è costata 0,0099 USD (`total_cost_usd`, misurata). Per task piccoli su una fixture di tre file si attendono costi nell'ordine di decine di centesimi per run: **è una stima, non una misura**; il valore reale viene registrato per ogni run.
@@ -30,7 +30,8 @@ Il tetto per run è molto sopra la stima attesa. Una chiamata minima è costata 
 
 - Workspace: copia temporanea della fixture fuori dalla repo; i test held-out restano fuori e vengono eseguiti da `scripts/evaluate.mjs` su una copia separata (l'agente non li vede).
 - Strumenti consentiti: Read, Edit, Write, Glob, Grep e Bash limitato a `node` e `npm test`. Niente web, niente `--dangerously-skip-permissions`.
-- Isolamento dalla configurazione dell'utente: `--setting-sources project` (non carica il `CLAUDE.md` globale, che altrimenti altererebbe il comportamento della baseline), `--strict-mcp-config` senza server MCP, `--no-session-persistence`.
+- Isolamento dalla configurazione dell'utente: `CLAUDE_CODE_DISABLE_CLAUDE_MDS=1` (esclude il `CLAUDE.md` globale, che altrimenti altera la baseline), `--setting-sources project`, `--strict-mcp-config` senza server MCP, `--no-session-persistence`.
+  **Correzione del 2026-10-20:** la prima versione si affidava solo a `--setting-sources project`, che **non** esclude il `CLAUDE.md` globale. Una sonda lo ha mostrato (senza la variabile l'agente riportava la regola «spiega e fermati»; con la variabile rispondeva `NESSUNA`). Le prime 9 run ne erano contaminate: gli agenti si fermavano a metà lavoro (ISSUE-6 fallì 3 volte su 3, con riassunti del tipo «mi fermo qui, come da tue preferenze»). Sono state **invalidate e conservate** in `results/invalid-contaminated/`, escluse da ogni confronto. Il loro costo (0,38 USD) resta nel registro. Le run valide sono state rifatte dopo la correzione.
 - Nessuna credenziale viene copiata in file o container. L'autenticazione è quella già presente nella CLI.
 
 ## Cosa NON è coperto (richiede un'altra approvazione)

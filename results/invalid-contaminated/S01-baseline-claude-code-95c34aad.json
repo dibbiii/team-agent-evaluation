@@ -1,0 +1,28 @@
+{
+  "run_id": "95c34aad-904f-4cb7-acc5-35285b66df9f",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.305 (Claude Code)",
+  "scenario_id": "S01",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "64e7710de2c19763e93afd7dab23eafd7f639a25",
+  "status": "FAIL",
+  "started_at_utc": "2026-10-20T21:15:59.479Z",
+  "finished_at_utc": "2026-10-20T21:16:25.175Z",
+  "duration_seconds": 25.696,
+  "input_tokens": 8,
+  "output_tokens": 2278,
+  "cache_tokens": 38381,
+  "estimated_cost_usd": 0.053037100000000004,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true
+  },
+  "artifact_paths": [],
+  "blockers": [
+    "RUN INVALIDA: il CLAUDE.md globale dell'utente (regola 'spiega e fermati') è stato caricato nonostante --setting-sources project; l'agente si è fermato a metà lavoro. Non usare per confronti."
+  ],
+  "notes": "[INVALIDA - contaminata] baseline Claude Code, 8 turni, issue ISSUE-1. Costo = stima a prezzo di listino (abbonamento). Riassunto agente: Ho applicato le modifiche, ma non ho ancora lanciato `npm test`. - **`src/pricing.js`:** `percentOff` ora usa `Math.floor((amountCents * (100 - percent) + 50) / 100)`. Con soli interi, 1995 con SAVE10 dà 1796 e la firma resta invariata. - **`test/cart.test.js`:** ho importato `percentOff` e aggiunto"
+}

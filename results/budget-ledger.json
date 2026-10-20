@@ -1,0 +1,185 @@
+{
+  "spent_usd": 0.833309,
+  "runs": [
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.0484405,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/invalid-contaminated/S01-baseline-claude-code-ed04a9e1.json",
+      "at": "2026-10-20T21:15:26.748Z",
+      "invalid": true,
+      "invalid_reason": "CLAUDE.md globale caricato"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.03602570000000001,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/invalid-contaminated/S01-baseline-claude-code-c200ba47.json",
+      "at": "2026-10-20T21:15:57.952Z",
+      "invalid": true,
+      "invalid_reason": "CLAUDE.md globale caricato"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.053037100000000004,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/invalid-contaminated/S01-baseline-claude-code-95c34aad.json",
+      "at": "2026-10-20T21:16:25.175Z",
+      "invalid": true,
+      "invalid_reason": "CLAUDE.md globale caricato"
+    },
+    {
+      "issue": "ISSUE-2",
+      "scenario": "S01x",
+      "cost_usd": 0.0492176,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/invalid-contaminated/S01x-baseline-claude-code-3080d65d.json",
+      "at": "2026-10-20T21:16:50.123Z",
+      "invalid": true,
+      "invalid_reason": "CLAUDE.md globale caricato"
+    },
+    {
+      "issue": "ISSUE-2",
+      "scenario": "S01x",
+      "cost_usd": 0.044966400000000004,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/invalid-contaminated/S01x-baseline-claude-code-34c25827.json",
+      "at": "2026-10-20T21:17:15.420Z",
+      "invalid": true,
+      "invalid_reason": "CLAUDE.md globale caricato"
+    },
+    {
+      "issue": "ISSUE-2",
+      "scenario": "S01x",
+      "cost_usd": 0.0418181,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/invalid-contaminated/S01x-baseline-claude-code-77cea030.json",
+      "at": "2026-10-20T21:17:38.339Z",
+      "invalid": true,
+      "invalid_reason": "CLAUDE.md globale caricato"
+    },
+    {
+      "issue": "ISSUE-6",
+      "scenario": "S01x",
+      "cost_usd": 0.0377863,
+      "execution_error": false,
+      "status": "FAIL",
+      "result_file": "results/invalid-contaminated/S01x-baseline-claude-code-b591add9.json",
+      "at": "2026-10-20T21:18:00.736Z",
+      "invalid": true,
+      "invalid_reason": "CLAUDE.md globale caricato"
+    },
+    {
+      "issue": "ISSUE-6",
+      "scenario": "S01x",
+      "cost_usd": 0.0352234,
+      "execution_error": false,
+      "status": "FAIL",
+      "result_file": "results/invalid-contaminated/S01x-baseline-claude-code-5517f2c8.json",
+      "at": "2026-10-20T21:18:19.949Z",
+      "invalid": true,
+      "invalid_reason": "CLAUDE.md globale caricato"
+    },
+    {
+      "issue": "ISSUE-6",
+      "scenario": "S01x",
+      "cost_usd": 0.0380751,
+      "execution_error": false,
+      "status": "FAIL",
+      "result_file": "results/invalid-contaminated/S01x-baseline-claude-code-b32b45ef.json",
+      "at": "2026-10-20T21:18:42.013Z",
+      "invalid": true,
+      "invalid_reason": "CLAUDE.md globale caricato"
+    },
+    {
+      "issue": "ISSUE-6",
+      "scenario": "S01",
+      "cost_usd": 0.057113199999999996,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\S01-baseline-claude-code-d1903dcc.json",
+      "at": "2026-10-20T21:25:46.509Z"
+    },
+    {
+      "issue": "ISSUE-6",
+      "scenario": "S01",
+      "cost_usd": 0.0612239,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\S01-baseline-claude-code-c72da38e.json",
+      "at": "2026-10-20T21:26:35.795Z"
+    },
+    {
+      "issue": "ISSUE-6",
+      "scenario": "S01",
+      "cost_usd": 0.05051320000000001,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\S01-baseline-claude-code-4b66b982.json",
+      "at": "2026-10-20T21:27:12.498Z"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.0449435,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\S01-baseline-claude-code-851934fd.json",
+      "at": "2026-10-20T21:27:49.060Z"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.042976299999999995,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\S01-baseline-claude-code-b24424cc.json",
+      "at": "2026-10-20T21:28:24.137Z"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.0465561,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\S01-baseline-claude-code-34bd9eaa.json",
+      "at": "2026-10-20T21:29:17.917Z"
+    },
+    {
+      "issue": "ISSUE-2",
+      "scenario": "S01",
+      "cost_usd": 0.0492442,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\S01-baseline-claude-code-77fc2e06.json",
+      "at": "2026-10-20T21:29:54.925Z"
+    },
+    {
+      "issue": "ISSUE-2",
+      "scenario": "S01",
+      "cost_usd": 0.0551102,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\S01-baseline-claude-code-507e8401.json",
+      "at": "2026-10-20T21:30:31.324Z"
+    },
+    {
+      "issue": "ISSUE-2",
+      "scenario": "S01",
+      "cost_usd": 0.0410399,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\S01-baseline-claude-code-b4ac8346.json",
+      "at": "2026-10-20T21:31:02.484Z"
+    }
+  ]
+}

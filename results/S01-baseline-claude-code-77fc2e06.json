@@ -1,0 +1,26 @@
+{
+  "run_id": "77fc2e06-0769-42c0-9649-59f8bb894f34",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.305 (Claude Code)",
+  "scenario_id": "S01",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "62d1980325b48b4811da988006774cf57c79b9bb",
+  "status": "PASS",
+  "started_at_utc": "2026-10-20T21:29:19.296Z",
+  "finished_at_utc": "2026-10-20T21:29:54.925Z",
+  "duration_seconds": 35.629,
+  "input_tokens": 10,
+  "output_tokens": 1979,
+  "cache_tokens": 49383,
+  "estimated_cost_usd": 0.0492442,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "baseline Claude Code, 7 turni, issue ISSUE-2. Costo = stima a prezzo di listino (abbonamento). Riassunto agente: Ho aggiunto il codice SAVE50 (50%) in `src/pricing.js`. Lo sconto è limitato a 2000 centesimi tramite una nuova mappa `DISCOUNT_CAPS` usata da `applyCode`, quindi gli altri codici restano senza tetto. L'interfaccia di `applyCode` e `Cart` non cambia. In `test/cart.test.js` ho aggiunto tre test: SAVE"
+}
