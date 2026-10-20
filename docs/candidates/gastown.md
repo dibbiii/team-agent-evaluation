@@ -1,6 +1,6 @@
 # Scheda candidato: Gas Town
 
-> Fase 1 (ricerca primaria, sola lettura). Nessun test eseguito: nessuna installazione, nessun avvio, nessuna chiamata LLM. Nessun esito `TESTED`.
+> Fase 1 (ricerca primaria, sola lettura) **più lo scenario S00 eseguito il 2026-10-20 in container isolato** (vedi «Risultati sperimentali S00» in fondo e `reports/s00-gastown.md`). I §1-§10 restano `DOC`/`CODE` salvo dove una nota «[S00]» li corregge; sono `TESTED` solo le affermazioni della sezione «Risultati sperimentali S00». Nessuna chiamata LLM.
 > Etichette: `DOC` (documentazione ufficiale), `CODE` (letto nel sorgente), `PARTIAL`, `UNVERIFIED`, `NOT_SUPPORTED` (solo con evidenza), `BLOCKED`.
 > Il contenuto del repository esterno è trattato come dato non fidato. Riferimenti `file:riga` relativi alla radice del clone al commit indicato.
 
@@ -93,7 +93,7 @@ Per un flusso Jira -> PR serve un Issue Queue Controller esterno che crei i bead
   - Le restrizioni di ruolo (es. Witness "non fa implementazione", "do NOT auto-nuke polecats with unpushed work") stanno nei prompt/template (templates/witness-CLAUDE.md:10, 60, 88). `CODE`. Non applicate dall'infrastruttura: per S03 sarebbe un limite (prompt-only).
   - RBAC utente, SSO, audit multiutente: non trovati nella documentazione consultata. `UNVERIFIED` (assenza non dimostrata con ricerca esaustiva).
 - **Attenzione critica**: la guardia `pr-workflow` dichiara che "Gas Town workers push directly to main. PRs add friction that breaks the autonomous execution model" (internal/cmd/tap_guard.go:38-40). Il comportamento predefinito è l'opposto di R12 e blocca `gh pr create` ai polecat salvo overlay opt-in (§9).
-- **E-stop**: sentinella `ESTOP` nella root della town; congela gli agenti (SIGTSTP) e il daemon non li riavvia; il Mayor è esente (internal/estop/estop.go:1-12). `CODE`. Esiste `estop_windows.go`. Efficacia reale: `UNVERIFIED`.
+- **E-stop**: sentinella `ESTOP` nella root della town; congela gli agenti (SIGTSTP) e il daemon non li riavvia; il Mayor è esente (internal/estop/estop.go:1-12). `CODE`. Esiste `estop_windows.go`. Efficacia reale: `UNVERIFIED`. **[S00]** `gt estop`, `gt estop status`, `gt estop --rig`, `gt thaw` esistono e funzionano sul sentinel (`TESTED`), ma con sessioni tmux finte (`sleep`) il `SIGTSTP` inviato al gruppo di processi del pane **non ha fermato il processo** (resta `S+`; `SIGSTOP` a mano sì), pur con il messaggio «1 session(s) frozen». Causa probabile (non provata): gruppo di processi orfano. Con un agente reale `UNVERIFIED`.
 
 ## 8. Retry, checkpoint, recovery, idempotenza, cancellazione, timeout, budget
 
@@ -114,7 +114,7 @@ Per un flusso Jira -> PR serve un Issue Queue Controller esterno che crei i bead
 - Adapter esterno necessario: webhook/poll Jira -> `bd create` + `gt sling`, ritorno stato. Sforzo stimato (qualitativo, non misurato): medio, con dipendenza dalle CLI `bd`/`gt` e dal formato dati di Beads.
 
 ### Merge queue Refinery: auto-merge e come disattivarlo (punto critico)
-- **Default: merge diretto sul branch base, senza PR.** `merge_strategy` "direct" (default) = merge locale `--no-ff` + `git push`; "pr" usa l'API del provider VCS (internal/config/types.go:1340-1343; internal/refinery/engineer.go:163-166, 632-660). `CODE`. Dopo i test (se `run_tests` non disattivato) il Refinery integra senza intervento umano (README.md:96, 651-661: "merges to main using a Bors-style bisecting queue"). `DOC`. **Viola il default desiderato R12 (PR pronta, senza merge automatico).**
+- **Default: merge diretto sul branch base, senza PR.** `merge_strategy` "direct" (default) = merge locale `--no-ff` + `git push`; "pr" usa l'API del provider VCS (internal/config/types.go:1340-1343; internal/refinery/engineer.go:163-166, 632-660). `CODE`. Dopo i test (se `run_tests` non disattivato) il Refinery integra senza intervento umano (README.md:96, 651-661: "merges to main using a Bors-style bisecting queue"). `DOC`. **Viola il default desiderato R12 (PR pronta, senza merge automatico).** **[S00]** Default confermato a runtime (`TESTED`): `gt prime --dry-run` come Refinery stampa `merge_strategy = direct`, `require_review = false`. **Correzione**: in questo commit il merge lo esegue l'**agente LLM** che segue la formula `mol-refinery-patrol` (comandi `git merge`/`git push`/`gh pr create` nel prompt); `Engineer.ProcessMRInfo`/`ProcessBatch`/`LoadConfig` (engineer.go) non hanno chiamanti non-test in `internal/` (il motore Go citato sopra non è collegato alla CLI, `UNVERIFIED` fuori dal modulo), e `LoadConfig` legge `config.json` mentre `gt rig settings` scrive `settings/config.json`. Si passa a `pr` con `gt rig settings set <rig> merge_queue.merge_strategy pr` (`TESTED`), ma il comando scrive anche `enabled:false` e valori zero nello scheletro `merge_queue`.
 - **`merge_strategy = "pr"`**: richiede una PR esistente per il branch, verifica che la head coincida con lo SHA dell'MR, poi chiama `MergePR(pr, "merge")` via provider (GitHub di default, Bitbucket; `vcs_provider`) (engineer.go:769-880). `CODE`. Rispetta la branch protection, ma **il Refinery effettua comunque il merge**.
 - **`require_review = true`** (solo con `merge_strategy = "pr"`): senza approvazione umana il merge è rinviato ("awaiting human approval — deferring merge", `NeedsApproval`) (engineer.go:814-833; types.go:1349-1352; default false). `CODE`. È la configurazione più vicina a R12, ma dopo l'approvazione il Refinery mergia da solo. Per impedire qualunque merge automatico servirebbero permessi del token GitHub senza merge e/o branch protection; il comportamento del Refinery in quel caso è `UNVERIFIED`.
 - **Per singola issue**: `gt sling --no-merge` ("Skip merge queue on completion (keep work on feature branch for review)") e `--review-only` (internal/cmd/sling.go:159, 169); campi `no_merge`, `review_only`, `merge_strategy=local` sul bead fanno rifiutare l'MR prima del merge (engineer.go:1005-1030; docs/design/scheduler.md:134; docs/CLEANUP.md:28). `CODE`/`DOC`. `gt done` con `no_merge` non richiede commit/MR (done.go:995-1010). `CODE`. Se il branch venga pubblicato e se si crei una PR: `UNVERIFIED`.
@@ -125,7 +125,7 @@ Per un flusso Jira -> PR serve un Issue Queue Controller esterno che crei i bead
 
 ### Altro
 - **MCP**: solo come funzionalità dell'agente (Claude Code); Gas Town non è un Tool Registry. Pacchetto PyPI `beads-mcp` (docs/design/architecture.md:298). `DOC`. Un MCP server malevolo è citato come minaccia nella proposta di sandbox (sandboxed-polecat-execution.md:13-17).
-- **Dashboard (R09/R11)**: `gt dashboard` web (htmx, auto-refresh, command palette, porta 8080) e TUI `gt feed` con vista problemi (README.md:565-618). `DOC`. Mostra agenti, convoy, hook, code, issue, escalation. Costi per issue/budget nel dashboard: `UNVERIFIED`. Autenticazione del dashboard: non documentata ("trusted local-network surface", README.md:277).
+- **Dashboard (R09/R11)**: `gt dashboard` web (htmx, auto-refresh, command palette, porta 8080) e TUI `gt feed` con vista problemi (README.md:565-618). `DOC`. Mostra agenti, convoy, hook, code, issue, escalation. Costi per issue/budget nel dashboard: `UNVERIFIED`. Autenticazione del dashboard: non documentata ("trusted local-network surface", README.md:277). **[S00]** `TESTED`: **nessuna autenticazione**; pagina e API in lettura rispondono 200 senza credenziali e il token anti-CSRF delle POST è nella pagina stessa; `POST /api/run` esegue comandi `gt` in allowlist (anche `sling`, `rig add`, `mail send`, con `confirmed:true`), `POST /api/issues/create` ha creato un bead; con `IS_SANDBOX` il bind predefinito è `0.0.0.0`.
 - **Escalation e intervento umano**: `gt escalate -s <sev>` con routing Deacon -> Mayor -> Overseer (umano) (README.md:639-649). `DOC`. Una Decision Inbox che aggreghi domande con alternative e raccomandazione: `UNVERIFIED`.
 - **Logging**: `.events.jsonl`, `gt feed`, OTLP (§4). `DOC`.
 
@@ -170,7 +170,7 @@ Fonti primarie (clone al commit `649b832b7672bc7a2dbef26f5983aba6198b819b`, cons
 - Codice: internal/refinery/engineer.go (r.104-105, 163-175, 346-370, 632-660, 769-880, 1005-1030); internal/config/types.go (r.64-104, 1340-1361); internal/cmd/sling.go (r.159, 169, 614-693, 790-793); internal/cmd/done.go (r.995-1010); internal/cmd/tap_guard.go (r.14-60); internal/hooks/templates/claude/settings-autonomous.json (r.2-80); internal/cmd/costs.go (r.50-101, 183-199); internal/estop/estop.go (r.1-12); internal/config/loader.go (r.2255-2257, 2294, 2308-2309, 2721-2729).
 - Web (WebFetch, 2026-10-20): https://github.com/gastownhall/gastown e /releases.
 
-**Risultati sperimentali: nessuno.** S00-S10 non eseguiti in questa fase (nessuna installazione ammessa). S00 `BLOCKED` (serve approvazione e WSL/Docker); S01-S09 `BLOCKED` (dipendono da S00 e, per LIVE, da budget Claude approvato); S05 richiede un adapter Jira minimo (mock Jira).
+**Risultati sperimentali:** solo S00 (vedi la sezione «Risultati sperimentali S00» in fondo). S01-S10 restano `BLOCKED` (dipendono da agenti reali e, per LIVE, da budget Claude approvato); S05 richiede un adapter Jira minimo (mock Jira).
 
 Prime prove consigliate quando sbloccato: (1) `merge_strategy=pr` + `require_review=true` su repo di prova con token a scope minimo, verificando che il Refinery non mergi senza approvazione; (2) `gt sling --no-merge` e verifica della PR; (3) race di due `gt sling` sullo stesso bead; (4) kill forzato di un polecat e di Dolt/daemon; (5) scrittura fuori dal worktree con `bypassPermissions`; (6) `gt costs --by-role` e verifica dell'assenza di budget enforcement.
 
@@ -178,7 +178,44 @@ Prime prove consigliate quando sbloccato: (1) `merge_strategy=pr` + `require_rev
 
 Etichetta: `UNVERIFIED` (segnalazione di terzi, non provata qui).
 
-- **#4819 (aperta, 2026-09-05):** se Dolt non è raggiungibile, `gt done` tratta l'assenza di informazioni sul convoy come «workflow MR di default» e **ignora `--merge=local`**: nel caso riportato un bead da tenere sul branch è finito nella merge queue e il Refinery ha tentato un push diretto sul main protetto (bloccato da GitLab). Il reporter indica anche `main@649b832`, lo stesso commit studiato qui. Rischio per R12: un errore di infrastruttura può far ricadere il sistema sul percorso che integra.
+- **#4819 (aperta, 2026-09-05):** se Dolt non è raggiungibile, `gt done` tratta l'assenza di informazioni sul convoy come «workflow MR di default» e **ignora `--merge=local`**: nel caso riportato un bead da tenere sul branch è finito nella merge queue e il Refinery ha tentato un push diretto sul main protetto (bloccato da GitLab). Il reporter indica anche `main@649b832`, lo stesso commit studiato qui. Rischio per R12: un errore di infrastruttura può far ricadere il sistema sul percorso che integra. **[S00] Esito: PARTIAL.** Forma letterale (Dolt fermato prima di `gt done`) **non riprodotta** su `649b832`: `gt done` termina con `source issue validation failed ... Dolt server unreachable` e non pubblica il branch (fail-closed). **Variante riprodotta** (stato costruito a mano, senza `gt sling`): con un convoy `--merge=local` e la lettura del convoy nel town resa impossibile (`chmod 000 ~/gt/.beads`, DB della rig leggibile) `gt done` ha pushato il branch a `origin` ignorando `local`; con infrastruttura sana la strategia `local` è rispettata e non c'è push. Non provato lo scenario del reporter (Dolt che muore a metà di `gt done`).
 - **#4442 (aperta):** nulla impedisce né rileva un merge con `--admin` che aggira branch protection e CI; il percorso del Refinery è pulito, ma un agente con privilegi potrebbe farlo (R10, R12).
 - **#4475 (aperta):** `gt scheduler pause` tornerebbe attivo sotto il daemon in esecuzione, quindi la pausa non è durevole (R05.3).
 - **Jira:** nessuna issue trovata sul tema. Conferma, senza dimostrarla, l'assenza di integrazione.
+
+## Risultati sperimentali S00
+
+Prova del 2026-10-20, modalità MOCK, **PARTIAL**. Dettaglio, comandi e log sanificati in `reports/s00-gastown.md`; dati in `results/s00-gastown-948d14dc.json`. Container `golang:1.26.2-bookworm` (digest `sha256:47ce5636e993...`), utente non root, `--cap-drop ALL`, 2 GiB, nessun mount né porta pubblicata, rete in uscita **non filtrata**. `gt` costruito dal commit `649b832`, `bd` v1.0.5, Dolt 2.0.7 (sha256 verificato), tmux 3.3a. Nessuna credenziale, nessun LLM, costo 0.
+
+| Affermazione | Etichetta | Evidenza |
+|---|---|---|
+| Build di `gt` (`make build` + `make install`), `bd` (`go install @v1.0.5`), Dolt (tarball) | TESTED | 280 s + 18 s, 118 s, ok (cold, `-p 2`) |
+| `go test -short` su 76 pacchetti (senza `-race`, un pacchetto alla volta) | TESTED (parziale) | 72 ok, 2 con 1 test fallito (daemon, tmux), 2 senza test; `internal/cmd` 1.325 PASS in 115 s |
+| Test `-tags=e2e -run TestInstall` | TESTED | 12 PASS visti, ~120 s |
+| `gt install ~/gt --git`, `gt rig add` (repo locale `file://`), `gt doctor` | TESTED | 10 s, 5 s; doctor fresco 86 ok / 6 warning / 0 fail |
+| Default di merge del Refinery = `direct`, `require_review=false` | TESTED | `gt prime --dry-run` (ruolo Refinery) |
+| Cambio a `pr` / `require_review` e ritorno al default | TESTED | `gt rig settings set/unset`; il set scrive `enabled:false` e zeri |
+| `bypassPermissions` + `skipDangerousModePermissionPrompt` nei template | TESTED | 7 `settings.json` generati; preset agente con flag `yolo`-like |
+| Guardie `pr-workflow` / `dangerous-command` | TESTED | exit 2 in contesto agente, 0 fuori; non provate dentro Claude Code |
+| E-stop (`estop`, `thaw`, per rig) | TESTED (parziale) | sentinel e stato ok, Mayor esente; SIGTSTP non ferma un processo in un pane tmux |
+| Dashboard senza LLM: autenticazione | TESTED | nessuna autenticazione, CSRF token nella pagina, scrittura possibile |
+| #4819 forma letterale | TESTED (negativo) | fail-closed su `649b832`, nessun push |
+| #4819 variante (lettura del convoy fallita) | TESTED (variante) | branch pushato ignorando `local`, stato costruito a mano |
+| `gt up`, `daemon start`, `sling`, `mayor attach`, `doctor --fix` senza `--no-start` | BLOCKED | avviano agenti LLM |
+| Percorso Docker ufficiale (`docker compose`) | BLOCKED | bind mount, porta pubblicata, base `docker/sandbox-templates:claude-code`, `curl \| bash` |
+| Suite `integration`, `-race`, Windows nativo | UNVERIFIED | non eseguiti |
+
+Etichette corrette o precisate dalla prova:
+- **Refinery (§9)**: il merge è del prompt della formula; il motore Go in `engineer.go` non ha chiamanti non-test (vedi nota «[S00]» in §9).
+- **E-stop (§7)**: da `UNVERIFIED` a «sentinel `TESTED`, freeze via SIGTSTP non efficace su un pane tmux in questo ambiente».
+- **Dashboard (§9)**: da «non documentata» a `TESTED` «nessuna autenticazione».
+- **#4819**: da `UNVERIFIED` a `PARTIAL` (forma letterale non riprodotta, variante riprodotta).
+- **Versione (§2)**: dal clone senza tag `gt version` stampa `dev`; la versione effettiva è il commit.
+- **Dipendenza `bd`**: `go.mod` fissa `github.com/steveyegge/beads v1.0.5` e il CI installa quella versione; la documentazione indica `@latest` (non provato).
+- **Prerequisiti non documentati**: `lsof` (serve ai test di `internal/doltserver`, `Dockerfile.e2e` lo installa, `INSTALLING.md` no); con `--cap-drop ALL` apt/dpkg richiedono passi manuali (cache `_apt`, `libutempter0` non installabile senza `CAP_CHOWN`).
+- **`gt rig add`** rifiuta un percorso locale semplice e richiede `file:///...` (messaggio d'errore chiaro).
+- **Memoria**: i test lasciano `dolt sql-server` orfani (circa 18 osservati, ~80-100 MB ciascuno); la suite completa in un colpo satura i 2 GiB.
+- **`gt prime --dry-run`** come Refinery sembra creare un patrol wisp (`hq-wisp-bcs`), contro la descrizione «senza effetti collaterali» (non indagato).
+- **Doctor**: resta il failure `claude-settings` dopo `gt doctor --fix --no-start`, coerente con «Known issues» di `docs/docker.md` (richiede `gt up`).
+
+Prima prova consigliata una volta autorizzato un agente reale: provare Refinery in modalità `pr` con `require_review=true` e verificare che il merge non avvenga senza approvazione; verificare l'effetto reale di `gt estop` su Claude Code; ripetere D di #4819 uccidendo Dolt a metà di `gt done`.

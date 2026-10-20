@@ -1,0 +1,71 @@
+{
+  "run_id": "948d14dc-19f7-411f-9ad4-f379374711b6",
+  "candidate": "gastown",
+  "candidate_version": "649b832b7672bc7a2dbef26f5983aba6198b819b (post v1.2.1; gt version in container: dev, commit locale)",
+  "scenario_id": "S00",
+  "mode": "MOCK",
+  "model": null,
+  "baseline_commit": null,
+  "status": "PARTIAL",
+  "started_at_utc": "2026-10-20T22:11:00Z",
+  "finished_at_utc": "2026-10-20T23:14:00Z",
+  "duration_seconds": 3780,
+  "input_tokens": null,
+  "output_tokens": null,
+  "cache_tokens": null,
+  "estimated_cost_usd": null,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "environment": {
+      "host": "Windows 11 + Docker Engine 29.2.0, container Linux x64 (kernel 6.6.87.2-microsoft-standard-WSL2) non root (uid 1000)",
+      "image": {"ref": "golang:1.26.2-bookworm", "go": "1.26.2", "digest": "sha256:47ce5636e9936b2c5cbf708925578ef386b4f8872aec74a67bd13a627d242b19"},
+      "limits": "--memory 2g --memory-swap 2g --cpus 2 --pids-limit 512 --cap-drop ALL --security-opt no-new-privileges --user 1000:1000 --init, nessun mount, nessuna porta pubblicata, nessun socket",
+      "network_egress": "bridge predefinita, uscita non filtrata (pull immagine, apt, proxy.golang.org/GitHub per i moduli, release GitHub di Dolt)",
+      "binaries": {
+        "gt": "build da sorgente (make build/install) del commit 649b832; gt version stampa 46124df (commit locale mio)",
+        "bd": "v1.0.5 via go install (versione di go.mod e CI), CGO_ENABLED=0",
+        "dolt": "2.0.7 tarball linux-amd64, sha256 8e09138596763896cbce0632cd6e779fa1df405334c6c148bc314539a3b9795a (uguale al digest GitHub)",
+        "tmux": "3.3a (apt, libutempter estratta a mano)",
+        "git": "2.39.5",
+        "lsof": "4.95.0-1 (apt-get download + estrazione)"
+      },
+      "note": "started_at e' una stima (creazione del container ~22:12Z); finished_at misurato; duration_seconds e' la differenza, non un cronometro totale. Un riavvio del container per un mio errore (pkill -x sleep)."
+    },
+    "build_bd": {"label": "TESTED", "result": "PASS", "detail": "go install bd@v1.0.5 in 118 s a freddo"},
+    "build_gt": {"label": "TESTED", "result": "PASS", "detail": "make build (-p 2) 280 s a freddo, 3 binari; make install 18 s; gt 137 MB"},
+    "dolt_install": {"label": "TESTED", "result": "PASS", "detail": "tarball 2.0.7 con sha256 verificato; install.sh letto, non eseguito"},
+    "unit_tests_go_short": {"label": "TESTED", "result": "PARTIAL", "detail": "76 pacchetti: 72 ok, 2 FAIL (1 test ciascuno), 2 senza test. -short, senza -race, un pacchetto alla volta per limitare la RAM. internal/cmd: 1325 PASS 11 SKIP, 115 s"},
+    "unit_test_failures_diagnosed": {"label": "TESTED", "result": "INFO", "detail": "doltserver TestCleanStaleSocket_RemovesStaleFile: manca lsof (passa con lsof); daemon TestGitChildEnv_RecoversMissingIdentity: uid 1000 senza voce in /etc/passwd; tmux TestGetPaneCommand_MultiPane: /bin/sh e' dash e non fa exec (3/3); checkpoint TestCapture: archivio senza commit (passa dopo git commit)"},
+    "e2e_testinstall": {"label": "TESTED", "result": "PASS", "detail": "go test -tags=e2e -run TestInstall ./internal/cmd/...: 12 PASS visti (output troncato), ~120 s"},
+    "integration_suite_and_race": {"label": "UNVERIFIED", "result": "non eseguito", "detail": "-tags=integration e -race del CI non eseguiti (memoria/tempo)"},
+    "gt_install_and_rig_add": {"label": "TESTED", "result": "PASS", "detail": "gt install ~/gt --git 10,4 s; gt rig add richiede file:// per repo locali (percorso semplice rifiutato con messaggio chiaro); rig creata in 4,5-5,4 s"},
+    "gt_doctor": {"label": "TESTED", "result": "PARTIAL", "detail": "fresco: 86 ok, 6 warning, 0 fail (3,7 s). Dopo le mie prove e gt doctor --fix --no-start: resta 1 failure claude-settings (richiede gt up, come in docs/docker.md)"},
+    "merge_default_runtime": {"label": "TESTED", "result": "direct", "detail": "gt prime --dry-run come Refinery: Config: merge_strategy = direct, require_review = false; settings/config.json della rig senza merge_queue; default anche nella formula mol-refinery-patrol"},
+    "merge_switch_to_pr": {"label": "TESTED", "result": "PASS", "detail": "gt rig settings set <rig> merge_queue.merge_strategy pr -> prime mostra pr; require_review true -> true; unset merge_queue -> direct/false. Il set scrive uno scheletro con enabled:false e valori zero (nessun lettore non-test di enabled trovato)"},
+    "refinery_engine_wiring": {"label": "UNVERIFIED", "result": "nessun chiamante", "detail": "Engineer.ProcessMRInfo/ProcessBatch/LoadConfig senza chiamanti non-test in internal/; il merge reale e' dell'agente LLM che segue la formula. Engineer.LoadConfig legge config.json, gt rig settings scrive settings/config.json"},
+    "permissions_bypass": {"label": "TESTED", "result": "PRESENT", "detail": "bypassPermissions + skipDangerousModePermissionPrompt in 7 settings.json generati (mayor, deacon, boot, witness, crew, polecats, refinery); preset agente con flag yolo equivalenti"},
+    "guards": {"label": "TESTED", "result": "PASS", "detail": "gt tap guard pr-workflow exit 2 con GT_POLECAT, 0 fuori contesto; dangerous-command exit 2 su git push --force via stdin JSON, 0 su ls. Non provato dentro Claude Code"},
+    "estop": {"label": "TESTED", "result": "PARTIAL", "detail": "gt estop/status/thaw e per-rig funzionano su sentinel ESTOP e mostrano lo stato in gt status; Mayor esente. Il SIGTSTP al gruppo di processi non ha fermato un sleep in un pane tmux (stato S+), SIGSTOP si. Causa probabile: gruppo orfano (non provata). Efficacia con agenti reali UNVERIFIED"},
+    "dashboard_auth": {"label": "TESTED", "result": "NO_AUTH", "detail": "GET / e /api/commands 200 senza credenziali; POST richiede X-Dashboard-Token ma il token e' nel meta della pagina; POST /api/run status con token ok; /api/issues/create ha creato un bead; sling richiede confirmed:true. IS_SANDBOX=1 porta il bind predefinito a 0.0.0.0"},
+    "issue_4819_literal": {"label": "TESTED", "result": "NOT_REPRODUCED", "detail": "gt done con Dolt fermato: errore 'source issue validation failed ... Dolt unreachable', nessun push (fail-closed) su 649b832. Stato costruito a mano (bead, worktree polecat, env), non via gt sling"},
+    "issue_4819_variant": {"label": "TESTED", "result": "REPRODUCED_VARIANT", "detail": "convoy --merge=local creato con gt convoy create; con chmod 000 su ~/gt/.beads (lettura convoy fallita, DB rig leggibile) gt done ha pushato il branch a origin ignorando local; con infrastruttura sana (controllo) local rispettato e nessun push"},
+    "memory_docker_stats": {"label": "TESTED", "result": "INFO", "detail": "build picco campionato 917 MiB; go test -short ./... con -p 2: 1,995-2,0 GiB e OOM del linker per ~18 dolt sql-server orfani dei test (~80-100 MB ciascuno); con -p 1 e pkill dolt tra i pacchetti 1,0-1,2 GiB; a riposo 48 MiB; campionamento 6-30 s, include page cache; disco 5,26 GB"},
+    "gt_up_daemon_sling_mayor": {"label": "BLOCKED", "result": "non eseguito", "detail": "gt up, gt daemon start, gt doctor --fix (senza --no-start), gt sling, gt mayor attach avviano agenti LLM (Mayor, Deacon, Witness, Refinery, polecat)"},
+    "official_docker_path": {"label": "BLOCKED", "result": "non eseguito", "detail": "docker compose + Dockerfile (base docker/sandbox-templates:claude-code, curl|bash per bd, bind mount, porta 8080 pubblicata) incompatibili con i vincoli di laboratorio"},
+    "agents_real_claude_code": {"label": "BLOCKED", "result": "non provato", "detail": "claude/codex non installati; nessuna credenziale; nessuna chiamata LLM"},
+    "native_windows": {"label": "UNVERIFIED", "result": "non provato", "detail": ""},
+    "cleanup": {"label": "TESTED", "result": "PASS", "detail": "docker ps -a --filter label=tae=1 vuoto; nessuna immagine tae-/golang residua; immagini utente 17->17, container 9->9, volumi e reti invariati, segnalibro-db healthy"}
+  },
+  "artifact_paths": [
+    "reports/s00-gastown.md",
+    "docs/candidates/gastown.md"
+  ],
+  "blockers": [
+    "gt up / gt daemon start / gt sling / gt mayor attach: lanciano agenti LLM reali (Claude Code) non ammessi in MOCK senza credenziali",
+    "percorso Docker ufficiale: bind mount, porta pubblicata, base sandbox-templates:claude-code e curl|bash non ammessi",
+    "efficacia reale di E-stop, guard PreToolUse e flusso Refinery->merge/PR richiedono un agente reale",
+    "prova di #4819 con Dolt che muore a meta' di gt done non temporizzabile in modo ripetibile senza agenti"
+  ],
+  "notes": "S00 in MOCK, PARTIAL. Costruzione e installazione di gt/bd/Dolt/tmux in container non privilegiato; test unitari go short: 72/76 pacchetti ok, 2 fallimenti di ambiente diagnosticati. gt install, rig add, doctor, prime, estop/thaw, dashboard e gt done osservati senza LLM. Default di merge = direct (TESTED); il merge e' del prompt della formula, il motore Go del Refinery non ha chiamanti non-test. gt rig settings set scrive enabled:false. E-stop: sentinel ok, SIGTSTP inefficace su un pane tmux in questo ambiente. Dashboard senza autenticazione. #4819 non riprodotta nella forma letterale (fail-closed), riprodotta in una variante. Artefatti miei: git archive senza .git (git init + commit locale, gt version dev), apt con cap-drop ALL (libutempter e lsof estratti a mano), un riavvio del container per pkill -x sleep. Nessuna credenziale, costo 0."
+}
