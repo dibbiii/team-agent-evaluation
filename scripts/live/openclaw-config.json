@@ -1,0 +1,5 @@
+[
+  { "path": "agents.defaults.model", "value": "anthropic/claude-sonnet-5-5" },
+  { "path": "agents.defaults.models", "value": { "anthropic/claude-sonnet-5-5": { "agentRuntime": { "id": "claude-cli" } }, "anthropic/*": { "agentRuntime": { "id": "claude-cli" } } } },
+  { "path": "update.checkOnStart", "value": false }
+]

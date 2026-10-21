@@ -209,6 +209,27 @@ Discrepanze corrette sopra con note «[S00: ...]»: l'azione `merge` di `github_
 
 Scenari S01-S10 non eseguiti (`BLOCKED`). Per sbloccare il resto di S00: modello locale o account di prova con budget approvato (dispatch/worker, `ask_user`, S06), >= 4-6 GiB di RAM (build, typecheck, test del dispatcher), un canale di prova non reale, repository e token di valutazione con scope minimo per `github_publish`. Prove ancora utili in `MOCK`: scadenza claim con riavvio durante un run, visibilità tra due profili con ruoli `member`/`observer`, negazione di `github_publish merge` via tool policy.
 
+#### Risultati sperimentali S01 LIVE (2026-10-21, Claude Code reale in bwrap)
+
+Dettagli e comandi in `reports/s01-openclaw-live.md`; dati in `results/S01-openclaw-live-32674079.json` e `results/S01-openclaw-live-f1bc408a.json`. Release npm `openclaw@2026.10.5` (build `1b58cb9`) con backend `claude-cli` (Claude Code 2.1.306), modello `claude-sonnet-5-5`. Costi: **stime a listino** (abbonamento Team); il prezzo di cache write (2,50 USD/MTok) e' un'assunzione.
+
+| Area | Esito | Etichetta |
+|---|---|---|
+| Come lancia `claude` | binario `claude` con **nome fisso da `PATH`**, nessun override di comando in config; `--permission-mode bypassPermissions` con la policy exec predefinita; `--setting-sources user` fisso (ignora `.claude/settings.json` del repo); sottoprocesso caldo per sessione | `CODE` + `TESTED` |
+| Bash dell'agente | passa dal tool **`exec` del Gateway** (`hostOwnedTools`, `--disallowedTools Bash`): un wrapper solo su `claude` non confina i comandi | `CODE` + `TESTED` (`mcp__openclaw__exec` nella run) |
+| Confinamento | non per sostituzione del comando: **l'intero Gateway dentro `bwrap`** (stessi montaggi di Warren/Paperclip/Paseo, HOME dedicata con le sole credenziali copiate con `cp`); tutti i `claude` osservati in pid/mnt-namespace della sandbox | `TESTED` |
+| Run ISSUE-1 | c1 PASS (22,2 s, ~0,245 USD, cache fredda), c2 PASS (17,5 s, ~0,121 USD); valutazione Windows PASS/PASS; nessun commit/PR | `TESTED` |
+| Spesa automatica | heartbeat di default scattato a ~12 min dall'avvio (turno Sonnet, ~0,128 USD); riepiloghi Haiku dopo ogni turno (non misurati); dreaming `0 3 * * *` non scattato | `TESTED` (heartbeat, Haiku) |
+| Sessioni persistenti | dopo stop/riavvio del Gateway la sessione `c2` e' ripresa e ricorda la modifica (turno da 7,5 s, ~0,016 USD); due riavvii falliti con `Shared-state read and cleanup failed` dopo il primo stop, causa non diagnosticata | `TESTED` |
+| Segreti nell'ambiente di `claude` | solo `OPENCLAW_MCP_TOKEN` (per run), `OPENCLAW_MCP_CLI_CAPTURE_KEY`, `OPENCLAW_GATEWAY_PORT`, `OPENCLAW_CLI`; ne' token del Gateway ne' OAuth; **il token del Gateway e' pero' in chiaro in `~/.openclaw/openclaw.json`** (stessa HOME dell'agente) | `TESTED` (nomi) |
+| Token OAuth di Claude | nessuna traccia in stato/log di OpenClaw dopo le run; la doc dichiara che non li legge ne' li inoltra | `TESTED` + `DOC` |
+| Superficie di controllo | senza token 401; con token `config.patch` via WS accettata e ripristinata a caldo; il catalogo del profilo `full` include `gateway`, `openclaw`, `plugins`, `exec`; DOC: con Full Access (predefinito) le modifiche persistenti richieste da un agente sono applicate senza approvazione (non provato con l'agente) | `TESTED` / `DOC` |
+| Sandbox nativa | non provabile (nessun Docker nella distribuzione); `mode: off`; non copre i tool nativi di Claude per CODE/DOC | `BLOCKED` / `UNVERIFIED` |
+| Usage/cost di OpenClaw con `claude-cli` | `usage` = solo ultima chiamata, costo assente (`missingCostEntries`) | `TESTED` |
+| Overhead | Gateway RSS ~1,5 GB + ~250 MB per `claude` caldo; costo per run 2-4x degli altri candidati (prompt di sistema + ~68k caratteri di schema di tool) | `TESTED` |
+
+Differenze dal predefinito: Gateway e client in bwrap, `--skip-bootstrap`, modello fissato a Sonnet 5.5, update check/telemetria disattivati, heartbeat disattivato dopo il primo scatto, nessun canale. Non provati: ACP, multi-agente, Workboard con worker reali, `ask_user`, crash con run in volo, permission modes ristretti, agente che modifica la config.
+
 ### 11.3 Fonti consultate (clone `6beb671c`)
 
 SECURITY.md (1-260); README.md (1-140); VISION.md e CONTRIBUTING.md non letti; docs/concepts/{multi-user,multi-agent,memory,decision-models,parallel-specialist-lanes,managed-worktrees}.md; docs/gateway/{team-server,operator-scopes,restart-recovery,cloud-workers,cli-backends,sandboxing,audit,opentelemetry}.md; docs/gateway/security/trust-model.md; docs/gateway/config-tools/github-identity.md; docs/gateway/cloud-workers/session-lifecycle.md; docs/plugins/workboard.md; docs/tools/{goal,ask-user,mcp,acp-agents,lobster,exec-approvals,swarm}.md; docs/automation/{cron-jobs,standing-orders,hooks}.md e cron-jobs/webhooks.md; docs/concepts/{usage-tracking,model-failover}.md; extensions/workboard/src/{dispatcher,store-workflow}.ts; src/agents/tools/github-publish-tool.ts; extensions/*/package.json e README (github, a2a, mcp-events, admin-http-rpc, team-reports, policy). Pagina Releases GitHub (parziale). Issue tracker non consultato (`gh` non autenticato; nessuna WebFetch su issue): maturità/bug aperti `UNVERIFIED`. Non letti: docs/gateway/security/{tool-permissions,access-control,hardened-baseline}.md, docs/gateway/cloud-workers/security-model.md, src/gateway/operator-role-policy.ts.

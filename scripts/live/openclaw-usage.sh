@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Riepilogo costi/uso dal Gateway (sola lettura, dentro la sandbox): totali di usage.cost e per sessione di sessions.usage.
+cd /home/dibbi/oc-ws/ws1 || exit 1
+openclaw gateway call sessions.usage --json --timeout 60000 2>&1 | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const j=JSON.parse(s.slice(s.indexOf("{")));console.log("cacheStatus",JSON.stringify(j.cacheStatus));console.log("totals",JSON.stringify(j.totals));for(const x of j.sessions)console.log(x.key,x.model,JSON.stringify(x.usage&&{input:x.usage.input,output:x.usage.output,cacheRead:x.usage.cacheRead,cacheWrite:x.usage.cacheWrite,totalCost:x.usage.totalCost,missingCostEntries:x.usage.missingCostEntries}),"computing="+x.computing);console.log("byModel",JSON.stringify(j.aggregates&&j.aggregates.byModel))})'

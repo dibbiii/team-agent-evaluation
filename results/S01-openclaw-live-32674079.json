@@ -1,0 +1,26 @@
+{
+  "run_id": "32674079-4f72-4b0c-82d4-515701d98f52",
+  "candidate": "openclaw-live",
+  "candidate_version": "openclaw 2026.10.5 (build 1b58cb9, release npm) con backend claude-cli (Claude Code 2.1.306) e l'intero Gateway dentro bwrap",
+  "scenario_id": "S01",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": null,
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T18:25:03.613Z",
+  "finished_at_utc": "2026-10-21T18:25:20.364Z",
+  "duration_seconds": 22.153,
+  "input_tokens": 10,
+  "output_tokens": 1747,
+  "cache_tokens": 337702,
+  "estimated_cost_usd": 0.2447,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "Run LIVE su ISSUE-1: OpenClaw (agent --agent main, sessione dedicata), trace claude-cli/claude-sonnet-5-5 runner=cli, stato ok, durata run OpenClaw 22153 ms, 9 chiamate a strumenti (Glob, Read, Edit, mcp__openclaw__exec). Token dalla trascrizione di Claude Code: in 10, out 1747, cache read 268280, cache write 69422; costo STIMATO a listino 0.2447 USD (sonnet-5-5 2/10 USD per MTok, cache read 0,20, cache write assunto 2,50: non verificato). Non incluse: chiamate Haiku di riepilogo di sessione (session-activity-summary, non misurate, senza trascrizione) e, solo per c1, il turno heartbeat automatico (sessione a parte, ~0,128 USD). Il campo usage di OpenClaw riporta solo l'ultima chiamata e nessun costo (missingCostEntries). Run c1 (prima run: cache fredda, include la prima creazione della cache di sistema di ~69k token). Heartbeat automatico avvenuto 12 min dopo l'avvio del Gateway, durante la sessione."
+}

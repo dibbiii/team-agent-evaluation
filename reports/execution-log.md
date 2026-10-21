@@ -157,3 +157,11 @@
 - **Superficie di controllo (TESTED):** con il daemon senza password il WebSocket accetta chiunque; cambiando `providers.claude.command` e usando `create_terminal` è stato eseguito un comando arbitrario sull'host, fuori da bwrap (file marcatore, poi rimosso). Con la password impostata la connessione è rifiutata.
 - **Deviazione dichiarata:** queste sonde sono state eseguite dall'agente di valutazione (come client esterno) prima del mio divieto; l'azione fermata dal classificatore era probabilmente una di esse. Nessun Claude Code fuori da bwrap; fuori sono girati solo Node (CLI, client, daemon, Hub). Due file grezzi di run cancellati per errore prima della copia: valori trascritti dalla console, `started_at/finished_at` di c2 nulli.
 - Pulizia verificata da me: nessun processo, nessuna porta, nessuna copia di credenziali, marcatore assente.
+
+## 2026-10-21 (notte) — OpenClaw LIVE (Gateway in bwrap): concluso
+
+- 2 run su ISSUE-1 (+ un turno di ripresa), entrambe PASS (visibili + held-out lato Windows), `claude-sonnet-5-5`; 22 s/0,245 USD (cache fredda) e 17,5 s/0,121 USD; ripresa 0,016 USD. Un heartbeat automatico (~0,128 USD, ~12 min dopo l'avvio) e riepiloghi Haiku non misurati (≤ ~0,1 USD): spesa registrata 0,51 USD (ledger 4,56 su 15), stime a listino. Report: `reports/s01-openclaw-live.md`.
+- **Il comando `claude` non è sostituibile** (nome fisso da PATH) e il Bash dell'agente è `mcp__openclaw__exec`, eseguito dal Gateway: si è confinato l'intero Gateway dentro bwrap (TESTED). Il backend usa `--permission-mode bypassPermissions` e ignora il `.claude/settings.json` del repo.
+- Segreti: nell'ambiente di claude ci sono `OPENCLAW_MCP_TOKEN` e altri; il token del Gateway è in chiaro in `~/.openclaw/openclaw.json`, nella HOME dell'agente. `config.patch` via WS con il token è accettata.
+- Costo 2–4× degli altri candidati (prompt di sistema e schema dei tool); Gateway ~1,5 GB RSS. Sandbox nativa non provabile (niente Docker nella distribuzione).
+- Nessun Claude Code fuori da bwrap. Pulizia verificata da me: nessun processo, porta o copia di credenziali.

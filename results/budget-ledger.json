@@ -1,5 +1,5 @@
 {
-  "spent_usd": 4.050626,
+  "spent_usd": 4.560626,
   "runs": [
     {
       "issue": "ISSUE-1",
@@ -447,6 +447,26 @@
       "result_file": "results/S01-paseo-live-7085fe27.json",
       "at": "2026-10-21T17:56:19.484Z",
       "note": "Paseo daemon, provider claude in bwrap"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.373,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-openclaw-live-32674079.json",
+      "at": "2026-10-21T18:36:29.026Z",
+      "note": "OpenClaw gateway in bwrap; include heartbeat/ripresa stimati; riepiloghi Haiku (<=0,1) non misurati"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.137,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-openclaw-live-f1bc408a.json",
+      "at": "2026-10-21T18:36:29.027Z",
+      "note": "OpenClaw gateway in bwrap; include heartbeat/ripresa stimati; riepiloghi Haiku (<=0,1) non misurati"
     }
   ]
 }
