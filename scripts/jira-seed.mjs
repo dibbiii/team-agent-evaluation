@@ -37,7 +37,7 @@ export const planFor = (catalog) =>
     blockedBy: c.blocked_by,
   }));
 
-export async function seed({ baseUrl, email, token, project = 'KAN', apply = false, catalog, log = console.log }) {
+export async function seed({ baseUrl, email, token, project = 'KAN', apply = false, catalog, log = console.log, mapPath = join(root, 'results', 'jira-seed-map.json') }) {
   const plan = planFor(catalog);
   if (!apply) {
     log(`DRY-RUN su progetto ${project}: nessuna chiamata di rete. Verrebbero create ${plan.length} issue:`);
@@ -96,8 +96,10 @@ export async function seed({ baseUrl, email, token, project = 'KAN', apply = fal
       if (!ok) warnings.push(`DIREZIONE DEL LINK INATTESA tra ${blocker} e ${blocked}: controlla in Jira che ${blocked} risulti "è bloccata da" ${blocker}; in caso contrario il controller va adattato.`);
     }
   }
-  mkdirSync(join(root, 'results'), { recursive: true });
-  writeFileSync(join(root, 'results', 'jira-seed-map.json'), JSON.stringify({ project, map }, null, 2));
+  if (mapPath) {
+    mkdirSync(dirname(mapPath), { recursive: true });
+    writeFileSync(mapPath, JSON.stringify({ project, map }, null, 2)); // solo chiavi Jira, nessun segreto
+  }
   for (const w of warnings) log(w);
   log(warnings.length ? 'COMPLETATO CON AVVISI (vedi sopra).' : 'COMPLETATO: direzione dei collegamenti verificata.');
   return { applied: true, map, warnings };

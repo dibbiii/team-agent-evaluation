@@ -137,7 +137,7 @@ const seedEnv = async () => {
   const auth = 'Basic ' + Buffer.from('a@b.c:tok').toString('base64');
   const jira = createMockJira([], { projectKey: 'KAN', auth });
   const baseUrl = await jira.listen();
-  return { jira, baseUrl, args: { baseUrl, email: 'a@b.c', token: 'tok', project: 'KAN', catalog, log: () => {} } };
+  return { jira, baseUrl, args: { baseUrl, email: 'a@b.c', token: 'tok', project: 'KAN', catalog, log: () => {}, mapPath: null } };
 };
 
 test('seed: dry-run non fa nessuna chiamata', async () => {
