@@ -175,3 +175,21 @@ Eseguiti il 2026-10-20 (UTC 23:20-23:53), modalita' MOCK, esito complessivo **PA
 | Login CLI con approvazione, dashboard nel browser, Windows | UNVERIFIED | non provati |
 
 Discrepanze rispetto alla scheda: (1) "Nothing is queued" e' smentito per `manual.run`; (2) la tabella SHA riportava l'oggetto tag di Hub come commit e uno SHA di Paseo troncato; (3) con daemon offline il dispatch non da' 409 ne' `daemon_not_connected` ma 200 `running`; (4) la risposta al dispatch ripetuto viene riprodotta, la doc dice di non contarci; (5) il daemon scarica ~814 MB di modelli vocali al primo avvio; (6) `/api/v1/triggers/*` e il bundle legacy hanno regole diverse sui provider (solo Claude/Codex/OpenCode contro qualunque).
+
+## Risultati sperimentali S01 LIVE (2026-10-21)
+
+Dettagli, comandi e limiti: `reports/s01-paseo-live.md`; dati: `results/S01-paseo-live-7085fe27.json`, `results/S01-paseo-live-6eb3b3ed.json`. Daemon Paseo 0.12.0 (npm `@getpaseo/cli`), Hub v0.10.0 (sorgente, commit 28f6c78), Claude Code 2.1.306 dentro `bwrap`, modello `claude-sonnet-5-5`, n=2 su ISSUE-1.
+
+| Affermazione | Etichetta | Evidenza |
+|---|---|---|
+| Il provider `claude` e' lanciato dalla SDK con `spawnProcess` senza shell; `agents.providers.claude.command` (array) sostituisce il comando per OGNI lancio (agente, metadati haiku, scoperta modelli, `--version`); nessun motore alternativo lo bypassa | CODE + TESTED | `claude/query.ts`, log del wrapper; diverso da Paperclip (engine ACP) |
+| Confinamento con wrapper `bwrap` via `command`: 2 run LIVE PASS (test visibili e held-out), 12,3 s ciascuna, 0,0732 e 0,0720 USD a listino, token 6/1.038/58.614 e 6/952/58.555 (in/out/cache), `bypassPermissions`, modello da `runtimeInfo` | TESTED | report sez. 3 |
+| Fine run: stato `idle`, nessun commit/PR, nessuna continuazione automatica | TESTED | report 3.1 |
+| Dopo riavvio del daemon l'agente finito passa a `closed`, `lastUsage` perso, `sessionId`/`nativeHandle`/cwd/modello conservati; ripresa della sessione non provata; riavvio durante una run non provato | TESTED (parziale) | report 3.2 |
+| **Il daemon passa `PASEO_PASSWORD` (in chiaro) e `PASEO_HOME`, `PASEO_AGENT_ID/CWD` nell'ambiente di ogni processo provider lanciato**; `PARENT_SESSION_ENV_VARS` toglie solo 4 variabili Claude. Il mio wrapper le scarta con `env -i`; senza wrapper arriverebbero all'agente. Non sfruttato | TESTED (osservazione passiva) + CODE | `provider-launch-config.ts`; report sez. in testa |
+| Senza password il WS del daemon accetta chiunque; la config `providers.claude.command` e' modificabile via `set_daemon_config_request` (`daemon.manage`) e `create_terminal` esegue comandi arbitrari sull'host fuori da bwrap (provato da me, da client esterno, non dall'agente) | TESTED | report sez. 2 |
+| Con password impostata il WS e' rifiutato (`Password required`) | TESTED | report sez. 2 |
+| Trigger nuovo `manual.run` con provider `claude` reale: `validate` 200 (a differenza di S00); `install`/`dispatch` via Hub non eseguiti | TESTED (validate) / UNVERIFIED | report 2.1 |
+| Multi-agente, worktree, MCP Paseo agli agenti, PostgreSQL, UI | UNVERIFIED | non provati |
+
+Differenze dal predefinito: `command` del provider `claude` = wrapper bwrap; password del daemon impostata; voce/dettatura spente; relay spento (gia' default); dispatch diretto invece di Hub. Claude Code non e' mai stato eseguito fuori da bwrap.

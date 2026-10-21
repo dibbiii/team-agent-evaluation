@@ -1,0 +1,26 @@
+{
+  "run_id": "6eb3b3ed-c289-4a80-9760-b35727789e54",
+  "candidate": "paseo-live",
+  "candidate_version": "Paseo daemon 0.12.0 (npm @getpaseo/cli 0.12.0), provider 'claude' con command override -> wrapper bwrap + Claude Code 2.1.306; dispatch diretto (createAgent via client WS), non tramite Hub",
+  "scenario_id": "S01",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": null,
+  "status": "PASS",
+  "started_at_utc": null,
+  "finished_at_utc": null,
+  "duration_seconds": 12.289,
+  "input_tokens": 6,
+  "output_tokens": 952,
+  "cache_tokens": 58555,
+  "estimated_cost_usd": 0.0720035,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "Run c2: agentId 0b94e6dd-0800-479d-aaa4-575cee87ca63, workspace ws2 (fixture rigenerata da zero, stesso HEAD baseline di ws1), modeId bypassPermissions. started_at/finished_at non recuperabili (il file grezzo ps-run-c2.json e' stato rimosso dalla pulizia prima di essere copiato in results/raw: errore di sequenza, vedi report); duration_seconds e tutti gli altri valori sono quelli misurati e stampati in console durante la run (waitForFinish + lastUsage), trascritti qui dal log del terminale. Nessun commit. evaluate.mjs su export tar senza .claude/."
+}

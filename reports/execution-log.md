@@ -148,3 +148,12 @@
 - **Riprova #16935 con claude_local (TESTED, anche in modalità authenticated):** un agente cambia budget e `dangerouslySkipPermissions` con la sua chiave; `command` è protetto (403) ma `engine:"acp"`, `agentCommand`, `replaceAdapterConfig` sono accettati: l'agente può uscire dal wrapper (non eseguito dopo l'aggiramento).
 - **Deviazione:** il primo tentativo (senza `engine`) ha lanciato Claude Code sull'host senza bwrap con permessi approve-all; fallito subito per assenza di login (nessuna chiamata al modello, costo 0, nessun accesso a `~/.claude`). Le run valide: tutte con `engine:"cli"` dentro bwrap.
 - Pulizia verificata da me: nessun processo, nessuna copia di credenziali, distribuzioni ferme.
+
+## 2026-10-21 (sera) — Paseo (daemon 0.12.0 + Hub 0.10.0) LIVE in bwrap: concluso
+
+- 2 run su ISSUE-1, entrambe PASS (visibili + held-out lato Windows), `claude-sonnet-5-5`, 12 s e ~0,073 USD ciascuna, nessuna continuazione automatica. Spesa 0,145 USD (ledger ~4,05 su 15). Report: `reports/s01-paseo-live.md`.
+- `agents.providers.claude.command` sostituisce il binario per ogni lancio e non esiste un motore alternativo che lo aggiri: confinabile con wrapper bwrap (TESTED).
+- **Finding:** il daemon passa `PASEO_PASSWORD`/`PASEO_HOME` in chiaro nell'ambiente del processo claude; senza wrapper che ripulisca l'ambiente un agente con Bash li legge con `env`.
+- **Superficie di controllo (TESTED):** con il daemon senza password il WebSocket accetta chiunque; cambiando `providers.claude.command` e usando `create_terminal` è stato eseguito un comando arbitrario sull'host, fuori da bwrap (file marcatore, poi rimosso). Con la password impostata la connessione è rifiutata.
+- **Deviazione dichiarata:** queste sonde sono state eseguite dall'agente di valutazione (come client esterno) prima del mio divieto; l'azione fermata dal classificatore era probabilmente una di esse. Nessun Claude Code fuori da bwrap; fuori sono girati solo Node (CLI, client, daemon, Hub). Due file grezzi di run cancellati per errore prima della copia: valori trascritti dalla console, `started_at/finished_at` di c2 nulli.
+- Pulizia verificata da me: nessun processo, nessuna porta, nessuna copia di credenziali, marcatore assente.

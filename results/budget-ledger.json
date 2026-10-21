@@ -1,5 +1,5 @@
 {
-  "spent_usd": 3.905426,
+  "spent_usd": 4.050626,
   "runs": [
     {
       "issue": "ISSUE-1",
@@ -427,6 +427,26 @@
       "result_file": "results/S01-paperclip-live-6f3cb08d.json",
       "at": "2026-10-21T14:47:36.244Z",
       "note": "Paperclip claude_local in bwrap, run 2 (incl. continuazione automatica 0,0881)"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.0732,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-paseo-live-6eb3b3ed.json",
+      "at": "2026-10-21T17:56:19.481Z",
+      "note": "Paseo daemon, provider claude in bwrap"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.072,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-paseo-live-7085fe27.json",
+      "at": "2026-10-21T17:56:19.484Z",
+      "note": "Paseo daemon, provider claude in bwrap"
     }
   ]
 }
