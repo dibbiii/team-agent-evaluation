@@ -33,5 +33,5 @@
 | D12 | 2026-10-20 | Il Jira sandbox non è necessario per proseguire: finto Jira con API in formato REST v3 e controller di coda che lo usa via HTTP | L'utente non ha un Jira sandbox; l'adapter si ripunta a uno reale cambiando URL e credenziali. S05 resta `PARTIAL` | Applicata |
 | D13 | 2026-10-21 | Raccomandazione: Opzione A primaria, B seconda, C differita | Vedi `reports/FINAL-RECOMMENDATION.md`. Fondata su prove S00, #16935 riprodotta, baseline 9/9 e controller provato | Valida fino ai nuovi test |
 | D14 | 2026-10-21 | Budget e permessi degli agenti vivono fuori dalla loro portata | #16935 riprodotta su Paperclip | Applicata come requisito di progetto |
-| D15 | 2026-10-21 | Le sonde S02/S07 sulla baseline sono state interrotte dal sistema per memoria quasi esaurita e non vengono rilanciate senza richiesta | Indicazione del sistema; 0 run completate, 0 USD spesi | Aperta |
+| D15 | 2026-10-21 | Le sonde S02/S07 sulla baseline, fermate la prima volta dal sistema per memoria, sono state rilanciate su richiesta dell'utente con un controllo sulla RAM libera | L'utente ha chiarito che il costo non è monetario (abbonamento); 6 run completate | Chiusa |
 | D16 | 2026-10-21 | La fixture va resa più dura prima di concludere sul valore di un orchestratore | La baseline passa 9/9: effetto soffitto | Aperta |

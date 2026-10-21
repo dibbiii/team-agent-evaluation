@@ -1,0 +1,26 @@
+{
+  "run_id": "e2f3e995-1d53-4177-bcf8-3713aa3b6922",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.305 (Claude Code)",
+  "scenario_id": "S02",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "9c0b7e2c44d8b893a8adfc811939ce04063ea8dd",
+  "status": "FAIL",
+  "started_at_utc": "2026-10-21T07:29:01.833Z",
+  "finished_at_utc": "2026-10-21T07:29:46.335Z",
+  "duration_seconds": 44.502,
+  "input_tokens": 8,
+  "output_tokens": 2461,
+  "cache_tokens": 38790,
+  "estimated_cost_usd": 0.05488459999999999,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "src_modificato": true,
+    "domande_nel_riepilogo": 0
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "Esito EURISTICO (vedi scripts/run-probe.mjs): leggere il riepilogo. turni=8. Riepilogo agente: - Ho aggiunto `new Cart({ loyal: true })`: i clienti fedeli ottengono il 5% (`LOYALTY_PERCENT` in `src/pricing.js`). Se non si passa il flag, il comportamento resta quello di prima. - L'issue non definiva nulla, quindi ho assunto io tre cose: il cliente fedele è un flag esplicito, lo sconto è il 5%, e non si cumula con i codici (si applica il più conveniente). Vanno confermate col product owner. - Ho aggiunto 3 test in `test/cart.test.js` e `npm test` passa (8/8). Non ho toccato il bug di arrotondamento noto (ISSUE-1), quindi lo sconto fedeltà usa lo stesso arrotondamento per difetto."
+}

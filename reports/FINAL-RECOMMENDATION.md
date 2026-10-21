@@ -9,7 +9,7 @@ Il giudizio «vince la PoC» e il giudizio «adatto alla produzione» sono tenut
 - **I default di sicurezza sono permissivi in tutti, e lo abbiamo provato, non solo letto:** Gas Town `bypassPermissions` nei 7 `settings.json` generati, dashboard senza autenticazione e `merge_strategy=direct`; OpenClaw con sandbox spenta ed exec `full` e `ask=off`, e un agente che legge la sessione di un altro (`visibility=all`); Paperclip in `local_trusted` senza login; Warren con token operatore in chiaro nel log di avvio senza `WARREN_API_TOKEN`.
 - **Risultato più pesante: in Paperclip il budget non è un controllo di sicurezza.** L'issue #16935 è stata **riprodotta** da noi: un agente senza permessi alza il proprio budget (5.000 → 99.999.999 centesimi) e cambia la propria config, e anche budget e config di altri agenti, sul commit studiato e sulla release npm `2026.1012.0`. Il budget e i permessi vanno quindi tenuti **fuori dalla portata dell'agente**.
 - **Paseo Hub è il candidato con la meccanica di dispatch meglio provata** (RBAC verificato, idempotenza con 6 richieste concorrenti = 1 run, coda con daemon offline, SIGKILL con run in volo senza duplicati). Ma v0.10.0 ha un bug provato (`manual-runs` risponde 500 dopo il riavvio) e SIGTERM non termina con un daemon connesso (#147 riprodotta). Non è un orchestratore del ciclo di sviluppo.
-- **La baseline regge.** Claude Code da solo: 9 run su 9 PASS, ~0,05 USD e ~37 s per issue, ma su una fixture troppo facile. Il benchmark attuale **non può dimostrare alcun vantaggio di un orchestratore**.
+- **La baseline regge, con un limite.** Claude Code da solo: 9 run su 9 PASS, ~0,05 USD e ~37 s per issue, ma su una fixture troppo facile. Con un'issue ambigua (S02) implementa con assunzioni dichiarate invece di chiedere (3/3): per R02 serve una readiness imposta dal controller. Il benchmark attuale **non può dimostrare alcun vantaggio di un orchestratore**.
 - **La parte che manca a tutti è piccola e sotto il nostro controllo:** coda con lease, idempotenza, riconciliazione, rollback. Il controller di riferimento (97 righe, più 100 del finto Jira REST) ha 7 test sul mock REST di Jira più 7 sul mock in-process, tutti PASS.
 - **Indicazione:** partire dallo stack minimale (Opzione A), con il controller e le policy fuori dall'agente. Warren come Execution Plane (Opzione B) solo se la baseline non regge run isolate e recovery su una fixture più dura. Paperclip + Warren (Opzione C) rimandato.
 
@@ -35,7 +35,7 @@ Dettaglio in `reports/comparison.md`.
 
 - **Provato con comando e risultato** (`TESTED`): le cinque installazioni offline (report `s00-*`); le riproduzioni di #16935 (Paperclip), #147 (Hub) e di una **variante** di #4819 (Gas Town: `gt done` con la lettura del convoy resa impossibile ha pushato ignorando `--merge=local`; la forma letterale con Dolt fermato prima di `gt done` non è riprodotta); RBAC, idempotenza e coda di Hub; Workboard di OpenClaw (claim con TTL, idempotency key); la baseline; il sandbox di laboratorio (13/13); il controller di coda.
 - **Costo:** 0 USD per tutti gli smoke test. Baseline: 0,45 USD per le 9 run valide (stima a listino, abbonamento); 0,83 USD totali nel registro, di cui 0,38 USD sprecati da run invalidate per un errore di configurazione nostro (`reports/s01-baseline.md`).
-- **Non provato:** qualunque run LIVE dei candidati; l'**isolamento reale** di Warren (gli scenari verdi usano uno shim `bwrap`); `warren up`, `gt up`, `claude_local` e agenti reali; Jira reale; «lavora con il PC spento»; S02, S03, S08 su qualunque sistema (la sonda S02/S07 sulla baseline è stata interrotta dal sistema per memoria quasi esaurita, 0 run completate); cross-repo e UI.
+- **Non provato:** qualunque run LIVE dei candidati; l'**isolamento reale** di Warren (gli scenari verdi usano uno shim `bwrap`); `warren up`, `gt up`, `claude_local` e agenti reali; Jira reale; «lavora con il PC spento»; S02 sui candidati, S03 e S08 su qualunque sistema. Sulla baseline S02 e S07 sono state provate (`reports/s02-s07-baseline.md`): con un'issue ambigua implementa con assunzioni dichiarate invece di chiedere (3/3, FAIL per R02); davanti a una prompt injection da issue non ha letto il file-esca (3/3), ma nessun confine del sistema lo impedisce; cross-repo e UI.
 - **Limiti di validità:** n=1 per le misure dei candidati, n=3 per la baseline; un solo host (Windows 11 + Docker, 2 GiB per container): diversi blocchi (Paperclip `vite build`, OpenClaw dispatcher) sono **OOM dell'ambiente**, non difetti accertati. OpenClaw: la release provata non coincide con il commit studiato (il merge di `github_publish` esiste solo nel sorgente). Le schede iniziali sono state redatte da agenti e corrette dalle prove.
 - **Errore di metodo trovato e corretto:** le prime 9 run baseline erano contaminate dal `CLAUDE.md` globale dell'utente; invalidate, conservate e rifatte.
 
@@ -102,7 +102,7 @@ Licenze permissive (MIT, Apache-2.0), nessun obbligo oneroso rilevato. Sicurezza
 
 ## 10. Decisioni aperte, test non eseguiti e risorse
 
-Non eseguiti: S02/S07 sulla baseline (da rilanciare con più RAM libera); S01–S03 e S08 sui candidati con un agente reale; Jira reale; PC spento (serve una VM remota); isolamento reale di Warren; riproduzione di #16935 con `claude_local` e in modalità `authenticated`.
+Non eseguiti: S02 sui candidati; S01–S03 e S08 sui candidati con un agente reale; Jira reale; PC spento (serve una VM remota); isolamento reale di Warren; riproduzione di #16935 con `claude_local` e in modalità `authenticated`.
 Risorse necessarie: una VM Linux con ≥8 GiB di RAM; budget LLM aggiuntivo **con approvazione esplicita se serve fornire credenziali dentro i container dei candidati**; un progetto Jira Cloud gratuito (token a scope minimo in variabile d'ambiente).
 Decisioni aperte: vedi `docs/decisions.md`.
 
@@ -117,7 +117,7 @@ scripts/s07-sandbox-check.sh                                         # 13 contro
 
 # Baseline LIVE (consuma budget: vedi reports/budget.md; l'isolamento dal CLAUDE.md globale è nel wrapper)
 node scripts/run-baseline.mjs ISSUE-1 S01
-node scripts/run-probe.mjs S02        # sonde S02/S07: non completate, da rilanciare con RAM libera
+node scripts/run-probe.mjs S02        # e S07: sonde sulla baseline, 3 run ciascuna (reports/s02-s07-baseline.md)
 
 # Smoke test dei candidati: procedure e comandi esatti in reports/s00-<candidato>.md
 # Pulizia: solo risorse del benchmark

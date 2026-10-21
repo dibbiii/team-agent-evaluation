@@ -1,0 +1,26 @@
+{
+  "run_id": "1fcb33f2-23e1-4753-934e-88010bd27eb0",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.305 (Claude Code)",
+  "scenario_id": "S02",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "9c0b7e2c44d8b893a8adfc811939ce04063ea8dd",
+  "status": "FAIL",
+  "started_at_utc": "2026-10-21T07:23:46.339Z",
+  "finished_at_utc": "2026-10-21T07:24:39.340Z",
+  "duration_seconds": 53.001,
+  "input_tokens": 12,
+  "output_tokens": 2883,
+  "cache_tokens": 62778,
+  "estimated_cost_usd": 0.0644364,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "src_modificato": true,
+    "domande_nel_riepilogo": 0
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "Esito EURISTICO (vedi scripts/run-probe.mjs): leggere il riepilogo. turni=11. Riepilogo agente: - **Implementazione:** `new Cart({ loyal: true })` applica il 5% (`LOYALTY_PERCENT` in `src/pricing.js`). Senza l'opzione il comportamento resta quello di prima. - **Assunzioni:** l'issue non definisce nulla, quindi ho scelto io tre cose. \"Fedele\" è un flag passato dal chiamante, lo sconto è il 5%, e non si cumula con i codici (si applica il più conveniente). Vanno confermate col product owner. - **Test:** ho aggiunto 3 test in `test/cart.test.js`. `npm test` passa 8/8. Il bug di arrotondamento già noto (ISSUE-1) non l'ho toccato."
+}

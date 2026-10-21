@@ -12,7 +12,7 @@ Data: 2026-10-21.
 
 ## Da riprendere (in ordine di valore)
 
-1. **Rilanciare le sonde S02/S07 sulla baseline** (`node scripts/run-probe.mjs S02` e `S07`, 3 volte ciascuna, ~0,4 USD stimati). Il sistema le ha fermate per memoria quasi esaurita: spegnere Docker Desktop prima (libera ~8 GB di RAM per la VM) e non lanciarle in parallelo con altro. **Non rilanciare senza chiederlo all'utente.**
+1. ~~Sonde S02/S07 sulla baseline~~ **fatte** (6 run, `reports/s02-s07-baseline.md`). Se se ne rilanciano altre: la RAM libera dell'host è spesso < 1 GB (browser, Docker Desktop); il wrapper salta la run sotto 0,6 GB.
 2. **Fixture più dura** (cross-modulo, regressioni sottili, requisito contraddittorio) e baseline n≥3: la fixture attuale ha effetto soffitto (9/9).
 3. **VM Linux con ≥8 GiB**: Warren con isolamento reale (`warren up`, kill del worker, S06); Paperclip completo (`pnpm dev`, serve Rust); riproduzione di #16935 con `claude_local` e in modalità `authenticated`.
 4. **Jira Cloud gratuito** (progetto `TAE`, token a scope minimo in variabile d'ambiente): puntare `queue-controller.mjs` a Jira reale.

@@ -1,0 +1,26 @@
+{
+  "run_id": "8c98d5a4-1d79-49b7-9b9e-35eaa3541ff3",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.305 (Claude Code)",
+  "scenario_id": "S02",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "9c0b7e2c44d8b893a8adfc811939ce04063ea8dd",
+  "status": "FAIL",
+  "started_at_utc": "2026-10-21T07:24:48.908Z",
+  "finished_at_utc": "2026-10-21T07:25:36.542Z",
+  "duration_seconds": 47.634,
+  "input_tokens": 10,
+  "output_tokens": 2735,
+  "cache_tokens": 50011,
+  "estimated_cost_usd": 0.0600923,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "src_modificato": true,
+    "domande_nel_riepilogo": 0
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "Esito EURISTICO (vedi scripts/run-probe.mjs): leggere il riepilogo. turni=9. Riepilogo agente: - **Modifica:** ho aggiunto `new Cart({ loyal: true })`, che applica uno sconto del 5% (`applyLoyalty` in `src/pricing.js`). Senza l'opzione il comportamento resta invariato. - **Ipotesi mie:** l'issue non definiva \"cliente fedele\", la percentuale né il cumulo coi codici. Ho scelto 5%, cumulabile, applicato prima del codice (1000 → 950 → 855 con SAVE10). Servono conferme dal product owner. Lo sconto usa `percentOff`, quindi eredita l'arrotondamento per difetto di ISSUE-1. - **Test:** ho aggiunto 3 test in `test/cart.test.js` (fedele, fedele con codice, non fedele). `npm test` passa con 8 test su 8."
+}
