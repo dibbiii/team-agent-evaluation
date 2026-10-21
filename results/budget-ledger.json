@@ -1,5 +1,5 @@
 {
-  "spent_usd": 1.158209,
+  "spent_usd": 1.36544,
   "runs": [
     {
       "issue": "ISSUE-1",
@@ -234,6 +234,44 @@
       "status": "FAIL",
       "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\S02-baseline-claude-code-e2f3e995.json",
       "at": "2026-10-21T07:29:46.335Z"
+    },
+    {
+      "issue": "probe-claude-nella-distribuzione",
+      "scenario": "live-prep",
+      "cost_usd": 0.0079609,
+      "execution_error": false,
+      "status": "chiamata minima di verifica del login",
+      "result_file": null,
+      "at": "2026-10-21T11:26:41.170Z"
+    },
+    {
+      "issue": "model-pin-check (a-d, 2 esecuzioni)",
+      "scenario": "live-prep",
+      "cost_usd": 0.1081914,
+      "execution_error": false,
+      "status": "sonde sul modello: 6 chiamate minime",
+      "result_file": null,
+      "at": "2026-10-21T11:26:41.171Z"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0,
+      "execution_error": true,
+      "status": "FAIL (DNS nella sandbox, run non valida)",
+      "result_file": null,
+      "at": "2026-10-21T11:26:41.171Z",
+      "invalid": true,
+      "invalid_reason": "DNS dentro la sandbox, errore di configurazione"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01-warren-live",
+      "cost_usd": 0.0910789,
+      "execution_error": false,
+      "status": "PASS S01-warren-live-2291cbcc.json",
+      "result_file": null,
+      "at": "2026-10-21T11:26:41.171Z"
     }
   ]
 }

@@ -1,0 +1,28 @@
+{
+  "run_id": "2291cbcc-5693-43b8-a15a-25b1162a08a2",
+  "candidate": "warren",
+  "candidate_version": "warren 0.19.3 @ ce088e8 (runtime local, bwrap reale, forge fake) + claude-code 2.1.306 (aggiornato da solo da 2.1.304)",
+  "scenario_id": "S01",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "73f78fa2c96de1c7871d41077b01d15dbdfd70ba (repository bare della run, un commit baseline)",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T11:25:05.713Z",
+  "finished_at_utc": "2026-10-21T11:25:21.251Z",
+  "duration_seconds": 15.538,
+  "input_tokens": null,
+  "output_tokens": null,
+  "cache_tokens": null,
+  "estimated_cost_usd": 0.0910789,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true
+  },
+  "artifact_paths": [
+    "results/raw/warren-live-ISSUE-1/ (log grezzi locali, non versionati)"
+  ],
+  "blockers": [],
+  "notes": "Run LIVE n=1 su ISSUE-1. Warren: costUsd 0,0910789 con costBasis=api (con l'abbonamento è una stima a listino); token non riportati da Warren (null). Durata dichiarata da Warren 15,5 s (script intero 21 s). Modello verificato dall'evento init: claude-sonnet-5-5, fissato con .claude/settings.json di progetto perché Warren non passa --model. È il SECONDO tentativo: il primo (run_42t1sjc5t01x) è fallito per DNS nella sandbox (errore di configurazione mio), costo 0, non conta come run valida dell'agente. Tra i due tentativi sono intervenuti correzioni di infrastruttura (DNS, modello), non interventi umani sulla run. L'agente ha eseguito npm test (7 passati) e un commit con l'identità reale dell'utente (nome ed email dell'account, passati con git -c): attribuzione a una persona e non a un bot. Valutazione: test visibili e held-out eseguiti lato Windows su src/ estratto senza .claude/."
+}
