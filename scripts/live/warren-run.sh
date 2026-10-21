@@ -183,6 +183,9 @@ if [ -n "$S_AT" ] && [ -n "$E_AT" ]; then
 fi
 echo "== tipi di evento (conteggio)"
 jq -r '.kind' "$ROOT/events.ndjson" | sort | uniq -c | sort -rn
+echo "== modello usato da Claude Code (evento init) e uso reale (risultato)"
+jq -r 'select(.kind=="state_change")|.payload|select(.subtype=="init")|"init.model=" + .model' "$ROOT/events.ndjson" | head -1
+jq -r 'select(.kind=="state_change")|.payload|select(has("modelUsage"))|"modelUsage=" + (.modelUsage|keys|join(",")) + " total_cost_usd=" + (.total_cost_usd|tostring) + " terminal_reason=" + (.terminal_reason // "?")' "$ROOT/events.ndjson" | head -2
 echo "== eventi reap/run essenziali"
 jq -c 'select(.kind|test("^(reap|run)\\."))|{kind,payload}' "$ROOT/events.ndjson" | cut -c1-300
 
@@ -194,7 +197,7 @@ if git --git-dir="$BARE" rev-parse -q --verify "refs/heads/$BRANCH" >/dev/null; 
   git --git-dir="$BARE" diff --stat "$BASE_SHA" "refs/heads/$BRANCH"
   # Sicurezza: Warren NON esclude .claude/ dai commit (commitExcludes vuoto) e in live copia li' le credenziali
   # (.claude/.credentials.json). Un `git add -A` dell'agente le porterebbe nel branch. Segnalo e le tolgo dal tar.
-  LEAK="$(git --git-dir="$BARE" ls-tree -r --name-only "refs/heads/$BRANCH" | grep -E '^(\.claude|\.sandbox-tmp|\.warren)(/|$)|credentials' || true)"
+  LEAK="$(git --git-dir="$BARE" diff --name-only "$BASE_SHA" "refs/heads/$BRANCH" | grep -E '^(\.claude|\.sandbox-tmp|\.warren)(/|$)|credentials' || true)"
   if [ -n "$LEAK" ]; then echo "ATTENZIONE: file di stato/credenziali NEL BRANCH (esclusi dal tar): $LEAK"; fi
   XDIR="$(mktemp -d "$REAL_HOME/.export.XXXXXX")"
   git --git-dir="$BARE" archive --format=tar "refs/heads/$BRANCH" | tar -x -C "$XDIR"

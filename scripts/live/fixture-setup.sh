@@ -21,6 +21,16 @@ for f in "$WORK"/*; do
 done
 if grep -rqi 'acceptance' "$WORK"; then echo "STOP: riferimenti ad acceptance nella fixture"; exit 1; fi
 
+# Fissa il modello per la run LIVE. Warren NON passa --model a Claude Code (verificato nei sorgenti: l'argv del
+# claude-code non lo contiene) e con una HOME pulita Claude Code sceglie da solo il modello; nella prima run LIVE
+# l'evento init riportava claude-opus-5-5. Le impostazioni di progetto fanno parte del repository baseline.
+# PIN_MODEL vuoto = nessuna fissazione.
+PIN_MODEL="${PIN_MODEL-claude-sonnet-5-5}"
+if [ -n "$PIN_MODEL" ]; then
+  mkdir -p "$WORK/.claude"
+  printf '{\n  "model": "%s"\n}\n' "$PIN_MODEL" > "$WORK/.claude/settings.json"
+fi
+
 export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null
 export GIT_AUTHOR_NAME=tae-bot GIT_AUTHOR_EMAIL=tae-bot@example.invalid
 export GIT_COMMITTER_NAME=tae-bot GIT_COMMITTER_EMAIL=tae-bot@example.invalid
