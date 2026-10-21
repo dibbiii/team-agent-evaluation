@@ -63,3 +63,21 @@ Regole di arresto: stop dopo 2 run consecutive in errore di esecuzione; stop se 
 Rischio accettato dall'utente: il token di accesso dell'abbonamento resta salvato nella distribuzione dedicata e può essere letto dai processi che girano lì (codice di terzi, agenti con i permessi disattivati). Non è denaro, ma un accesso al suo account. Mitigazioni: distribuzione senza disco Windows né interop, utente non root, `claude logout` e `wsl --unregister Ubuntu-26.04` a fine prova, e nessun altro uso di quella distribuzione.
 
 Costi: con l'abbonamento `total_cost_usd` è una stima a listino. Warren può avere un proprio tetto per run (da configurare); in ogni caso il registro del benchmark è la fonte per il totale.
+
+---
+
+## Aggiunta 2026-10-21 (sera) — run LIVE degli altri quattro candidati (autorizzate dall'utente)
+
+L'utente ha dato l'approvazione esplicita alle run LIVE di Paperclip, Gas Town, Paseo Hub e OpenClaw («hai l'approvazione per la run degli altri candidati»), con il login di Claude Code già presente nella distribuzione `Ubuntu-26.04` (piano Team, organizzazione Brainy Labs). Rischi già dichiarati e accettati: credenziali leggibili dai processi nella distribuzione, rete aperta, permessi dell'agente disattivati dentro la sandbox o dentro la distribuzione dedicata.
+
+Tetti che stabilisco io, **in stima a listino**, entro i 15 USD totali del registro (spesa al momento circa 3,5):
+
+| Candidato | Tetto | Run massime | Note |
+|---|---|---|---|
+| Paperclip (`claude_local`) | 1,5 USD | 2 | più la riprova di #16935 con un agente `claude_local` (senza LLM) |
+| Paseo Hub + daemon | 1,5 USD | 2 | un provider reale (Claude) agganciato al daemon |
+| OpenClaw | 1,5 USD | 2 | con la CLI `claude` dell'host come backend (documentato), non con una chiave API |
+| Gas Town | 2,5 USD | 1–2 | il più rischioso: più agenti LLM (Mayor, Polecat, Refinery) possono consumare molto; limite di tempo e arresto manuale |
+
+Regole: una run alla volta (RAM), un candidato alla volta; per ogni candidato una prova a costo zero prima (rete e DNS dentro la sandbox, come per Warren); isolamento verificato prima di dare credenziali; arresto se il consumo supera il tetto; pulizia e verifica che non restino copie di credenziali; nessun push né PR verso repository esterni; nessuna porta esposta fuori dal PC. Restano esclusi: webhook Jira pubblici (richiedono un endpoint raggiungibile da internet: decisione separata).
+Se il controllo automatico dei permessi di Claude Code blocca un'azione (per esempio un agente senza sandbox con i permessi disattivati), non la aggiro: mi fermo e lo riferisco.
