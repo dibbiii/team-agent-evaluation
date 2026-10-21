@@ -1,0 +1,2 @@
+# Gli script di shell devono avere sempre fine riga Unix (LF), anche se modificati o scaricati su Windows.
+*.sh text eol=lf
