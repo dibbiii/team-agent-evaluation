@@ -1,86 +1,86 @@
 # Confronto — due matrici distinte
 
-Data: 2026-10-20. **Nessun candidato è stato installato né eseguito.** La prima matrice descrive ciò che è stato letto (documentazione e sorgente, SHA nelle schede); la seconda descrive ciò che è stato provato. Le due cose non vanno confuse.
+Data: 2026-10-21. Aggiornato dopo gli smoke test S00 e la baseline LIVE. Ogni cella dichiara il tipo di evidenza: **T** provato qui (comando e risultato nei report `reports/s00-*.md`, `reports/s01-baseline.md`), **C** letto nel codice, **D** letto nella documentazione, **I** segnalazione di terzi non riprodotta, **?** non verificato, **A** assenza con evidenza.
 
-Versioni verificate (consultazione 2026-10-20):
+Versioni (consultazione 2026-10-20/21):
 
-| Candidato | Versione / commit | Licenza |
-|---|---|---|
-| Paperclip | master `05f7079`, ultimo tag stabile v2026.1012.0 | MIT |
-| Paseo (daemon) | v0.12.0 `cafe4b0` | Apache-2.0 |
-| Paseo Hub | v0.10.0 `38bfafd` (dichiara «early development, expect breaking changes and data loss») | Apache-2.0 |
-| OpenClaw | main `6beb671`, release 2026.10.5 | MIT |
-| Warren | 0.19.3 `ce088e8` (HEAD, tag non verificabile nel clone shallow) | MIT |
-| Gas Town | `649b832` (2026-07-23), ultima release v1.2.1 | MIT |
+| Candidato | Versione provata/studiata | Licenza | Come è stato provato |
+|---|---|---|---|
+| Paperclip | sorgente `05f7079` (0.3.1) e release npm `2026.1012.0` (`bba6a45`) | MIT | container Node 24, 2 GiB |
+| Paseo (daemon) | v0.12.0 `cafe4b0` | Apache-2.0 | immagine ufficiale, non root |
+| Paseo Hub | v0.10.0 (commit `28f6c78`, `38bfafd` è l'oggetto tag) | Apache-2.0 | dal sorgente, DB embedded |
+| OpenClaw | release npm 2026.10.5 (`1b58cb9`); sorgente studiato `6beb671`: **non coincidono** | MIT | container Node 24 |
+| Warren | 0.19.3 `ce088e8` | MIT | Bun 1.2.23 e 1.3.14 |
+| Gas Town | `649b832` (post v1.2.1), `gt version` = `dev` | MIT | container Go 1.26.2 |
+| Baseline | Claude Code 2.1.304, `claude-sonnet-5-5` | — | host, permessi ristretti |
 
-## 1. Copertura funzionale R01–R13 (letta, non provata)
+Tutti gli smoke test: container non privilegiato, 2 GiB, senza mount né socket Docker né porte pubblicate, senza credenziali né LLM, costo 0. Rete in uscita non filtrata (solo per scaricare dipendenze). Cleanup verificato dopo ogni prova.
 
-Legenda: **N** nativo (DOC/CODE), **P** parziale o via configurazione, **A** assente (evidenza trovata), **?** non verificato, **BL** baseline Claude Code. Per BL le colonne sono `?`: il documento (§13) dice che deve ancora dimostrarle, e non sono state provate.
+## 1. Copertura funzionale R01–R13
 
-| Req. | Paperclip | Paseo + Hub | OpenClaw | Warren | Gas Town | BL |
+| Req. | Paperclip | Paseo + Hub | OpenClaw | Warren | Gas Town | Baseline |
 |---|---|---|---|---|---|---|
-| R01 Jira e coda con lease | A: nessun connettore Jira (spec in bozza); checkout atomico per run, non lease con TTL | A: Jira non supportato; dispatch idempotente per `deliveryKey` (P) | P: Workboard (plugin spento) ha claim con TTL ma su schede locali; Jira assente | P: estensione Jira sperimentale (get, stati JQL, blockedBy, close); niente webhook, lease, priorità | A: nessuna integrazione Jira | ? |
-| R02 Analyst e intervista | P: approvazioni, nessun Analyst | A | P: `ask_user`, `workboard_specify` | A | A | ? |
-| R03 Piano e DAG | P: piano come documento, DAG costruito dagli agenti | A (docs) | P: dipendenze e decompose, niente verification contract | P: plan-run seriale, nessun DAG | P: `convoy stage` calcola wave (solo design doc) | ? |
-| R04 Team dinamico | P: ruoli da azienda (CEO, CMO…) | P | P: preset coordinator/researcher/writer/reviewer | A | P: Mayor, Polecat, Witness, Refinery | ? |
-| R04.3 Permessi di ruolo dell'infrastruttura | P: governance applicata dal runtime, ma permessi agente ampi | A | A: ruoli non sono confini di sicurezza | A | A: vincoli da prompt e guardie su pattern | ? |
-| R05 Scheduler deterministico | P: agenti-manager | P: dispatcher a eventi | P: dispatch locale, batch piccolo | P | P: coordinamento affidato a LLM | ? |
-| R06 Model gateway e budget | P: modello per agente, budget hard stop | P: modello statico, nessun budget | P: provider e failover, niente routing per task | P: cost cap per run | P: routing per ruolo, nessun enforcement budget | ? |
-| R07 Knowledge | P: memoria sperimentale | A | P: memoria in Markdown | P: mulch/Seeds | P | ? |
-| R08 Esecuzione remota e recovery | P: runtime esterno (sandbox via plugin provider) | P (forte): daemon e Hub | P: cloud worker documentati | P (forte): watchdog, salvage, riconciliazione; sessione non ripresa | P | ? |
-| R09 Collaborazione e audit | N (migliore): più utenti con ruoli, audit | P: RBAC base owner/admin/member | P: handoff di sessione tra persone che si fidano | A: un solo bearer token | A | ? |
-| R10 Quality e Security | P: gateway MCP, preset low_trust; niente gate CI | P: token GitHub a scope e scadenza 1 h; niente sandbox | P: sandbox opzionale, default permissivi | P: container non-root, ma socket Docker e `SYS_ADMIN` | P: guardie su comandi, `bypassPermissions` | ? |
-| R11 Osservabilità e costi | N (migliore): budget, audit, costi | P | P: OpenTelemetry, Prometheus | P | P: `gt costs` con prezzi fermi a gen 2025 | ? |
-| R12 PR senza merge automatico | P: nessuna policy, serve branch protection | P: serve branch protection | A: `github_publish` include il merge | P: `pr.autoMerge` opt-in, spento di default | A: merge diretto di default | ? |
-| R13 Estensioni | P | P | P: plugin, MCP, A2A | P: cross-repo rimosso | P | ? |
-
-Fatti verificati direttamente nei sorgenti il 2026-10-20 (etichetta `CODE`):
-- Warren monta `/var/run/docker.sock` per il runtime `docker` (`docs/design/runtime-docker-provider.md:21`) e lancia Claude Code con `--dangerously-skip-permissions` (`deploy/docker/Dockerfile.agent:120`).
-- Gas Town: il Refinery fa merge diretto per default (`internal/refinery/engineer.go:163`, `internal/config/types.go:1340`); il merge via PR si attiva con `merge_strategy=pr` (`engineer.go:636`).
-- Paperclip: `dangerouslySkipPermissions` ha default `true` (`packages/adapters/claude-local/src/index.ts:71`).
-- OpenClaw: `github_publish` ammette `action: "merge"` (`docs/gateway/config-tools/github-identity.md:162`).
+| R01 Jira e coda con lease | A: nessun connettore Jira (spec in bozza); checkout per run, non lease con TTL (D/C) | A: Jira assente; dispatch idempotente per `deliveryKey` e coda con daemon offline (**T**) | P: Workboard (spento di default) con claim, token, TTL, idempotency key su schede locali (**T**); Jira assente | P: `fake-jira` + conformance `warren-tracker/v1` 8 gruppi (**T**); estensione sperimentale: solo lettura, stati, blockedBy, close (C); niente lease né webhook | A: nessuna integrazione Jira (C); `bd`/convoy come modello interno | ? (da dimostrare, §13) |
+| R02 Analyst e intervista | P: approvazioni (D); nessun Analyst | A | P: `ask_user`, `workboard_specify` (D); non provati (servono LLM) | A | A | **sonda S02 non completata** |
+| R03 Piano e DAG | P: piano come documento, DAG dagli agenti (D) | A (D) | P: dipendenze genitore-figlio (**T** su schede), niente verification contract | P: plan-run seriale (C) | P: `convoy stage` solo design doc (D) | ? |
+| R04 Team dinamico | P: ruoli da azienda (D) | P | P: preset di ruoli per prompt (D) | A | P: Mayor/Polecat/Witness/Refinery, vincolati da prompt (C) | ? |
+| R04.3 Permessi di ruolo imposti dall'infrastruttura | **A in pratica**: un agente senza permessi modifica budget e config propri e di altri agenti (**T**, #16935) | P: RBAC owner/admin/member verificato (**T**) per gli utenti; per gli agenti: `hub.execute` spento di default (**T**) | A: ruoli non sono confini di sicurezza (D); `visibility=all` fa leggere la sessione di un altro agente (**T**) | A | A: vincoli da prompt e guardie su pattern (C); guardie bloccano in contesto agente (**T**) | ? |
+| R05 Scheduler deterministico | P (D) | P: dispatch a eventi, idempotente (**T**) | P: dispatch locale (C); worker non provato | P | P: coordinamento affidato a un agente LLM (C) | ? |
+| R06 Model gateway e budget | **budget aggirabile dall'agente** (**T**, #16935); policy `unpricedUsagePolicy=block` manda in hard stop un run a 0 cent (**T**) | P: modello statico, nessun budget (D) | P: provider e failover (D) | P: cost cap per run (C); non provato | P: `gt costs` con prezzi fermi a gen 2025, nessun enforcement (C) | costo misurato per run (**T**) |
+| R07 Knowledge | P: memoria sperimentale (D) | A | P: memoria Markdown (D) | P: mulch/Seeds (C) | P (D) | ? |
+| R08 Esecuzione remota e recovery | P: runtime esterno; riavvio con dati persistiti (**T**) | P forte: SIGKILL di Hub con run in volo, nessun duplicato, riconnessione ~2 s (**T**); **bug** v0.10.0: `manual-runs` 500 dopo il riavvio (**T**) | P: riavvio con persistenza di schede, claim, sessione (**T**); crash con run in volo non provato | P: riavvio sullo stesso DB (**T**), watchdog/salvage (C); isolamento non provato | P: non provato (servono agenti) | ? |
+| R09 Collaborazione e audit | P: multiutente e audit (D); `local_trusted` senza login (**T**) | P: RBAC base (**T**) | P: handoff di sessione tra persone che si fidano (D) | A: un solo bearer token (D) | A: dashboard senza autenticazione (**T**) | ? |
+| R10 Quality e Security | P: gateway MCP (D); adapter locali non sandboxati (D) | P: token GitHub scoped (D) | P: sandbox **spenta**, exec `full`/ask off (**T**) | P: socket Docker o `SYS_ADMIN` per l'isolamento (C); gli scenari verdi usano uno shim `bwrap` (**T**: non provano l'isolamento) | P: `bypassPermissions` in tutti i 7 `settings.json` generati (**T**) | permessi ristretti per CLI (**T** nelle 9 run) |
+| R11 Osservabilità e costi | P: audit log (**T**: `agent.updated`, `budget.policy_upserted`) | P | P: OpenTelemetry, Prometheus (D) | P | P: `gt costs` (C) | token e costo per run (**T**) |
+| R12 PR senza merge automatico | P: nessuna policy di merge (C); branch protection esterna | P: branch protection esterna (D) | **release 2026.10.5: `github_publish` solo draft PR (T)**; il merge esiste solo nel sorgente `6beb671` (C) | P: `pr.autoMerge` opt-in spento (C) | **A: `merge_strategy=direct` di default, `require_review=false` (T)**; cambio a `pr` funziona ma scrive anche `enabled:false` (T) | — |
+| R13 Estensioni | P (D) | P | P (D) | P (C) | P (D) | — |
 
 ## 2. Risultati sperimentali S00–S10
 
-| Scenario | Esito | n | Ambiente | Nota |
-|---|---|---|---|---|
-| S00 Installazione e smoke | `BLOCKED` per tutti i candidati | 0 | — | Nessuna installazione autorizzata. Docker spento; Warren e Gas Town richiedono WSL2 o Linux (Windows nativo non supportato). Bun, Go, Dolt, tmux non presenti |
-| S01 Issue semplice → PR | `BLOCKED` (LIVE) | 0 | — | Serve budget approvato. Harness `scripts/evaluate.mjs` pronto e verificato (PASS con fix, FAIL senza) |
-| S02 Requisiti incompleti | `BLOCKED` | 0 | — | Serve LIVE. ISSUE-5 pronta come input |
-| S03 Planning e ruoli | `BLOCKED` | 0 | — | Serve LIVE |
-| S04 Parallelismo e collisioni | `PARTIAL` solo per il controller di riferimento | 1 | locale, MOCK | Il mock Jira impedisce il doppio claim (test **TESTED**, 7/7). Nessun candidato provato; ISSUE-2/3 sono pronte come conflitto |
-| S05 Coda continua e Jira | `PARTIAL` solo per il controller di riferimento | 1 | locale, MOCK | Issue bloccata e ambigua mai scelte, evento duplicato idempotente, riconciliazione lease dopo riavvio: **TESTED** sul mock. Jira sandbox `BLOCKED` |
-| S06 Crash e recovery | `PARTIAL` solo per il controller di riferimento | 1 | locale, MOCK | Riavvio dell'orchestratore con lease scaduta: **TESTED** sul mock. Kill del worker, provider e CI: `BLOCKED` |
-| S07 Sicurezza e blast radius | `BLOCKED` | 0 | — | Serve Docker o VM. Analisi solo documentale nel threat model |
-| S08 Memoria e handoff | `BLOCKED` | 0 | — | Serve LIVE |
-| S09 Modelli, costi e budget | `BLOCKED` | 0 | — | Serve LIVE; token e costi restano `null` |
-| S10 Cross-repo e UI | `BLOCKED` (secondario) | 0 | — | Non bloccante per il report |
+`n` indica le ripetizioni. Dove non è indicato, n=1.
 
-Il «mock Jira» è un controller di riferimento scritto da noi (92 righe, più 71 di test): misura la complessità dell'adapter richiesto, **non** una capacità dei candidati.
+| Scenario | Esito | Dettaglio |
+|---|---|---|
+| **S00 Paperclip** | `PARTIAL` | Server, API e un run con adapter `http` OK; `pnpm dev` non parte senza `cargo` e la UI va in OOM a 2 GiB. `reports/s00-paperclip.md` |
+| **S00 Paseo + Hub** | `PARTIAL` | Daemon, Hub, RBAC, idempotenza, coda: OK. Trigger nuovi e agenti reali: bloccati. `reports/s00-paseo-hub.md` |
+| **S00 OpenClaw** | `PARTIAL` | Gateway, persistenza, Workboard provati senza LLM; il test del dispatcher è andato in OOM a 2 GiB. `reports/s00-openclaw.md` |
+| **S00 Warren** | `PARTIAL` | Install, 7.927 test, serve, `fake-jira`: OK. `warren up` e runtime reali: bloccati. `reports/s00-warren.md` |
+| **S00 Gas Town** | `PARTIAL` | Build, `gt doctor` (86 ok/6 warning/0 fail), merge default, dashboard, E-stop: provati. `gt up`/agenti: bloccati. `reports/s00-gastown.md` |
+| **S01 baseline** | `PASS` (n=3 per issue, 9/9) | ISSUE-1, 2, 6; ~0,05 USD e ~37 s per run; `reports/s01-baseline.md`. Nessun candidato provato in LIVE |
+| S02 Requisiti incompleti | `BLOCKED` | Sonda sulla baseline fermata dal sistema per memoria quasi esaurita (0 run completate, 0 USD) |
+| S03 Planning e ruoli | `BLOCKED` | Richiede LIVE dei candidati |
+| S04 Parallelismo e collisioni | `PARTIAL`, controller di riferimento | 5 worker concorrenti non prendono mai la stessa issue (**T**, 14 test). Nessun candidato provato su collisioni |
+| S05 Coda continua e Jira | `PARTIAL`, controller di riferimento + mock REST | Coda drenata in ordine; bloccata e ambigua mai scelte; evento duplicato idempotente anche dopo riavvio. Jira reale `BLOCKED`. Idempotenza provata anche su Paseo Hub (6 richieste concorrenti, 1 run) |
+| S06 Crash e recovery | `PARTIAL` | Controller: riavvio con lease riconciliata (**T**). Paseo Hub: SIGKILL con run in volo (**T**). OpenClaw/Warren/Paperclip: solo riavvio a riposo |
+| S07 Sicurezza e blast radius | `PARTIAL` | Sandbox di laboratorio 13/13 (**T**, non un candidato). Sui candidati: #16935 riprodotta su Paperclip, `bypassPermissions` e dashboard senza auth su Gas Town, default permissivi su OpenClaw. **Isolamento reale dei candidati non provato** |
+| S08 Memoria e handoff | `BLOCKED` | Richiede LIVE |
+| S09 Modelli, costi, budget | `PARTIAL` | Costo e token misurati per la baseline; budget dei candidati non provato; l'aggirabilità del budget Paperclip è provata (**T**) |
+| S10 Cross-repo e UI | `BLOCKED` (secondario) | |
 
 ## 3. Rubrica pesata
 
-Nessun criterio è valutabile in modo difendibile: i voti 0–5 richiedono evidenza sperimentale, che non esiste. Riportare numeri sarebbe arbitrario. Indicazioni documentali, senza punteggio e con confidenza `bassa`:
+I voti 0–5 restano **non valutabili** per la maggior parte dei criteri: gli esperimenti sono in MOCK e nessun candidato ha prodotto una PR con un agente reale. Indicazioni con confidenza `bassa`/`media`:
 
-| Criterio (peso) | Indicazione dalla sola lettura |
+| Criterio (peso) | Indicazione |
 |---|---|
-| Correttezza del codice e PR (20%) | non valutabile |
-| Recovery, persistenza, idempotenza (20%) | non valutabile. Lettura: Warren (watchdog, salvage, riconciliazione) e Paseo Hub (dispatch idempotente) hanno il meccanismo più chiaro; nessuno riprende la sessione conversazionale |
-| Sicurezza, policy, controllo umano (20%) | non valutabile. Lettura: tutti i candidati partono da default permissivi (`bypassPermissions`, `--dangerously-skip-permissions`, socket Docker). Paperclip ha la governance più completa |
-| Workflow Jira → PR e autonomia della coda (15%) | non valutabile. Lettura: nessun candidato lo copre nativamente |
-| Multi-agente e handoff (10%) | non valutabile. Lettura: Paperclip e OpenClaw i più avanzati sull'handoff tra persone |
-| Costi e prestazioni per issue accettata (10%) | non valutabile |
-| Semplicità, maturità, manutenzione (5%) | non valutabile. Lettura: Hub dichiara perdita di dati possibile; Warren è del 2026-05; Gas Town ha una catena di dipendenze pesante |
+| Correttezza e PR verificabili (20%) | **solo baseline valutabile**: 9/9 PASS, ma su una fixture troppo facile (effetto soffitto). Candidati: non valutabile |
+| Recovery, persistenza, idempotenza (20%) | Paseo Hub il meglio provato (SIGKILL, idempotenza, coda), ma con il bug v0.10.0 su `manual-runs` e #147 (SIGTERM). Gli altri: riavvio a riposo. Confidenza media |
+| Sicurezza, policy, controllo umano (20%) | **tutti sotto la soglia** per l'adozione senza hardening: default permissivi provati o letti in ognuno. Confidenza media (provati in S00, ma non sotto carico) |
+| Workflow Jira → PR e autonomia (15%) | nessun candidato lo copre; il controller di riferimento sì, ma è nostro. Non valutabile sui candidati |
+| Multi-agente e handoff (10%) | non valutabile |
+| Costi e prestazioni per issue accettata (10%) | solo baseline: ~0,045–0,056 USD (stima a listino). Candidati: non valutabile |
+| Semplicità, maturità, manutenzione (5%) | misurata in S00: Warren e Hub installano in modo pulito; Paperclip e OpenClaw superano i 2 GiB per build e test; Gas Town richiede una catena lunga (Go, Dolt, bd, tmux) e la suite lascia ~18 `dolt` orfani. Confidenza media |
 
-## 4. Gate bloccanti per l'adozione aziendale (stato da lettura)
+## 4. Gate bloccanti per l'adozione aziendale
 
-| Gate | Paperclip | Paseo+Hub | OpenClaw | Warren | Gas Town |
+| Gate | Paperclip | Paseo + Hub | OpenClaw | Warren | Gas Town |
 |---|---|---|---|---|---|
-| Perdita di segreti | non verificato | non verificato | rischio: un solo confine di fiducia per Gateway | non verificato | non verificato |
-| Esecuzione non confinabile | rischio: adapter locali non sandboxati | rischio: nessuna sandbox | rischio: sandbox spenta di default | **rischio documentato**: socket Docker (root equivalente) o `SYS_ADMIN` senza seccomp | rischio: `bypassPermissions` senza confini di infrastruttura |
-| Duplicazione task | serve lease | idempotenza per execution id (P) | lease solo locale | nessun lease per issue | non verificato |
-| Arresto affidabile | non verificato | non verificato | non verificato | cancellazione e watchdog (P) | E-stop esistente, non provato |
-| Impedire merge non autorizzati | solo branch protection | solo branch protection | **da disattivare** | opt-in spento | **merge diretto di default** |
+| Perdita di segreti | Postgres embedded con password fissa `paperclip`, in ascolto solo su loopback (T); telemetria e update check attivi di default (T, contenuto non misurato) | non provato | token Gateway in chiaro in `openclaw.json` (0600) (T) | **token operatore in chiaro nel log di avvio senza `WARREN_API_TOKEN` (T)** | non provato |
+| Esecuzione non confinabile | adapter locali non sandboxati (D); `local_trusted` senza login (T) | nessuna sandbox (D) | **sandbox spenta, exec full (T)** | non provato; socket Docker/`SYS_ADMIN` (C) | **`bypassPermissions` (T)** |
+| Duplicazione task | lock per run (D) | **idempotente (T)** | claim con TTL su schede locali (T) | nessun lease per issue (C) | non provato |
+| Arresto affidabile | SIGTERM 240–425 ms, dati persistiti (T); stop forzato di un run non provato | **SIGTERM bloccato con daemon connesso (T, #147)** | SIGTERM 0,8–1,4 s (T) | SIGTERM 20–29 ms (T) | E-stop: SIGTSTP non ferma un processo in tmux, SIGSTOP sì (T) |
+| Impedire merge non autorizzati | solo branch protection | solo branch protection | release: solo draft PR (T); sorgente: merge (C) | opt-in spento (C) | **merge diretto di default (T)** |
 | Verifica con CI esterna | non nativa | non nativa | non nativa | non nativa | non nativa |
+| Budget/permessi non aggirabili dall'agente | **FALLISCE: #16935 riprodotta (T)** | n/d | n/d | n/d | n/d |
 
-Nessun gate è stato verificato in esecuzione. Un `rischio` indica una configurazione di default letta nel codice, non un exploit dimostrato.
+«Gate bloccante» qui significa: condizione da risolvere o mitigare con un controllo esterno prima dell'adozione, non un exploit contro l'azienda. Tutte le prove sono in ambienti isolati, senza dati reali.

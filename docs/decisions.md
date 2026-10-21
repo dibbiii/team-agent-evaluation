@@ -22,3 +22,16 @@
 | Memoria | File versionati e Serena per la fase A | Coerente con §6 e §13; nessun candidato offre code intelligence |
 | Autonomia | PR pronta, nessun merge automatico, imposto da branch protection | R12.2; nessun candidato lo garantisce da solo |
 | Complessità | Stack minimale prima, piattaforma modulare solo se serve | §13 |
+
+## Decisioni successive (2026-10-21)
+
+| ID | Data | Decisione | Motivo | Stato |
+|---|---|---|---|---|
+| D09 | 2026-10-20 | Budget LIVE 15 USD totali, 1,50 USD per run, solo baseline | Delegato dall'utente; vedi `reports/budget.md` | Applicata |
+| D10 | 2026-10-20 | Le 9 prime run baseline sono invalidate e conservate in `results/invalid-contaminated/` | Il `CLAUDE.md` globale era caricato nonostante `--setting-sources project`; ora `CLAUDE_CODE_DISABLE_CLAUDE_MDS=1`, verificato con una sonda | Applicata |
+| D11 | 2026-10-20 | Smoke test dei candidati solo in container non privilegiato, senza socket, mount né porte, senza credenziali | Istruzioni §1 e §9; sul daemon ci sono container dell'utente | Applicata |
+| D12 | 2026-10-20 | Il Jira sandbox non è necessario per proseguire: finto Jira con API in formato REST v3 e controller di coda che lo usa via HTTP | L'utente non ha un Jira sandbox; l'adapter si ripunta a uno reale cambiando URL e credenziali. S05 resta `PARTIAL` | Applicata |
+| D13 | 2026-10-21 | Raccomandazione: Opzione A primaria, B seconda, C differita | Vedi `reports/FINAL-RECOMMENDATION.md`. Fondata su prove S00, #16935 riprodotta, baseline 9/9 e controller provato | Valida fino ai nuovi test |
+| D14 | 2026-10-21 | Budget e permessi degli agenti vivono fuori dalla loro portata | #16935 riprodotta su Paperclip | Applicata come requisito di progetto |
+| D15 | 2026-10-21 | Le sonde S02/S07 sulla baseline sono state interrotte dal sistema per memoria quasi esaurita e non vengono rilanciate senza richiesta | Indicazione del sistema; 0 run completate, 0 USD spesi | Aperta |
+| D16 | 2026-10-21 | La fixture va resa più dura prima di concludere sul valore di un orchestratore | La baseline passa 9/9: effetto soffitto | Aperta |
