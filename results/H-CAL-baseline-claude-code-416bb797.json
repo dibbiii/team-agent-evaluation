@@ -1,0 +1,36 @@
+{
+  "run_id": "416bb797-ecc2-4c3b-a964-7d5a69424b99",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "H-CAL",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "acd0bdb7bd4091228f8b3fd83c5c955e209adfe4",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T13:55:31.379Z",
+  "finished_at_utc": "2026-10-21T13:57:17.969Z",
+  "duration_seconds": 106.59,
+  "input_tokens": 14,
+  "output_tokens": 6096,
+  "cache_tokens": 86623,
+  "estimated_cost_usd": 0.1155416,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true,
+    "src_changed": true,
+    "changed_files": [
+      "src/events.js",
+      "test/events.test.js"
+    ],
+    "questions": 0,
+    "expected_behavior": "implement",
+    "fixture": "hard",
+    "preapplied_dependencies": [],
+    "ask_nudge": false
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "baseline Claude Code, 10 turni, issue HARD-10. Costo = stima a prezzo di listino (abbonamento). Riassunto agente: HARD-10 è risolto in `src/events.js`. `npm test` passa: 97 test su 97, di cui 6 nuovi in `test/events.test.js`. - **Errori:** `new EventBus({ onError })` fa girare tutti gli handler e `emit` non lancia mai. Gli errori sincroni e le promise rifiutate vanno a `onError(error, { type, payload })`. Senza"
+}

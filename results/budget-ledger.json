@@ -1,5 +1,5 @@
 {
-  "spent_usd": 2.539869,
+  "spent_usd": 3.681726,
   "runs": [
     {
       "issue": "ISSUE-1",
@@ -353,6 +353,60 @@
       "status": "PASS",
       "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-b6aa6e56.json",
       "at": "2026-10-21T13:31:07.033Z"
+    },
+    {
+      "issue": "HARD-4",
+      "scenario": "H-CAL",
+      "cost_usd": 0.23342810000000003,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-2f630dc6.json",
+      "at": "2026-10-21T13:52:53.625Z"
+    },
+    {
+      "issue": "HARD-9",
+      "scenario": "H-CAL",
+      "cost_usd": 0.15890579999999999,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-ac61e71a.json",
+      "at": "2026-10-21T13:55:26.485Z"
+    },
+    {
+      "issue": "HARD-10",
+      "scenario": "H-CAL",
+      "cost_usd": 0.1155416,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-416bb797.json",
+      "at": "2026-10-21T13:57:17.969Z"
+    },
+    {
+      "issue": "HARD-7",
+      "scenario": "H-CAL",
+      "cost_usd": 0.0285225,
+      "execution_error": false,
+      "status": "FAIL",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-ebd1470b.json",
+      "at": "2026-10-21T13:58:05.540Z"
+    },
+    {
+      "issue": "HARD-8",
+      "scenario": "H-CAL",
+      "cost_usd": 0.1900268,
+      "execution_error": false,
+      "status": "FAIL",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-572704dc.json",
+      "at": "2026-10-21T14:00:00.684Z"
+    },
+    {
+      "issue": "HARD-3",
+      "scenario": "H-CAL",
+      "cost_usd": 0.41543169999999996,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-3de6c8c3.json",
+      "at": "2026-10-21T14:04:10.459Z"
     }
   ]
 }

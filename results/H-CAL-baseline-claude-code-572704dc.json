@@ -1,0 +1,38 @@
+{
+  "run_id": "572704dc-7163-46a1-b410-8c170c42be05",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "H-CAL",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "e633ced2a07f3babc5d9cd7c879685e58f8bb91b",
+  "status": "FAIL",
+  "started_at_utc": "2026-10-21T13:58:10.475Z",
+  "finished_at_utc": "2026-10-21T14:00:00.684Z",
+  "duration_seconds": 110.209,
+  "input_tokens": 16,
+  "output_tokens": 8982,
+  "cache_tokens": 152679,
+  "estimated_cost_usd": 0.1900268,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "error": "Nessun test di accettazione per HARD-8",
+    "src_changed": true,
+    "changed_files": [
+      "src/giftcards.js",
+      "src/index.js",
+      "src/orders.js",
+      "src/payments.js",
+      "test/giftcards.test.js"
+    ],
+    "questions": 0,
+    "expected_behavior": "ask",
+    "fixture": "hard",
+    "preapplied_dependencies": [],
+    "ask_nudge": false
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "[ESITO EURISTICO ask] baseline Claude Code, 16 turni, issue HARD-8. Costo = stima a prezzo di listino (abbonamento). Riassunto agente: Ho aggiunto le gift card come strumento di pagamento, non come sconto, quindi la regola ADR-002 sugli sconti non si applica. `npm test` passa: 98 test su 98, inclusi i nuovi in `test/giftcards.test.js`. - **Cosa fa:** il nuovo `GiftCardService` (`src/giftcards.js`, esportato da `index.js`) ha `issue Testo completo: results/raw/baseline-HARD-8-1792591199301.txt"
+}

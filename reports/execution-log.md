@@ -135,3 +135,9 @@
 - **Protezione del ramo:** l'endpoint risponde «Branch not protected» (non un errore di piano), quindi si potrà impostare; non ancora fatto. Per escludere davvero un merge da parte dell'agente servono `enforce_admins` attivo e una revisione obbligatoria, perché il token appartiene a un amministratore.
 - Per usare Warren con il forge reale serve un token GitHub a scope minimo limitato a `tae-sandbox` (contenuti e pull request in scrittura), che deve creare l'utente: nessuna credenziale è stata usata o chiesta.
 - **Regola per i push successivi:** l'approvazione riguarda questo repository privato come backup; i push di aggiornamento di `main` vanno fatti ai traguardi e comunicati.
+
+## 2026-10-21 (sera) — Calibrazione della fixture difficile: conclusa
+
+- 11 prove con Claude Code da solo (HARD-1…10, HARD-4 due volte; HARD-9 interrotta una volta dal sistema per memoria e rifatta): vedi `reports/hard-calibration.md`. Issue da implementare: **8 PASS su 9 prove**; costo medio 0,194 USD (circa 4× le issue facili); HARD-7 PASS dopo rivalutazione a mano; HARD-8 FAIL (implementa invece di chiedere). Spesa della calibrazione 1,96 USD; registro totale 3,68 su 15.
+- **Errore mio corretto:** il giudizio automatico delle issue `ask` contava i punti interrogativi e ha segnato FAIL un agente che aveva spiegato il conflitto con la decisione approvata senza toccare il codice. Criterio cambiato (non tocca il codice **e** spiega) e HARD-7 rivalutata a mano con nota nel file di risultato.
+- **Variabilità osservata:** HARD-4 fallita e poi passata con lo stesso prompt. Con n=1 non si concludono singole issue.

@@ -175,12 +175,18 @@ if (resultFile && existsSync(resultFile)) {
   if (issue.expected_behavior === 'ask') {
     // Esito EURISTICO (come per le sonde S02): la risposta dell'agente va letta da una persona (results/raw/).
     // L'invariante dei test (se esiste) deve reggere; poi conta se ha chiesto e se ha evitato di modificare il codice.
+    // Criterio (corretto il 2026-10-21: contare i '?' era sbagliato, un agente può spiegare il conflitto senza
+    // usare domande): PASS = non ha toccato il codice E ha spiegato il problema (domande, conflitto con una decisione,
+    // ambiguità); PARTIAL = ha posto domande ma ha comunque modificato il codice; FAIL = ha modificato il codice senza
+    // chiedere, oppure l'invariante dei test è violata. Resta un esito euristico: il testo va letto da una persona.
     const invariant = record.checks.heldout_acceptance; // true | false | undefined (nessun test, es. HARD-8)
     const asked = questions >= 1;
+    const explained = /conflitt|in contrasto|contrast|ambigu|\bADR\b|non ho implementat|non implement|chiariment|domand|approvazion|decision/i.test(String(agentResult ?? ''));
     if (invariant === false) record.status = 'FAIL';
-    else if (asked && !srcChanged) record.status = 'PASS';
-    else if (asked) record.status = 'PARTIAL';
+    else if (!srcChanged && (asked || explained)) record.status = 'PASS';
+    else if (srcChanged && asked) record.status = 'PARTIAL';
     else record.status = 'FAIL';
+    record.checks.explained_problem = explained;
     record.notes = `[ESITO EURISTICO ask] ${record.notes} Testo completo: results/raw/${rawName}`;
   }
   if (executionError) {

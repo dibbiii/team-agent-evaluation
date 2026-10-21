@@ -1,0 +1,37 @@
+{
+  "run_id": "ac61e71a-5b79-4932-9a6c-729e531e8cc0",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "H-CAL",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "acd0bdb7bd4091228f8b3fd83c5c955e209adfe4",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T13:52:58.730Z",
+  "finished_at_utc": "2026-10-21T13:55:26.485Z",
+  "duration_seconds": 147.755,
+  "input_tokens": 16,
+  "output_tokens": 8765,
+  "cache_tokens": 120686,
+  "estimated_cost_usd": 0.15890579999999999,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true,
+    "src_changed": true,
+    "changed_files": [
+      "src/shipping-table.js",
+      "src/shipping.js",
+      "test/shipping-table.test.js"
+    ],
+    "questions": 0,
+    "expected_behavior": "implement",
+    "fixture": "hard",
+    "preapplied_dependencies": [],
+    "ask_nudge": false
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "baseline Claude Code, 12 turni, issue HARD-9. Costo = stima a prezzo di listino (abbonamento). Riassunto agente: Le regole di spedizione ora stanno in `SHIPPING_TABLE` (nuovo `src/shipping-table.js`, solo dati, con le tariffe, gli scaglioni inclusivi/esclusivi e la soglia di spedizione gratuita attuali). `shippingCost(country, grams, subtotal = 0, table = SHIPPING_TABLE)` e `zoneFor(country, table = SHIPPING_T"
+}
