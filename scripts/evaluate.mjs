@@ -3,6 +3,7 @@
 // Uso: node scripts/evaluate.mjs <workspace-dir> <ISSUE-KEY> <candidate> <scenario> <mode> [model]
 // Copia il solo `src/` del workspace in una cartella temporanea insieme ai test di accettazione,
 // così l'agente non può alterare i test né influenzare l'ambiente di valutazione.
+// FIXTURE=hard usa la fixture difficile: fixtures/seed-app-hard + fixtures/acceptance-hard (cartella intera, con helper e golden).
 import { cpSync, mkdtempSync, mkdirSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
@@ -11,6 +12,9 @@ import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const hard = process.env.FIXTURE === 'hard';
+const seedName = hard ? 'seed-app-hard' : 'seed-app';
+const accName = hard ? 'acceptance-hard' : 'acceptance';
 const [workspace, issue, candidate = 'unknown', scenario = 'S01', mode = 'MOCK', model = null] =
   process.argv.slice(2);
 if (!workspace || !issue) {
@@ -22,17 +26,18 @@ const started = new Date();
 const sandbox = mkdtempSync(join(tmpdir(), 'tae-eval-'));
 const checks = {};
 try {
-  cpSync(join(resolve(workspace), 'src'), join(sandbox, 'seed-app', 'src'), { recursive: true });
-  cpSync(join(root, 'fixtures', 'seed-app', 'package.json'), join(sandbox, 'seed-app', 'package.json'));
-  cpSync(join(root, 'fixtures', 'seed-app', 'test'), join(sandbox, 'seed-app', 'test'), { recursive: true });
+  cpSync(join(resolve(workspace), 'src'), join(sandbox, seedName, 'src'), { recursive: true });
+  cpSync(join(root, 'fixtures', seedName, 'package.json'), join(sandbox, seedName, 'package.json'));
+  cpSync(join(root, 'fixtures', seedName, 'test'), join(sandbox, seedName, 'test'), { recursive: true });
   mkdirSync(join(sandbox, 'acceptance'), { recursive: true });
-  const acc = join(root, 'fixtures', 'acceptance', `${issue}.acceptance.test.js`);
+  const acc = join(root, 'fixtures', accName, `${issue}.acceptance.test.js`);
   if (!existsSync(acc)) throw new Error(`Nessun test di accettazione per ${issue}`);
-  cpSync(acc, join(sandbox, 'acceptance', `${issue}.acceptance.test.js`));
+  if (hard) cpSync(join(root, 'fixtures', accName), join(sandbox, 'acceptance'), { recursive: true });
+  else cpSync(acc, join(sandbox, 'acceptance', `${issue}.acceptance.test.js`));
 
   const run = (cwd, target) =>
     spawnSync(process.execPath, ['--test', target], { cwd, encoding: 'utf8', timeout: 60_000 });
-  const visible = run(join(sandbox, 'seed-app'), 'test/*.test.js');
+  const visible = run(join(sandbox, seedName), 'test/*.test.js');
   const held = run(sandbox, `acceptance/${issue}.acceptance.test.js`);
   checks.visible_tests = visible.status === 0;
   checks.heldout_acceptance = held.status === 0;
@@ -65,7 +70,7 @@ const record = {
   checks,
   artifact_paths: [],
   blockers: [],
-  notes: `evaluate.mjs su ${issue}`,
+  notes: `evaluate.mjs su ${issue}${hard ? ' (FIXTURE=hard)' : ''}`,
 };
 const outDir = join(root, 'results');
 mkdirSync(outDir, { recursive: true });

@@ -1,0 +1,6 @@
+{
+  "name": "acceptance-hard",
+  "private": true,
+  "type": "module",
+  "description": "Test held-out della fixture difficile: eseguiti FUORI dal workspace dell'agente."
+}

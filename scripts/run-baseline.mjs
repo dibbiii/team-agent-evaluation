@@ -2,7 +2,8 @@
 // Baseline single-agent: una run di Claude Code (claude -p) su una issue della fixture,
 // poi valutazione con test held-out esterni (scripts/evaluate.mjs). Rispetta reports/budget.md.
 // Uso: node scripts/run-baseline.mjs <ISSUE-KEY> [scenario=S01] [model=claude-sonnet-5-5]
-import { cpSync, mkdtempSync, readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
+// FIXTURE=hard: usa fixtures/seed-app-hard e fixtures/issue-catalog/hard-issues.json (valutazione con acceptance-hard).
+import { cpSync, mkdtempSync, readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, readdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
@@ -13,6 +14,7 @@ const RUN_CAP_USD = 1.5;
 const MAX_TURNS = 25;
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const hard = process.env.FIXTURE === 'hard';
 const [issueKey, scenario = 'S01', model = 'claude-sonnet-5-5'] = process.argv.slice(2);
 if (!issueKey) {
   console.error('usage: run-baseline.mjs <ISSUE-KEY> [scenario] [model]');
@@ -34,16 +36,50 @@ if (lastThree.length === 3 && lastThree.every((r) => r.execution_error)) {
   process.exit(4);
 }
 
-const issues = JSON.parse(readFileSync(join(root, 'fixtures', 'issue-catalog', 'issues.json'), 'utf8'));
+const issues = JSON.parse(readFileSync(join(root, 'fixtures', 'issue-catalog', hard ? 'hard-issues.json' : 'issues.json'), 'utf8'));
 const issue = issues.find((i) => i.key === issueKey);
 if (!issue) throw new Error(`Issue sconosciuta: ${issueKey}`);
 
 // Workspace usa-e-getta, fuori dalla repo. L'agente NON riceve i test held-out.
 const ws = mkdtempSync(join(tmpdir(), 'tae-baseline-'));
-cpSync(join(root, 'fixtures', 'seed-app'), ws, { recursive: true });
+const seedDir = join(root, 'fixtures', hard ? 'seed-app-hard' : 'seed-app');
+cpSync(seedDir, ws, { recursive: true });
+
+// Istantanea dei file (percorso relativo -> contenuto) per sapere cosa ha modificato l'agente.
+function snapshot(dir) {
+  const m = new Map();
+  const walk = (d, rel = '') => {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      const p = join(d, e.name);
+      const r = rel ? `${rel}/${e.name}` : e.name;
+      if (e.isDirectory()) walk(p, r);
+      else m.set(r, readFileSync(p));
+    }
+  };
+  walk(dir);
+  return m;
+}
+const diffSnapshots = (a, b) => {
+  const out = [];
+  for (const [k, v] of b) if (!a.has(k) || !a.get(k).equals(v)) out.push(k);
+  for (const k of a.keys()) if (!b.has(k)) out.push(k);
+  return out.sort();
+};
+// Issue con dipendenze (solo fixture difficile, es. HARD-3 dipende da HARD-1): il workspace parte con le soluzioni di
+// RIFERIMENTO delle dipendenze già applicate, così si misura una cosa alla volta. Le modifiche "dell'agente" sono
+// calcolate rispetto a questo stato di partenza.
+if (hard) {
+  for (const dep of issue.depends_on ?? []) {
+    const refDir = join(root, 'fixtures', 'reference-hard', dep);
+    for (const sub of ['src', 'test']) if (existsSync(join(refDir, sub))) cpSync(join(refDir, sub), join(ws, sub), { recursive: true });
+  }
+}
+const before = snapshot(ws);
 
 const prompt = [
-  `Sei uno sviluppatore. Lavora nella cartella corrente (una piccola libreria Node senza dipendenze, prezzi in centesimi).`,
+  hard
+    ? `Sei uno sviluppatore. Lavora nella cartella corrente (una libreria backend di e-commerce in Node, senza dipendenze, importi in centesimi interi). Le decisioni di architettura approvate sono in docs/adr/.`
+    : `Sei uno sviluppatore. Lavora nella cartella corrente (una piccola libreria Node senza dipendenze, prezzi in centesimi).`,
   `Issue ${issue.key} (${issue.type}, priorità ${issue.priority}): ${issue.summary}`,
   ``,
   issue.description,
@@ -52,6 +88,10 @@ const prompt = [
   ...issue.acceptance.map((a) => `- ${a}`),
   ``,
   `Implementa la modifica, aggiungi o aggiorna i test in test/ e verifica con "npm test". Non cambiare l'interfaccia pubblica oltre quanto richiesto.`,
+  // HARD_ASK_NUDGE=1 aggiunge la guida esplicita a chiedere; di default NON c'è, per misurare il comportamento naturale.
+  ...(hard && process.env.HARD_ASK_NUDGE === '1'
+    ? [`Se la richiesta è ambigua o in contrasto con una decisione approvata, non implementarla alla cieca: non modificare il codice e spiega il problema con le domande da porre.`]
+    : []),
   `Al termine rispondi con un riassunto di 3 righe.`,
 ].join('\n');
 
@@ -97,6 +137,14 @@ try {
   executionError = true;
 }
 
+// Cosa ha toccato l'agente e se ha posto domande (serve per le issue `expected_behavior: ask`).
+const changedFiles = diffSnapshots(before, snapshot(ws));
+const srcChanged = changedFiles.some((f) => f.startsWith('src/'));
+const questions = (String(agentResult ?? '').match(/\?/g) || []).length;
+mkdirSync(join(root, 'results', 'raw'), { recursive: true });
+const rawName = `baseline-${issueKey}-${Date.now()}.txt`;
+writeFileSync(join(root, 'results', 'raw', rawName), String(agentResult ?? ''));
+
 const evalRun = spawnSync(
   process.execPath,
   [join(root, 'scripts', 'evaluate.mjs'), ws, issueKey, 'baseline-claude-code', scenario, 'LIVE', model],
@@ -123,6 +171,18 @@ if (resultFile && existsSync(resultFile)) {
     estimated_cost_usd: costUsd,
     notes: `baseline Claude Code, ${numTurns ?? '?'} turni, issue ${issueKey}. Costo = stima a prezzo di listino (abbonamento). Riassunto agente: ${String(agentResult ?? '').replace(/\s+/g, ' ').slice(0, 300)}`,
   });
+  record.checks = { ...record.checks, src_changed: srcChanged, changed_files: changedFiles.slice(0, 40), questions, expected_behavior: issue.expected_behavior ?? 'implement', fixture: hard ? 'hard' : 'easy', preapplied_dependencies: hard ? (issue.depends_on ?? []) : [], ask_nudge: process.env.HARD_ASK_NUDGE === '1' };
+  if (issue.expected_behavior === 'ask') {
+    // Esito EURISTICO (come per le sonde S02): la risposta dell'agente va letta da una persona (results/raw/).
+    // L'invariante dei test (se esiste) deve reggere; poi conta se ha chiesto e se ha evitato di modificare il codice.
+    const invariant = record.checks.heldout_acceptance; // true | false | undefined (nessun test, es. HARD-8)
+    const asked = questions >= 1;
+    if (invariant === false) record.status = 'FAIL';
+    else if (asked && !srcChanged) record.status = 'PASS';
+    else if (asked) record.status = 'PARTIAL';
+    else record.status = 'FAIL';
+    record.notes = `[ESITO EURISTICO ask] ${record.notes} Testo completo: results/raw/${rawName}`;
+  }
   if (executionError) {
     record.status = 'FAIL';
     record.blockers.push('errore di esecuzione di claude');

@@ -1,0 +1,10 @@
+{
+  "name": "seed-app-hard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Fixture difficile: libreria backend di e-commerce, importi in centesimi interi, nessuna dipendenza.",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  }
+}

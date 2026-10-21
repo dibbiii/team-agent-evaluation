@@ -1,0 +1,578 @@
+{
+ "all": {
+  "rows": [
+   {
+    "sku": "A13",
+    "name": "Prodotto A13",
+    "category": "standard",
+    "qty": 64,
+    "orders": 19,
+    "netCents": 114640,
+    "avgUnitCents": 1791,
+    "shareBp": 963
+   },
+   {
+    "sku": "A11",
+    "name": "Prodotto A11",
+    "category": "reduced",
+    "qty": 69,
+    "orders": 20,
+    "netCents": 103273,
+    "avgUnitCents": 1497,
+    "shareBp": 867
+   },
+   {
+    "sku": "A24",
+    "name": "Prodotto A24",
+    "category": "books",
+    "qty": 60,
+    "orders": 20,
+    "netCents": 85088,
+    "avgUnitCents": 1418,
+    "shareBp": 715
+   },
+   {
+    "sku": "A10",
+    "name": "Prodotto A10",
+    "category": "standard",
+    "qty": 49,
+    "orders": 15,
+    "netCents": 69041,
+    "avgUnitCents": 1409,
+    "shareBp": 580
+   },
+   {
+    "sku": "A20",
+    "name": "Prodotto A20",
+    "category": "reduced",
+    "qty": 73,
+    "orders": 24,
+    "netCents": 63778,
+    "avgUnitCents": 874,
+    "shareBp": 536
+   },
+   {
+    "sku": "A08",
+    "name": "Prodotto A08",
+    "category": "reduced",
+    "qty": 53,
+    "orders": 20,
+    "netCents": 58047,
+    "avgUnitCents": 1095,
+    "shareBp": 488
+   },
+   {
+    "sku": "A14",
+    "name": "Prodotto A14",
+    "category": "reduced",
+    "qty": 29,
+    "orders": 12,
+    "netCents": 55604,
+    "avgUnitCents": 1917,
+    "shareBp": 467
+   },
+   {
+    "sku": "A12",
+    "name": "Prodotto A12",
+    "category": "books",
+    "qty": 35,
+    "orders": 12,
+    "netCents": 55412,
+    "avgUnitCents": 1583,
+    "shareBp": 465
+   },
+   {
+    "sku": "A07",
+    "name": "Prodotto A07",
+    "category": "standard",
+    "qty": 56,
+    "orders": 16,
+    "netCents": 55196,
+    "avgUnitCents": 986,
+    "shareBp": 464
+   },
+   {
+    "sku": "A09",
+    "name": "Prodotto A09",
+    "category": "books",
+    "qty": 43,
+    "orders": 18,
+    "netCents": 54738,
+    "avgUnitCents": 1273,
+    "shareBp": 460
+   },
+   {
+    "sku": "A19",
+    "name": "Prodotto A19",
+    "category": "standard",
+    "qty": 68,
+    "orders": 26,
+    "netCents": 51164,
+    "avgUnitCents": 752,
+    "shareBp": 430
+   },
+   {
+    "sku": "A06",
+    "name": "Prodotto A06",
+    "category": "books",
+    "qty": 56,
+    "orders": 21,
+    "netCents": 48306,
+    "avgUnitCents": 863,
+    "shareBp": 406
+   },
+   {
+    "sku": "A23",
+    "name": "Prodotto A23",
+    "category": "reduced",
+    "qty": 37,
+    "orders": 12,
+    "netCents": 48204,
+    "avgUnitCents": 1303,
+    "shareBp": 405
+   },
+   {
+    "sku": "A22",
+    "name": "Prodotto A22",
+    "category": "standard",
+    "qty": 42,
+    "orders": 16,
+    "netCents": 48010,
+    "avgUnitCents": 1143,
+    "shareBp": 403
+   },
+   {
+    "sku": "A05",
+    "name": "Prodotto A05",
+    "category": "reduced",
+    "qty": 63,
+    "orders": 20,
+    "netCents": 45906,
+    "avgUnitCents": 729,
+    "shareBp": 386
+   },
+   {
+    "sku": "A21",
+    "name": "Prodotto A21",
+    "category": "books",
+    "qty": 46,
+    "orders": 15,
+    "netCents": 45333,
+    "avgUnitCents": 986,
+    "shareBp": 381
+   },
+   {
+    "sku": "A18",
+    "name": "Prodotto A18",
+    "category": "books",
+    "qty": 66,
+    "orders": 25,
+    "netCents": 40302,
+    "avgUnitCents": 611,
+    "shareBp": 338
+   },
+   {
+    "sku": "A04",
+    "name": "Prodotto A04",
+    "category": "standard",
+    "qty": 56,
+    "orders": 18,
+    "netCents": 32257,
+    "avgUnitCents": 576,
+    "shareBp": 271
+   },
+   {
+    "sku": "A17",
+    "name": "Prodotto A17",
+    "category": "reduced",
+    "qty": 49,
+    "orders": 19,
+    "netCents": 23148,
+    "avgUnitCents": 472,
+    "shareBp": 194
+   },
+   {
+    "sku": "A03",
+    "name": "Prodotto A03",
+    "category": "books",
+    "qty": 44,
+    "orders": 18,
+    "netCents": 20476,
+    "avgUnitCents": 465,
+    "shareBp": 172
+   },
+   {
+    "sku": "A02",
+    "name": "Prodotto A02",
+    "category": "reduced",
+    "qty": 61,
+    "orders": 19,
+    "netCents": 20078,
+    "avgUnitCents": 329,
+    "shareBp": 169
+   },
+   {
+    "sku": "GHOST",
+    "name": "GHOST",
+    "category": null,
+    "qty": 33,
+    "orders": 12,
+    "netCents": 15892,
+    "avgUnitCents": 482,
+    "shareBp": 133
+   },
+   {
+    "sku": "A01",
+    "name": "Prodotto A01",
+    "category": "standard",
+    "qty": 78,
+    "orders": 24,
+    "netCents": 15019,
+    "avgUnitCents": 193,
+    "shareBp": 126
+   },
+   {
+    "sku": "A16",
+    "name": "Prodotto A16",
+    "category": "standard",
+    "qty": 37,
+    "orders": 11,
+    "netCents": 12251,
+    "avgUnitCents": 331,
+    "shareBp": 103
+   },
+   {
+    "sku": "A15",
+    "name": "Prodotto A15",
+    "category": "books",
+    "qty": 35,
+    "orders": 12,
+    "netCents": 7514,
+    "avgUnitCents": 215,
+    "shareBp": 63
+   },
+   {
+    "sku": "T-A",
+    "name": "Gemello A",
+    "category": "standard",
+    "qty": 2,
+    "orders": 1,
+    "netCents": 1001,
+    "avgUnitCents": 500,
+    "shareBp": 8
+   },
+   {
+    "sku": "T-B",
+    "name": "Gemello B",
+    "category": "standard",
+    "qty": 2,
+    "orders": 1,
+    "netCents": 1001,
+    "avgUnitCents": 500,
+    "shareBp": 8
+   }
+  ],
+  "totalNetCents": 1190679,
+  "orderCount": 186,
+  "byCountry": [
+   {
+    "country": "DE",
+    "netCents": 267311,
+    "orders": 37
+   },
+   {
+    "country": "ES",
+    "netCents": 236176,
+    "orders": 33
+   },
+   {
+    "country": "FR",
+    "netCents": 248675,
+    "orders": 41
+   },
+   {
+    "country": "IT",
+    "netCents": 438517,
+    "orders": 75
+   }
+  ]
+ },
+ "ranged": {
+  "rows": [
+   {
+    "sku": "A13",
+    "name": "Prodotto A13",
+    "category": "standard",
+    "qty": 37,
+    "orders": 11,
+    "netCents": 66268,
+    "avgUnitCents": 1791,
+    "shareBp": 1106
+   },
+   {
+    "sku": "A11",
+    "name": "Prodotto A11",
+    "category": "reduced",
+    "qty": 35,
+    "orders": 10,
+    "netCents": 52826,
+    "avgUnitCents": 1509,
+    "shareBp": 882
+   },
+   {
+    "sku": "A10",
+    "name": "Prodotto A10",
+    "category": "standard",
+    "qty": 26,
+    "orders": 9,
+    "netCents": 36767,
+    "avgUnitCents": 1414,
+    "shareBp": 614
+   },
+   {
+    "sku": "A20",
+    "name": "Prodotto A20",
+    "category": "reduced",
+    "qty": 40,
+    "orders": 13,
+    "netCents": 35049,
+    "avgUnitCents": 876,
+    "shareBp": 585
+   },
+   {
+    "sku": "A14",
+    "name": "Prodotto A14",
+    "category": "reduced",
+    "qty": 17,
+    "orders": 7,
+    "netCents": 33342,
+    "avgUnitCents": 1961,
+    "shareBp": 557
+   },
+   {
+    "sku": "A22",
+    "name": "Prodotto A22",
+    "category": "standard",
+    "qty": 28,
+    "orders": 11,
+    "netCents": 31992,
+    "avgUnitCents": 1143,
+    "shareBp": 534
+   },
+   {
+    "sku": "A07",
+    "name": "Prodotto A07",
+    "category": "standard",
+    "qty": 30,
+    "orders": 9,
+    "netCents": 29803,
+    "avgUnitCents": 993,
+    "shareBp": 498
+   },
+   {
+    "sku": "A05",
+    "name": "Prodotto A05",
+    "category": "reduced",
+    "qty": 41,
+    "orders": 13,
+    "netCents": 29770,
+    "avgUnitCents": 726,
+    "shareBp": 497
+   },
+   {
+    "sku": "A24",
+    "name": "Prodotto A24",
+    "category": "books",
+    "qty": 19,
+    "orders": 7,
+    "netCents": 27550,
+    "avgUnitCents": 1450,
+    "shareBp": 460
+   },
+   {
+    "sku": "A12",
+    "name": "Prodotto A12",
+    "category": "books",
+    "qty": 17,
+    "orders": 6,
+    "netCents": 26559,
+    "avgUnitCents": 1562,
+    "shareBp": 443
+   },
+   {
+    "sku": "A21",
+    "name": "Prodotto A21",
+    "category": "books",
+    "qty": 27,
+    "orders": 8,
+    "netCents": 26550,
+    "avgUnitCents": 983,
+    "shareBp": 443
+   },
+   {
+    "sku": "A19",
+    "name": "Prodotto A19",
+    "category": "standard",
+    "qty": 34,
+    "orders": 12,
+    "netCents": 25327,
+    "avgUnitCents": 745,
+    "shareBp": 423
+   },
+   {
+    "sku": "A08",
+    "name": "Prodotto A08",
+    "category": "reduced",
+    "qty": 22,
+    "orders": 8,
+    "netCents": 24343,
+    "avgUnitCents": 1106,
+    "shareBp": 406
+   },
+   {
+    "sku": "A23",
+    "name": "Prodotto A23",
+    "category": "reduced",
+    "qty": 18,
+    "orders": 6,
+    "netCents": 23632,
+    "avgUnitCents": 1313,
+    "shareBp": 395
+   },
+   {
+    "sku": "A09",
+    "name": "Prodotto A09",
+    "category": "books",
+    "qty": 18,
+    "orders": 9,
+    "netCents": 22632,
+    "avgUnitCents": 1257,
+    "shareBp": 378
+   },
+   {
+    "sku": "A18",
+    "name": "Prodotto A18",
+    "category": "books",
+    "qty": 36,
+    "orders": 15,
+    "netCents": 21897,
+    "avgUnitCents": 608,
+    "shareBp": 366
+   },
+   {
+    "sku": "A06",
+    "name": "Prodotto A06",
+    "category": "books",
+    "qty": 24,
+    "orders": 11,
+    "netCents": 21145,
+    "avgUnitCents": 881,
+    "shareBp": 353
+   },
+   {
+    "sku": "A17",
+    "name": "Prodotto A17",
+    "category": "reduced",
+    "qty": 34,
+    "orders": 14,
+    "netCents": 16141,
+    "avgUnitCents": 475,
+    "shareBp": 269
+   },
+   {
+    "sku": "A04",
+    "name": "Prodotto A04",
+    "category": "standard",
+    "qty": 17,
+    "orders": 6,
+    "netCents": 10305,
+    "avgUnitCents": 606,
+    "shareBp": 172
+   },
+   {
+    "sku": "A01",
+    "name": "Prodotto A01",
+    "category": "standard",
+    "qty": 48,
+    "orders": 15,
+    "netCents": 9097,
+    "avgUnitCents": 190,
+    "shareBp": 152
+   },
+   {
+    "sku": "A02",
+    "name": "Prodotto A02",
+    "category": "reduced",
+    "qty": 24,
+    "orders": 7,
+    "netCents": 7796,
+    "avgUnitCents": 325,
+    "shareBp": 130
+   },
+   {
+    "sku": "GHOST",
+    "name": "GHOST",
+    "category": null,
+    "qty": 14,
+    "orders": 5,
+    "netCents": 6631,
+    "avgUnitCents": 474,
+    "shareBp": 111
+   },
+   {
+    "sku": "A03",
+    "name": "Prodotto A03",
+    "category": "books",
+    "qty": 14,
+    "orders": 7,
+    "netCents": 6332,
+    "avgUnitCents": 452,
+    "shareBp": 106
+   },
+   {
+    "sku": "A16",
+    "name": "Prodotto A16",
+    "category": "standard",
+    "qty": 11,
+    "orders": 5,
+    "netCents": 3849,
+    "avgUnitCents": 350,
+    "shareBp": 64
+   },
+   {
+    "sku": "A15",
+    "name": "Prodotto A15",
+    "category": "books",
+    "qty": 16,
+    "orders": 6,
+    "netCents": 3391,
+    "avgUnitCents": 212,
+    "shareBp": 57
+   }
+  ],
+  "totalNetCents": 598994,
+  "orderCount": 93,
+  "byCountry": [
+   {
+    "country": "DE",
+    "netCents": 91866,
+    "orders": 11
+   },
+   {
+    "country": "ES",
+    "netCents": 148517,
+    "orders": 20
+   },
+   {
+    "country": "FR",
+    "netCents": 109122,
+    "orders": 18
+   },
+   {
+    "country": "IT",
+    "netCents": 249489,
+    "orders": 44
+   }
+  ]
+ }
+}

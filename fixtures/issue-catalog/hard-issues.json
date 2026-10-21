@@ -1,0 +1,202 @@
+[
+  {
+    "key": "HARD-1",
+    "type": "Bug",
+    "priority": "High",
+    "summary": "Il totale di un ordine con IVA differisce di 1 centesimo fra riepilogo del carrello e fattura",
+    "description": "Il cliente paga l'importo dell'ordine ma riceve una fattura con un importo diverso. Esempio: tre articoli diversi da 0,75 EUR ciascuno, IVA italiana standard al 22%. Il riepilogo del carrello (Cart.summary) e i totali memorizzati dall'ordine (OrderService.createOrder) mostrano IVA 0,50 EUR e totale 2,75 EUR; la fattura (OrderService.invoice / buildInvoice) mostra IVA 0,48 EUR e totale 2,73 EUR. La regola approvata è ADR-001 (docs/adr): IVA per riga, arrotondamento half-even, totale ordine = somma esatta delle righe. Ogni punto in cui l'IVA o il totale ordine vengono calcolati o mostrati deve produrre gli stessi valori della fattura: riepilogo del carrello, totali memorizzati nell'ordine, fattura e report IVA (vatReport in src/reports.js). Gli ordini con una sola riga non devono cambiare.",
+    "acceptance": [
+      "Tre righe da 0,75 EUR al 22% (IT): Cart.summary, i totali dell'ordine e la fattura danno IVA 48 e totale 273 centesimi",
+      "Per qualunque carrello (sconti, categorie e paesi diversi) Cart.summary, i totali dell'ordine e la fattura concordano su IVA e totale",
+      "vatReport per paese coincide con la somma delle IVA e degli imponibili delle fatture degli ordini venduti",
+      "Le metà esatte si arrotondano half-even come da ADR-001",
+      "I totali degli ordini a riga singola non cambiano e i test esistenti passano"
+    ],
+    "components": ["src/cart.js", "src/reports.js", "src/orders.js", "src/tax.js"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S01",
+    "difficulty": "medium",
+    "expected_behavior": "implement",
+    "depends_on": []
+  },
+  {
+    "key": "HARD-2",
+    "type": "Bug",
+    "priority": "Critical",
+    "summary": "Cliente addebitato due volte quando la richiesta di pagamento viene ripetuta dopo un timeout",
+    "description": "Il gateway può addebitare la carta e poi perdere la risposta (nel FakeGateway: modalità 'timeout-after-charge'). Il client riceve un errore, richiama OrderService.pay(orderId) e il cliente viene addebitato una seconda volta. Succede anche con due chiamate pay() concorrenti sullo stesso ordine. Vale ADR-004 (docs/adr): idempotency key stabile per ordine. Comportamento atteso: pay() è idempotente. Una chiamata ripetuta, dopo un errore o un timeout, o concorrente, non produce mai un secondo addebito né un secondo evento order.paid. Chiamare pay() su un ordine già pagato (paid, shipped, delivered) risolve con l'ordine senza contattare il gateway. Tutti i tentativi di pagamento dello stesso ordine usano la stessa idempotency key; ordini diversi usano chiavi diverse. Una carta rifiutata lascia l'ordine pagabile (stato created) e il tentativo successivo può riuscire. Un ordine annullato continua a non essere pagabile.",
+    "acceptance": [
+      "Dopo un timeout con addebito avvenuto, una nuova pay() risolve con l'ordine pagato e il gateway ha un solo addebito, per l'importo del totale ordine",
+      "Due o più pay() concorrenti sullo stesso ordine: un solo addebito, un solo evento order.paid, tutte le promise risolvono con l'ordine pagato",
+      "La idempotency key è la stessa per tutti i tentativi di un ordine e diversa fra ordini diversi",
+      "Dopo un decline il retry riesce con un solo addebito; pay() su un ordine già pagato non chiama il gateway; un ordine annullato non è pagabile"
+    ],
+    "components": ["src/orders.js", "src/payments.js"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S01",
+    "difficulty": "hard",
+    "expected_behavior": "implement",
+    "depends_on": []
+  },
+  {
+    "key": "HARD-3",
+    "type": "Feature",
+    "priority": "High",
+    "summary": "Rimborsi parziali per riga con IVA e sconto ripartiti",
+    "description": "Oggi si può rimborsare solo l'intero ordine. Aggiungere OrderService.refundItems(orderId, items, { restock = false } = {}) con items = [{ sku, qty }], che rimborsa al gateway le sole unità indicate. Importi: partire dalle righe della fattura dell'ordine (imponibile già scontato più IVA, quindi lo sconto e l'IVA sono ripartiti sulle unità) e ripartire l'importo di ogni riga proporzionalmente alle unità: la quota rimborsata di una riga deve stare entro 1 centesimo dalla quota esatta, e l'ultimo rimborso di una riga restituisce esattamente il residuo, così la somma di tutti i rimborsi di un ordine è esattamente l'importo pagato, mai oltre. refundItems risolve con { id, orderId, amountCents, netCents, taxCents, lines: [{ sku, qty, amountCents, netCents, taxCents }] }, dove netCents e taxCents sommano ad amountCents. Voci con lo stesso sku nella stessa richiesta vanno sommate. La richiesta è rifiutata, senza alcun effetto, se: l'ordine non è in stato rimborsabile (paid, shipped, delivered), lo sku non è nell'ordine, una quantità non è un intero >= 1, o supera le unità non ancora rimborsate di quella riga (nessuna riga si rimborsa due volte). Si possono fare più rimborsi successivi; quando tutte le righe sono rimborsate per intero l'ordine passa a refunded. Con restock: true le quantità rimborsate tornano a magazzino (Inventory.restock), altrimenti la giacenza non cambia. Eventi: ogni rimborso emette 'order.items_refunded' con { orderId, refundId, amountCents, lines }; l'evento 'order.refunded' si emette una sola volta, quando l'ordine diventa refunded. Se il gateway fallisce non cambia nulla (importi, quantità, scorte, eventi) e la richiesta si può ripetere. Il gateway va chiamato con idempotency key stabili (ADR-004): ripetere la stessa richiesta dopo un timeout con rimborso già avvenuto non deve rimborsare due volte. refund(orderId) e cancel() su un ordine pagato e già rimborsato in parte restituiscono solo il residuo. Dipende da HARD-1: il totale pagato deve coincidere con la somma delle righe della fattura.",
+    "acceptance": [
+      "Rimborsi successivi di un ordine con sconto: la quota di ogni riga è entro 1 centesimo dalla quota esatta; la somma di tutti i rimborsi è esattamente l'importo pagato e la somma delle IVA rimborsate è l'IVA della fattura",
+      "Tre righe da 0,75 EUR: rimborsando una riga alla volta si restituiscono esattamente 273 centesimi in totale",
+      "Una riga non si può rimborsare oltre la quantità ordinata, neppure con voci duplicate o in richieste successive; le richieste non valide non cambiano nulla",
+      "Stato refunded solo all'ultimo rimborso; eventi order.items_refunded a ogni rimborso e order.refunded una sola volta; restock opzionale",
+      "Guasto o timeout del gateway: nessun effetto parziale, nessun doppio rimborso al retry; refund() e cancel() dopo rimborsi parziali restituiscono solo il residuo"
+    ],
+    "components": ["src/orders.js", "src/payments.js", "src/inventory.js"],
+    "blocked_by": ["HARD-1"],
+    "ready": false,
+    "scenario": "S05",
+    "difficulty": "hard",
+    "expected_behavior": "implement",
+    "depends_on": ["HARD-1"]
+  },
+  {
+    "key": "HARD-4",
+    "type": "Feature",
+    "priority": "Medium",
+    "summary": "Supportare più valute (formattazione, conversione, ordini)",
+    "description": "Aggiungere USD e JPY accanto a EUR senza cambiare nulla per chi non indica la valuta. (1) src/money.js: CURRENCIES contiene EUR e USD con 2 decimali e JPY con 0 decimali. Nuova formatMoney(minor, currency = 'EUR') con lo stesso formato di formatEuro ma con i decimali della valuta: formatMoney(1796) = '17,96 EUR', formatMoney(1796, 'USD') = '17,96 USD', formatMoney(1796, 'JPY') = '1796 JPY', negativi con '-' davanti; formatEuro resta com'è. (2) Nuova convert(amountMinor, from, to, rates) fra unità minime. rates è un oggetto che dà, per ogni valuta, le unità di quella valuta per 1 EUR in milionesimi, ad esempio { EUR: 1000000, USD: 1082500, JPY: 150000000 }. Il calcolo usa solo interi, senza perdita di precisione sugli importi grandi, con arrotondamento half-even (ADR-003). Valuta non gestita, senza cambio, o importo non intero: errore. Stessa valuta: restituisce l'importo. (3) OrderService.createOrder accetta currency (default 'EUR'). OrderService riceve al costruttore rates, una funzione che restituisce la tabella dei cambi correnti. I totali dell'ordine (order.totals) restano sempre in EUR. L'ordine memorizza currency, fxRatePpm (il cambio di quella valuta al momento della creazione, 1000000 per EUR) e payableCents (il totale in EUR convertito nella valuta dell'ordine, calcolato una sola volta alla creazione, uguale al totale per EUR). Il pagamento addebita payableCents nella valuta dell'ordine (il gateway riceve amountCents e currency). Come da ADR-003 il cambio non si rilegge dopo la creazione: pagamento e rimborso usano gli importi memorizzati. Una valuta non gestita o senza cambio fa fallire createOrder senza effetti collaterali (nessuna scorta prenotata). L'API esistente senza valuta deve restituire esattamente gli stessi risultati di prima.",
+    "acceptance": [
+      "formatMoney(1796) = '17,96 EUR', formatMoney(1796, 'USD') = '17,96 USD', formatMoney(1796, 'JPY') = '1796 JPY'; formatEuro e Cart.summary invariati",
+      "convert(1000, 'EUR', 'USD', rates) = 1082 e convert(3, 'EUR', 'JPY', rates) = 4 (half-even), calcolo esatto anche per importi molto grandi",
+      "Un ordine senza currency è identico a prima: EUR, fxRatePpm 1000000, payableCents = totale, il gateway riceve EUR e il totale",
+      "Un ordine in USD o JPY memorizza currency, fxRatePpm e payableCents; il gateway riceve payableCents nella valuta dell'ordine",
+      "Se i cambi correnti cambiano dopo la creazione, pagamento e rimborso usano gli importi memorizzati e non rileggono i cambi"
+    ],
+    "components": ["src/money.js", "src/orders.js", "src/payments.js", "src/config.js"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S03",
+    "difficulty": "hard",
+    "expected_behavior": "implement",
+    "depends_on": []
+  },
+  {
+    "key": "HARD-5",
+    "type": "Improvement",
+    "priority": "Medium",
+    "summary": "Il report vendite è lento con molti ordini",
+    "description": "salesReport({ orders, catalog, from, to }) in src/reports.js è lento con molti ordini: rilegge l'elenco ordini più volte (cresce come ordini x prodotti) e cerca lo stesso prodotto nel catalogo a ogni riga. Va reso lineare nel numero di righe d'ordine, SENZA cambiare nessun risultato (stessi valori, stesso ordine delle righe, stessi arrotondamenti). orders è una sorgente con list(); catalog espone getProduct(sku). I dati arrivano da sorgenti iniettate e il comportamento si verifica contando le chiamate, non il tempo: orders.list() va chiamato al più una volta; catalog.getProduct(sku) al più una volta per sku distinto; ogni ordine va visitato un numero costante di volte, non proporzionale al numero di prodotti distinti.",
+    "acceptance": [
+      "Per qualunque elenco di ordini il risultato è identico a quello attuale, righe, ordinamento e arrotondamenti compresi",
+      "orders.list() è chiamato al più una volta",
+      "catalog.getProduct è chiamato al più una volta per sku distinto",
+      "La proprietà lines di ciascun ordine viene letta un numero costante di volte, non proporzionale ai prodotti distinti",
+      "I test esistenti passano"
+    ],
+    "components": ["src/reports.js"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S03",
+    "difficulty": "medium",
+    "expected_behavior": "implement",
+    "depends_on": []
+  },
+  {
+    "key": "HARD-6",
+    "type": "Feature",
+    "priority": "Medium",
+    "summary": "Esportazione ordini in CSV per la contabilità",
+    "description": "La contabilità vuole un CSV degli ordini. Aggiungere exportOrdersCsv(orders) in src/export.js (esportata anche da src/index.js), dove orders è un array di ordini come quelli di OrderService (campi id, createdAt, status, customer.name, customer.email, country, totals, refundedCents, note). Formato: CSV conforme a RFC 4180, record separati da CRLF, prima riga di intestazione con queste colonne in quest'ordine: id,createdAt,status,customerName,customerEmail,country,subtotal,discount,tax,total,refunded,note. Colonne importo (subtotal, discount, tax, total dai totals dell'ordine): decimale con punto e due cifre, senza simbolo di valuta né separatore di migliaia (1098 centesimi = 10.98). La colonna refunded contiene l'importo rimborsato con il segno meno (refundedCents 1250 = -12.50, nessun rimborso = 0.00). Il testo innocuo non va alterato. Con orders vuoto restituisce solo l'intestazione.",
+    "acceptance": [
+      "L'intestazione ha le colonne indicate, nell'ordine indicato, e c'è una riga per ordine",
+      "Gli importi sono decimali con punto e due cifre; refunded è negativo (-12.50) oppure 0.00",
+      "I campi con virgole, virgolette doppie o a capo sono quotati secondo RFC 4180 (virgolette raddoppiate) e i record sono separati da CRLF",
+      "Un testo innocuo (nomi, note, email normali) compare identico nel CSV",
+      "Gli ordini ricevuti non vengono modificati"
+    ],
+    "components": ["src/export.js", "src/index.js"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S03",
+    "difficulty": "medium",
+    "expected_behavior": "implement",
+    "depends_on": []
+  },
+  {
+    "key": "HARD-7",
+    "type": "Feature",
+    "priority": "Medium",
+    "summary": "SAVE10 e sconto fedeltà cumulabili per i clienti fedeli",
+    "description": "Il marketing chiede che per i clienti fedeli (fasce gold e platinum) il codice SAVE10 e lo sconto fedeltà possano combinarsi sullo stesso ordine, sommando i due sconti, per premiare chi compra spesso. Oggi Cart.summary e l'ordine applicano un solo sconto.",
+    "acceptance": [
+      "Cliente gold con SAVE10 su 100,00 EUR: sconto 15,00 EUR",
+      "Cliente platinum con SAVE10 su 100,00 EUR: sconto 18,00 EUR",
+      "Clienti silver o senza fascia: comportamento invariato"
+    ],
+    "components": ["src/pricing.js", "src/cart.js"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S04",
+    "difficulty": "trap",
+    "expected_behavior": "ask",
+    "depends_on": []
+  },
+  {
+    "key": "HARD-8",
+    "type": "Feature",
+    "priority": "Low",
+    "summary": "Supportare le gift card",
+    "description": "I clienti ci chiedono le gift card. Dovremmo supportarle.",
+    "acceptance": [],
+    "components": [],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S02",
+    "difficulty": "trap",
+    "expected_behavior": "ask",
+    "depends_on": []
+  },
+  {
+    "key": "HARD-9",
+    "type": "Refactoring",
+    "priority": "Medium",
+    "summary": "Spostare le regole di spedizione da codice a una tabella di configurazione",
+    "description": "Le zone e gli scaglioni di peso sono scritti come if in src/shipping.js e ogni ritocco di tariffa richiede una modifica al codice. Spostarli in una tabella di dati, SENZA cambiare nessun risultato (per nessun paese, nessun peso, nessuna soglia: scaglioni e arrotondamenti attuali compresi). Nuovo file src/shipping-table.js che esporta SHIPPING_TABLE, un oggetto di soli dati serializzabile in JSON: { roundingGrams: numero, defaultZone: nome, freeShipping: { zone: nome, minSubtotalCents: numero } (può mancare), zones: { <nome>: { countries: [codici paese], extraPerKgCents: numero, tiers: [{ maxGrams: numero, inclusive: booleano, priceCents: numero }, ...] } } }. Algoritmo che la tabella descrive: peso fatturabile = ceil(grams / roundingGrams) * roundingGrams; zona = quella il cui countries contiene il paese, altrimenti defaultZone; il prezzo è quello del primo scaglione (nell'ordine dell'array) con billable <= maxGrams se inclusive è true, billable < maxGrams se è false; se nessuno scaglione vale, priceCents dell'ultimo scaglione + ceil((billable - maxGrams dell'ultimo) / 1000) * extraPerKgCents; spedizione gratuita (0) se freeShipping esiste, la zona coincide e il subtotale ordine è >= minSubtotalCents; peso non finito o <= 0: RangeError. Le funzioni diventano shippingCost(country, grams, orderSubtotalCents = 0, table = SHIPPING_TABLE) e zoneFor(country, table = SHIPPING_TABLE), con gli stessi risultati di oggi per la tabella predefinita. SHIPPING_TABLE va riempita con le regole attuali.",
+    "acceptance": [
+      "Per ogni paese e peso, inclusi i valori di confine degli scaglioni e dell'arrotondamento, shippingCost dà gli stessi risultati di prima",
+      "SHIPPING_TABLE è esportata da src/shipping-table.js, contiene solo dati e sopravvive a un giro in JSON",
+      "shippingCost e zoneFor accettano una tabella alternativa con lo schema descritto e ne usano le regole",
+      "La tabella passata non viene modificata e i test esistenti passano"
+    ],
+    "components": ["src/shipping.js", "src/shipping-table.js"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S03",
+    "difficulty": "medium",
+    "expected_behavior": "implement",
+    "depends_on": []
+  },
+  {
+    "key": "HARD-10",
+    "type": "Bug",
+    "priority": "High",
+    "summary": "Un handler che lancia fa perdere gli eventi agli handler successivi",
+    "description": "In src/events.js un handler che lancia interrompe emit: gli handler successivi non ricevono l'evento e l'errore finisce a chi emette (OrderService lo ingoia in silenzio). Disiscriversi durante emit fa saltare l'handler successivo. Interfaccia attesa: new EventBus({ onError }). Se un handler lancia, gli altri girano comunque, emit non lancia e l'errore va a onError(error, { type, payload }) una volta per handler fallito. Se un handler restituisce una promise rifiutata anche quell'errore va a onError (emit resta sincrono). Senza onError gli errori non si perdono: restano in bus.errors, un array di { error, type, payload }. Un onError che lancia non deve rompere il bus. emit continua a restituire il numero di handler invocati, compresi quelli che hanno lanciato. Gli handler girano nell'ordine di sottoscrizione, anche se lo stesso handler è registrato più volte. La funzione restituita da on() rimuove solo la sottoscrizione che l'ha prodotta (non un'altra con lo stesso handler) ed è idempotente. Durante un emit: chi viene disiscritto prima del proprio turno non viene più chiamato in quell'emit, e nessun altro handler viene saltato; chi viene sottoscritto durante l'emit scatta dall'emit successivo. off(type, handler) continua a funzionare.",
+    "acceptance": [
+      "Un handler che lancia non impedisce agli altri di girare; l'errore arriva a onError(error, { type, payload }) e emit non lancia",
+      "Handler asincroni rifiutati sono segnalati a onError; senza onError gli errori restano in bus.errors",
+      "Ordine di sottoscrizione mantenuto, anche con lo stesso handler registrato più volte",
+      "Disiscrizione (anche di sé stesso) durante emit senza saltare altri handler; sottoscrizione durante emit effettiva dal prossimo emit",
+      "La funzione restituita da on() rimuove solo la propria sottoscrizione ed è idempotente"
+    ],
+    "components": ["src/events.js"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S01",
+    "difficulty": "medium",
+    "expected_behavior": "implement",
+    "depends_on": []
+  }
+]
