@@ -60,3 +60,10 @@
 - Spesa registro totale: 1,16 USD su 15. Report: `reports/s02-s07-baseline.md`.
 - Docker Desktop risultava ancora acceso dopo la chiusura della finestra (processo e distro WSL attivi); non l'ho spento io.
 - Jira: l'accesso al progetto `KAN` richiede il connettore Atlassian, che l'utente deve autenticare (`/mcp`). Non verificato.
+
+## 2026-10-21 — Jira dell'utente (progetto KAN)
+
+- Dagli screenshot: progetto Jira Cloud "test jira", chiave `KAN`, 3 ticket di esempio (KAN-1, KAN-2, sottoattività KAN-3), workflow To Do / In Progress / In Review / Done, interfaccia in italiano, campo priorità presente ma vuoto, nessun repository collegato. Non ho potuto leggere il progetto con il connettore (strumenti non esposti alla sessione).
+- Il controller era troppo ottimista: ID di transizione fissi, commenti in testo semplice, Done alla PR. Corretto: transizioni scoperte a runtime, stati anche localizzati, ADF, "In Review", dipendenze soddisfatte solo da "Done", paginazione, `projectKey`.
+- Il mock ora rifiuta ciò che rifiuterebbe Jira (commenti non ADF, ID di transizione sbagliati, richieste non autenticate).
+- Nuovo `scripts/jira-seed.mjs` (118 righe): dry-run di default, idempotente, verifica la direzione del collegamento "blocca" (dubbio mio sul comportamento reale). 21 test PASS. **Mai eseguito contro un Jira vero.**

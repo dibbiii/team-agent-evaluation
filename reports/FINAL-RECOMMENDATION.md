@@ -10,7 +10,7 @@ Il giudizio «vince la PoC» e il giudizio «adatto alla produzione» sono tenut
 - **Risultato più pesante: in Paperclip il budget non è un controllo di sicurezza.** L'issue #16935 è stata **riprodotta** da noi: un agente senza permessi alza il proprio budget (5.000 → 99.999.999 centesimi) e cambia la propria config, e anche budget e config di altri agenti, sul commit studiato e sulla release npm `2026.1012.0`. Il budget e i permessi vanno quindi tenuti **fuori dalla portata dell'agente**.
 - **Paseo Hub è il candidato con la meccanica di dispatch meglio provata** (RBAC verificato, idempotenza con 6 richieste concorrenti = 1 run, coda con daemon offline, SIGKILL con run in volo senza duplicati). Ma v0.10.0 ha un bug provato (`manual-runs` risponde 500 dopo il riavvio) e SIGTERM non termina con un daemon connesso (#147 riprodotta). Non è un orchestratore del ciclo di sviluppo.
 - **La baseline regge, con un limite.** Claude Code da solo: 9 run su 9 PASS, ~0,05 USD e ~37 s per issue, ma su una fixture troppo facile. Con un'issue ambigua (S02) implementa con assunzioni dichiarate invece di chiedere (3/3): per R02 serve una readiness imposta dal controller. Il benchmark attuale **non può dimostrare alcun vantaggio di un orchestratore**.
-- **La parte che manca a tutti è piccola e sotto il nostro controllo:** coda con lease, idempotenza, riconciliazione, rollback. Il controller di riferimento (97 righe, più 100 del finto Jira REST) ha 7 test sul mock REST di Jira più 7 sul mock in-process, tutti PASS.
+- **La parte che manca a tutti è piccola e sotto il nostro controllo:** coda con lease, idempotenza, riconciliazione, rollback. Il controller di riferimento (131 righe, più 150 del finto Jira REST e 118 dello script che crea le issue) ha 7 test sul mock REST di Jira più 7 sul mock in-process, tutti PASS.
 - **Indicazione:** partire dallo stack minimale (Opzione A), con il controller e le policy fuori dall'agente. Warren come Execution Plane (Opzione B) solo se la baseline non regge run isolate e recovery su una fixture più dura. Paperclip + Warren (Opzione C) rimandato.
 
 ## 2. Requisiti e priorità
@@ -79,7 +79,7 @@ Confini di fiducia in `docs/security-threat-model.md`.
 | Componente | Esistente | Da sviluppare | Sforzo | Rischio |
 |---|---|---|---|---|
 | Coding agent | Claude Code (baseline provata) | permessi e sandbox | basso | medio |
-| Coda e lease | prova su mock REST (controller di 97 righe, 14 test) | persistenza Postgres, webhook, Jira reale, auth | medio | basso |
+| Coda e lease | prova su mock REST (controller di 131 righe, 21 test) | persistenza Postgres, webhook, Jira reale, auth | medio | basso |
 | Policy, budget, retry | — | applicati dal controller, non dall'agente | medio | medio |
 | Sandbox | schema validato 13/13 | integrazione con il runner, rete con allowlist | medio | medio |
 | Esecuzione isolata alternativa | Warren (B) | isolamento senza socket, RBAC davanti | medio-alto | alto |
@@ -111,7 +111,7 @@ Decisioni aperte: vedi `docs/decisions.md`.
 ```bash
 # Dalla radice della repository (Node >= 22; per la parte Docker serve Docker Desktop attivo)
 (cd fixtures/seed-app && npm test)                                   # 5 test visibili
-node --test "fixtures/mock-integrations/*.test.mjs"                  # 14 test (mock in-process + controller via REST finto)
+node --test "fixtures/mock-integrations/*.test.mjs"                  # 21 test (mock in-process + controller via REST finto + script di creazione delle issue)
 node scripts/evaluate.mjs fixtures/seed-app ISSUE-1 baseline S01 MOCK   # atteso: FAIL (bug presente)
 scripts/s07-sandbox-check.sh                                         # 13 controlli sul sandbox di laboratorio (usa postgres:18-alpine già presente)
 

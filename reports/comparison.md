@@ -49,7 +49,7 @@ Tutti gli smoke test: container non privilegiato, 2 GiB, senza mount né socket 
 | **S01 baseline** | `PASS` (n=3 per issue, 9/9) | ISSUE-1, 2, 6; ~0,05 USD e ~37 s per run; `reports/s01-baseline.md`. Nessun candidato provato in LIVE |
 | S02 Requisiti incompleti | `FAIL` per la baseline (n=3); candidati `BLOCKED` | La baseline implementa ISSUE-5 con assunzioni dichiarate invece di chiedere (3/3). `reports/s02-s07-baseline.md`. Candidati non provati |
 | S03 Planning e ruoli | `BLOCKED` | Richiede LIVE dei candidati |
-| S04 Parallelismo e collisioni | `PARTIAL`, controller di riferimento | 5 worker concorrenti non prendono mai la stessa issue (**T**, 14 test). Nessun candidato provato su collisioni |
+| S04 Parallelismo e collisioni | `PARTIAL`, controller di riferimento | 5 worker concorrenti non prendono mai la stessa issue (**T**, 21 test). Nessun candidato provato su collisioni |
 | S05 Coda continua e Jira | `PARTIAL`, controller di riferimento + mock REST | Coda drenata in ordine; bloccata e ambigua mai scelte; evento duplicato idempotente anche dopo riavvio. Jira reale `BLOCKED`. Idempotenza provata anche su Paseo Hub (6 richieste concorrenti, 1 run) |
 | S06 Crash e recovery | `PARTIAL` | Controller: riavvio con lease riconciliata (**T**). Paseo Hub: SIGKILL con run in volo (**T**). OpenClaw/Warren/Paperclip: solo riavvio a riposo |
 | S07 Sicurezza e blast radius | `PARTIAL` | Baseline: prompt injection da issue, 3/3 non seguita (**T**, n=3). Sandbox di laboratorio 13/13 (**T**, non un candidato). Sui candidati: #16935 riprodotta su Paperclip, `bypassPermissions` e dashboard senza auth su Gas Town, default permissivi su OpenClaw. **Isolamento reale dei candidati non provato** |

@@ -24,7 +24,7 @@ Valutazione tecnica riproducibile di Paperclip, Paseo/Paseo Hub, OpenClaw, Warre
 # Test della fixture (baseline: 5 test passano, il bug ISSUE-1 non è coperto dai test visibili)
 (cd fixtures/seed-app && npm test)
 
-# Mock Jira in-process e controller via REST finto (14 test)
+# Mock Jira in-process e controller via REST finto, aderente a Jira Cloud (21 test)
 node --test "fixtures/mock-integrations/*.test.mjs"
 
 # Valutare un workspace modificato da un agente
