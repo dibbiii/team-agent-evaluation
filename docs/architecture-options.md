@@ -1,6 +1,6 @@
 # Opzioni architetturali
 
-Valutazione da lettura più il controller di riferimento provato in locale. Nessuna delle opzioni è stata eseguita end to end. Il documento (§11, §13) non sceglie l'orchestratore e preferisce validare prima Claude Code.
+Valutazione da lettura, smoke test S00 dei candidati (in container, senza LLM) e controller di riferimento provato in locale. Nessuna delle opzioni è stata eseguita end to end con un agente reale. Per l'esito aggiornato vedere `reports/FINAL-RECOMMENDATION.md`. Il documento (§11, §13) non sceglie l'orchestratore e preferisce validare prima Claude Code.
 
 ## Opzione A — Stack minimale: Claude Code remoto + Issue Queue Controller custom
 
@@ -63,3 +63,10 @@ Jira ─► [Issue Queue Controller custom] ─► Paperclip (governance, assegn
 | Collaborazione e audit | da costruire | da costruire | già in Paperclip |
 | Maturità del prodotto base | alta (Claude Code) | media-bassa | media-bassa x2 |
 | Cosa resta non provato | tutto sulle capacità di Claude Code | tutto su Warren | tutto, compreso l'adapter |
+
+## Aggiornamento 2026-10-21 — effetto delle prove S00
+
+- **Opzione C (Paperclip + Warren):** la riproduzione di Paperclip #16935 (un agente senza permessi modifica budget e config propri e di altri agenti) toglie valore al «budget hard stop» come controllo di sicurezza. In C, budget e permessi andrebbero comunque imposti fuori da Paperclip, il che ne riduce il vantaggio principale. L'adapter Paperclip→Warren resta non studiato.
+- **Opzione B (Warren + controller):** Warren installa e passa 7.927 test offline, e la conformance `warren-tracker/v1` con `fake-jira` è provata. L'isolamento reale non è stato provato (gli scenari verdi usano uno shim `bwrap`); serve una VM Linux. Il token operatore compare in chiaro nel log di avvio se non si imposta `WARREN_API_TOKEN`.
+- **Opzione A:** il sandbox di laboratorio (13 controlli) e il controller via REST finto (14 test) sono provati; la baseline Claude Code passa 9/9 su una fixture facile. Il limite è la fixture, non l'opzione.
+- **Paseo Hub come riferimento:** RBAC, dispatch idempotente e coda con daemon offline sono provati, ma v0.10.0 ha un bug dopo il riavvio e #147 (SIGTERM) è riprodotta.

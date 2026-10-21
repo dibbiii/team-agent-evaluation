@@ -39,3 +39,16 @@
 
 - Scritti `reports/comparison.md`, `docs/architecture-options.md`, `docs/decisions.md`, `docs/security-threat-model.md`, `reports/FINAL-RECOMMENDATION.md`, `reports/HANDOFF.md`.
 - Raccomandazione **provvisoria**, confidenza bassa. La rubrica 0–5 non è compilata per mancanza di dati sperimentali.
+
+## Aggiornamento 2026-10-20/21 — Docker attivo, LIVE autorizzato, S00 sui candidati
+
+- **Docker:** avviato dall'utente. Sul daemon ci sono container e volumi dell'utente: operato solo su risorse `tae-`/label `tae=1`; nessun socket, mount o porta; dopo ogni prova 0 container `tae-`, immagini 17=17, `segnalibro-db` sano.
+- **S07 sandbox di laboratorio:** `scripts/s07-sandbox-check.sh`, 13/13 PASS (dopo aver corretto due controlli scritti male: S07.11 e S07.12).
+- **Budget:** 15 USD, 1,50 USD per run, solo baseline (`reports/budget.md`). `claude -p` autenticato con account claude.ai: costi = stima a listino.
+- **Baseline S01:** prime 9 run **contaminate** dal `CLAUDE.md` globale (gli agenti si fermavano a metà: ISSUE-6 «falliva» 3/3). Diagnosi con una sonda a due condizioni; invalidate e conservate; wrapper corretto (`CLAUDE_CODE_DISABLE_CLAUDE_MDS=1`); rifatte: **9/9 PASS**, ~0,05 USD e ~37 s per run (`reports/s01-baseline.md`).
+- **Finto Jira REST + controller di coda:** 14 test PASS (mock in-process + via HTTP): ordine, bloccata/ambigua mai scelte, 5 worker concorrenti senza doppioni, riavvio con lease riconciliata, evento duplicato, rollback se Jira rifiuta la transizione.
+- **Issue dei repository (con `gh`):** aggiunte alle schede come `UNVERIFIED`; poi **riprodotte** #16935 (Paperclip) e #147 (Hub) e una variante di #4819 (Gas Town).
+- **S00 dei cinque candidati**, tutti `PARTIAL`: `reports/s00-{warren,paperclip,gastown,paseo-hub,openclaw}.md`, JSON in `results/s00-*.json`. Eseguiti da cinque agenti in sequenza (uno alla volta per la RAM), controllati da me su cleanup e, a campione, sulle prove (#16935).
+- **Sonde S02/S07 sulla baseline:** fermate dal sistema per memoria quasi esaurita, **0 run completate, 0 USD**. Non rilanciate (indicazione del sistema). Rimossa una cartella temporanea residua, per nome esatto.
+- **Sintesi:** riscritti `reports/comparison.md` e `reports/FINAL-RECOMMENDATION.md`; aggiornati threat model (T11–T15) e decisioni (D09–D16).
+- **Errori miei corretti lungo il percorso:** etichetta di scenario `S01x` non valida; due celle sbagliate nel confronto; «~110 righe» del controller (sono 97); comando di pulizia che avrebbe cancellato risultati validi.
