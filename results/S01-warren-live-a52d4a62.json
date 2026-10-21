@@ -1,0 +1,26 @@
+{
+  "run_id": "a52d4a62-51e4-4483-969e-3715a21e1520",
+  "candidate": "warren",
+  "candidate_version": "warren 0.19.3 @ ce088e8 (runtime local, bwrap reale, forge fake) + claude-code 2.1.306",
+  "scenario_id": "S01",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": null,
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T11:29:22.793Z",
+  "finished_at_utc": "2026-10-21T11:29:39.862Z",
+  "duration_seconds": 17.069,
+  "input_tokens": null,
+  "output_tokens": null,
+  "cache_tokens": null,
+  "estimated_cost_usd": 0.1084761,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "Run LIVE su ISSUE-1: run Warren run_1tmq274e8sbk, stato succeeded, costUsd 0.1084761 (costBasis=api: con l'abbonamento è una stima a listino), modello dall'evento init: claude-sonnet-5-5. Token non riportati da Warren (null). Serie di run LIVE (run 2 di 4)."
+}

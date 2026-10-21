@@ -1,5 +1,5 @@
 {
-  "spent_usd": 1.36544,
+  "spent_usd": 1.721194,
   "runs": [
     {
       "issue": "ISSUE-1",
@@ -272,6 +272,42 @@
       "status": "PASS S01-warren-live-2291cbcc.json",
       "result_file": null,
       "at": "2026-10-21T11:26:41.171Z"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01-warren-live",
+      "cost_usd": 0.08393019999999998,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-warren-live-feb15c40.json",
+      "at": "2026-10-21T11:29:15.914Z"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01-warren-live",
+      "cost_usd": 0.1084761,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-warren-live-a52d4a62.json",
+      "at": "2026-10-21T11:29:50.189Z"
+    },
+    {
+      "issue": "ISSUE-6",
+      "scenario": "S01-warren-live",
+      "cost_usd": 0.07912320000000002,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-warren-live-0bca536c.json",
+      "at": "2026-10-21T11:30:17.499Z"
+    },
+    {
+      "issue": "ISSUE-2",
+      "scenario": "S01-warren-live",
+      "cost_usd": 0.0842253,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-warren-live-d5b289ef.json",
+      "at": "2026-10-21T11:30:46.174Z"
     }
   ]
 }
