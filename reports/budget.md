@@ -43,3 +43,23 @@ Il tetto per run è molto sopra la stima attesa. Una chiamata minima è costata 
 ## Limiti di validità
 
 n=3 per issue: nessuna generalizzazione statistica. Un solo modello, quindi nessun confronto fra modelli. La baseline gira sull'host con permessi ristretti e non in un container: è un compromesso per non dover iniettare credenziali in una sandbox.
+
+---
+
+## Aggiunta 2026-10-21 — run LIVE dei candidati (autorizzata dall'utente: «decidi tu»)
+
+L'utente ha delegato la scelta del budget (che «viene preso dall'abbonamento») e dei candidati.
+
+| Voce | Decisione |
+|---|---|
+| Autenticazione | Abbonamento claude.ai dell'utente, con login di `claude` fatto **dentro** la distribuzione WSL dedicata `Ubuntu-26.04`. Nessuna chiave API. Il login lo completa l'utente nel browser |
+| Candidati | **Warren** (priorità: decide fra le opzioni A e B), poi **Paperclip** con `claude_local` solo se Warren è completato (anche per rifare #16935 con un agente reale). **Nessun LIVE** per Gas Town (`direct` di default, `bypassPermissions`), Paseo Hub (dispatcher), OpenClaw (fuori dal percorso critico) |
+| Tetto (stima a listino, registro condiviso `results/budget-ledger.json`, 15 USD totali) | Warren 5 USD, Paperclip 3 USD |
+| Per run | 1,00 USD; Warren max 6 run, Paperclip max 3 |
+| Dati | Solo la fixture del benchmark: nessun dato reale, nessun repository privato, nessuna credenziale oltre al login di `claude` |
+
+Regole di arresto: stop dopo 2 run consecutive in errore di esecuzione; stop se `scripts/wsl-isolate.sh verify` non passa; stop se una run tenta di leggere o scrivere fuori dal worktree o di raggiungere il disco Windows; stop se il login scade.
+
+Rischio accettato dall'utente: il token di accesso dell'abbonamento resta salvato nella distribuzione dedicata e può essere letto dai processi che girano lì (codice di terzi, agenti con i permessi disattivati). Non è denaro, ma un accesso al suo account. Mitigazioni: distribuzione senza disco Windows né interop, utente non root, `claude logout` e `wsl --unregister Ubuntu-26.04` a fine prova, e nessun altro uso di quella distribuzione.
+
+Costi: con l'abbonamento `total_cost_usd` è una stima a listino. Warren può avere un proprio tetto per run (da configurare); in ogni caso il registro del benchmark è la fonte per il totale.
