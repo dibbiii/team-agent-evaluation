@@ -84,3 +84,11 @@ I voti 0–5 restano **non valutabili** per la maggior parte dei criteri: gli es
 | Budget/permessi non aggirabili dall'agente | **FALLISCE: #16935 riprodotta (T)** | n/d | n/d | n/d | n/d |
 
 «Gate bloccante» qui significa: condizione da risolvere o mitigare con un controllo esterno prima dell'adozione, non un exploit contro l'azienda. Tutte le prove sono in ambienti isolati, senza dati reali.
+
+## Aggiornamento 2026-10-21 — Warren in una distribuzione WSL2 dedicata (preparazione LIVE)
+
+Dettaglio in `reports/live-warren-prep.md`. Questi risultati **correggono in parte le S00 di Warren**, ottenute in un container Docker non privilegiato:
+
+- `bwrap` funziona come utente normale in WSL2 (userns senza restrizioni), senza socket Docker né `SYS_ADMIN`: l'isolamento locale che Warren richiede **è ottenibile su un host Linux/WSL2** (**T**). Il «gate bloccante» sul socket Docker/`SYS_ADMIN` riguardava il runtime `docker` e il container; con il runtime `local` su Linux non si è presentato.
+- `GET /readyz` = 200 con `bwrap: ok` (nelle S00: 503). `warren doctor` verde. Suite: 7.928 pass, 32 skip, 1 fail (test del lint UI, non correlato; causa non indagata).
+- Resta **non provato** il comportamento della sandbox di Warren con un agente reale (run LIVE), il cleanup sotto carico e la rete isolata per run.
