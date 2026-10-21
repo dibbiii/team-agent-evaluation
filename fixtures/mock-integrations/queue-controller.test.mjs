@@ -172,3 +172,29 @@ test('seed --apply è idempotente: una seconda esecuzione non crea duplicati', a
   assert.equal(links, 2, 'un solo collegamento (visto da entrambi i lati)');
   await jira.close();
 });
+
+// ---- scripts/jira-check.mjs (sola lettura) ----
+import { check } from '../../scripts/jira-check.mjs';
+
+test('check: elenca utente, progetto, issue e transizioni senza scrivere nulla', async () => {
+  const auth = 'Basic ' + Buffer.from('a@b.c:tok').toString('base64');
+  const jira = createMockJira(catalog, { auth });
+  const baseUrl = await jira.listen();
+  const lines = [];
+  const r = await check({ baseUrl, email: 'a@b.c', token: 'tok', project: 'KAN', log: (l) => lines.push(l) });
+  assert.equal(r.project, 'KAN');
+  assert.equal(r.issues, 6);
+  assert.ok(r.transitions.some((t) => t.startsWith('In Review')));
+  assert.equal(jira.log.length, 0, 'nessuna scrittura');
+  assert.ok(!lines.join('\n').includes('tok'), 'il token non compare nell\'output');
+  await jira.close();
+});
+
+test('check: token sbagliato -> 401 con messaggio chiaro; progetto sbagliato -> 404', async () => {
+  const auth = 'Basic ' + Buffer.from('a@b.c:tok').toString('base64');
+  const jira = createMockJira(catalog, { auth });
+  const baseUrl = await jira.listen();
+  await assert.rejects(() => check({ baseUrl, email: 'a@b.c', token: 'SBAGLIATO', log: () => {} }), /401.*non corrispondono/);
+  await assert.rejects(() => check({ baseUrl, email: 'a@b.c', token: 'tok', project: 'ZZZ', log: () => {} }), /404/);
+  await jira.close();
+});

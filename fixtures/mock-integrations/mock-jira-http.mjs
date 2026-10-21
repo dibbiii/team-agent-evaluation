@@ -56,6 +56,10 @@ export function createMockJira(catalog = [], { projectKey = 'KAN', auth = null }
     try {
       if (auth && req.headers.authorization !== auth) return json(res, 401, { errorMessages: ['unauthorized'] });
 
+      if (req.method === 'GET' && path === '/rest/api/3/myself') return json(res, 200, { displayName: 'Utente Mock', accountId: 'mock' });
+      const pm = path.match(/^\/rest\/api\/3\/project\/([A-Z]+)$/);
+      if (req.method === 'GET' && pm) return pm[1] === projectKey ? json(res, 200, { key: projectKey, name: 'mock project', style: 'next-gen' }) : json(res, 404, { errorMessages: ['No project could be found'] });
+
       if (req.method === 'POST' && path === '/rest/api/3/search/jql') {
         const { jql = '' } = await readBody(req);
         const m = jql.match(/status\s*(?:=\s*"([^"]+)"|in\s*\(([^)]*)\))/i);
