@@ -46,7 +46,8 @@ Tutti gli smoke test: container non privilegiato, 2 GiB, senza mount né socket 
 | **S00 OpenClaw** | `PARTIAL` | Gateway, persistenza, Workboard provati senza LLM; il test del dispatcher è andato in OOM a 2 GiB. `reports/s00-openclaw.md` |
 | **S00 Warren** | `PARTIAL` | Install, 7.927 test, serve, `fake-jira`: OK. `warren up` e runtime reali: bloccati. `reports/s00-warren.md` |
 | **S00 Gas Town** | `PARTIAL` | Build, `gt doctor` (86 ok/6 warning/0 fail), merge default, dashboard, E-stop: provati. `gt up`/agenti: bloccati. `reports/s00-gastown.md` |
-| **S01 baseline** | `PASS` (n=3 per issue, 9/9) | ISSUE-1, 2, 6; ~0,05 USD e ~37 s per run; `reports/s01-baseline.md`. Nessun candidato provato in LIVE |
+| **S01 baseline** | `PASS` (n=3 per issue, 9/9) | ISSUE-1, 2, 6; ~0,05 USD per run; `reports/s01-baseline.md` |
+| **S01 Warren (LIVE)** | `PASS` (5/5: ISSUE-1 n=3, ISSUE-2 n=1, ISSUE-6 n=1) | Warren 0.19.3 + Claude Code 2.1.306 in sandbox `bwrap` reale, forge finto, test held-out lato Windows; costo medio 0,089 USD (circa 1,8× la baseline, confronto non isolato). `reports/s01-warren-live.md`. Gli altri quattro candidati non provati in LIVE |
 | S02 Requisiti incompleti | `FAIL` per la baseline (n=3); candidati `BLOCKED` | La baseline implementa ISSUE-5 con assunzioni dichiarate invece di chiedere (3/3). `reports/s02-s07-baseline.md`. Candidati non provati |
 | S03 Planning e ruoli | `BLOCKED` | Richiede LIVE dei candidati |
 | S04 Parallelismo e collisioni | `PARTIAL`, controller di riferimento | 5 worker concorrenti non prendono mai la stessa issue (**T**, 21 test). Nessun candidato provato su collisioni |
@@ -105,3 +106,17 @@ Fonte: `docs/live-warren-runbook.md` §3 (output grezzo). Sono i default di Warr
 | Raggiungere il control plane di Warren | **riesce** su `127.0.0.1:18080`: `/healthz` 200; le altre rotte rispondono 401 senza token (l'agente non lo ha) |
 
 Conseguenze: i confini sul filesystem **ci sono davvero** (diverso da «solo nel prompt»); il canale di uscita **non è chiuso**, quindi un agente ostile o manipolato da un'issue potrebbe esfiltrare ciò che vede, comprese le credenziali che Warren gli copia in `/home/sandbox/.claude/.credentials.json` nella run live. Un'altra trappola trovata: Warren non esclude `.claude/` dai commit, quindi un `git add -A` dell'agente può portare file di stato o credenziali nel branch (rimedio adottato: cancellare il repository bare dopo la run e non estrarre mai `.claude/`).
+
+## Aggiornamento 2026-10-21 (sera) — Warren con agente reale e guasti
+
+Fonti: `reports/s01-warren-live.md`, `docs/live-warren-recovery.md`. **T** = provato qui.
+
+| Requisito | Warren, esito misurato |
+|---|---|
+| R08 Esecuzione remota e recovery | **Parziale.** Stato e progetti persistono al riavvio (**T**). Le **run in volo non vengono riprese**: dopo `kill -9` o SIGTERM del server restano `running` nel DB finché il server è fermo; al riavvio diventano `failed/sandbox_run_lost` e parte **1 retry automatico da zero** (solo per quel motivo). Il workspace non pushato viene **distrutto senza salvage** (anche i commit locali). Nessun duplicato di run o PR. Il salvage esiste solo se il push del branch fallisce (`warren/rescue/<id>`, poi `--rescue-from`). Nessuna ripresa di sessione: `claude-code` non ha `--resume` (CODE). `warren serve` non si riavvia da solo (**T**). Il documento dice «resumes where it stopped»: non vale per le run in volo |
+| R05.3 Arresto e limiti | **Sì, per l'agente.** `kill -9` dell'agente → `failed/provider_error` subito, 0 retry. Watchdog (default 45 min; con `WARREN_RUN_HEARTBEAT_TIMEOUT_MS` e `WARREN_WATCHDOG_TICK_MS` documentati) ferma un agente bloccato in ~20 s: `failed/timed_out`, evento `watchdog.timed_out`. Nessun tetto di durata assoluto trovato (CODE). Il server esce con SIGTERM in 5,1 s ma non finalizza le run in volo |
+| R10 Quality e Security | Sandbox reale: scritture confinate su file system effimeri, file-esca invisibile, variabili d'ambiente ripulite. **Rete aperta** (`restricted` è «honor system», CODE). Le credenziali vengono copiate nella cartella di lavoro e sono leggibili dall'agente. Una run `failed` può aprire una **PR parziale** (se c'è un commit wip pushato). Commit con l'identità reale dell'utente |
+| R06 Model gateway | Il modello **non è controllabile** da Warren per `claude-code`: nessun `--model` e nessun `ANTHROPIC_MODEL` (CODE); la prima run mostrava `opus-5-5`. Aggirato con `.claude/settings.json` di progetto. Tetto di spesa per run accettato (`--max-cost-usd 1`), effetto non misurato; Warren non riporta i token |
+| S04 (parallelismo) | non provato: run concorrenti non esercitate |
+
+**Gate bloccanti, stato di Warren dopo le prove:** *esecuzione non confinabile* → il filesystem sì, la rete no; *perdita di segreti* → credenziali leggibili dall'agente con rete aperta, token operatore in chiaro nel log senza `WARREN_API_TOKEN`; *duplicazione* → nessuna nei guasti provati; *arresto affidabile* → sì per l'agente (kill, watchdog), non per il server; *merge non autorizzato* → non applicabile al forge finto (`pr.autoMerge` opt-in spento); *CI esterna* → non provata.

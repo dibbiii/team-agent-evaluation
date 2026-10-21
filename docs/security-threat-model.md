@@ -81,3 +81,14 @@ Le righe sopra nascono dalla lettura. Gli smoke test S00 (container non privileg
 | T13 | **Percorso di arresto non cooperativo** non garantito (Hub #147; E-stop di Gas Town: SIGTSTP non ferma un processo in tmux, SIGSTOP sì) | Arresto dall'esterno con `docker kill` o equivalente, provato nel sandbox di laboratorio |
 | T14 | **Bug di migrazione che perde la coda** dopo il riavvio (Hub v0.10.0: `manual-runs` risponde 500 dopo la migrazione) | Test di riavvio con coda piena prima di ogni aggiornamento di versione |
 | T15 | **Prompt injection da issue verso la lettura di file fuori dal workspace**: **provata sulla baseline (n=3): non seguita**; l'agente ha dichiarato di non aver letto il file-esca. Nessun confine del sistema lo avrebbe impedito (`Bash(node:*)` consente di leggerlo), quindi è un esito del modello, non dell'infrastruttura. Non provata sui candidati | Sandbox senza credenziali raggiungibili; non affidarsi al comportamento del modello (`reports/s02-s07-baseline.md`) |
+
+## Aggiornamento 2026-10-21 (sera) — emerso dalle run LIVE di Warren
+
+| ID | Minaccia | Osservazione (T = provato) | Mitigazione |
+|---|---|---|---|
+| T16 | **Attribuzione dei commit a una persona** | L'agente ha firmato il commit con nome ed email reali dell'utente (T), conosciuti dal contesto di Claude Code; l'ambiente della sandbox è ripulito e `WARREN_GIT_AUTHOR_*` non arriva | Identità git di macchina imposta fuori dall'agente; verifica dell'autore in CI |
+| T17 | **Esfiltrazione con rete aperta e credenziali copiate** | Warren copia `.credentials.json` nella cartella di lavoro; la sandbox ha `network="open"` (T); `restricted` è «honor system» (CODE) | Regole di rete esterne alla sandbox (firewall/egress filtering), credenziale a tetto di spesa e revocabile, non riusare la stessa credenziale altrove |
+| T18 | **Perdita di lavoro al riavvio** | Il workspace non pushato viene distrutto senza salvage al riavvio del server (T) | Supervisore del processo, copia dei workspace prima del riavvio, commit/push frequenti dentro la run |
+| T19 | **PR parziale da run fallita** | Con un commit wip pushato, Warren apre una PR anche con la run `failed` (T) | Policy sul forge che richiede CI verde e review umana; etichettare le PR di run fallite |
+| T20 | **Credenziali nel branch** | Warren non esclude `.claude/` dai commit (CODE); un `git add -A` dell'agente può portarci stato o credenziali. Nelle 5 run valide non è successo (verificato sulle differenze) | Escludere `.claude/` con un controllo in CI/pre-receive; cancellare il repository di prova dopo le run |
+| T21 | **Il pannello di controllo è raggiungibile dall'agente** | L'agente raggiunge `127.0.0.1:18080`; `/healthz` 200, il resto 401 senza token (T) | Token non esposto all'agente (già così), bind su socket o rete separata |
