@@ -76,3 +76,9 @@
 - Un primo `jira-check` ha dato `fetch failed` (rete): aggiunto retry sulle sole letture.
 - Aggiunti `scripts/jira-check.mjs` (sola lettura) e `scripts/jira-s05-live.mjs` (prova S05 su Jira reale con cleanup). 29 test PASS sul mock. **S05 su Jira reale non ancora eseguita.**
 - Il token API dell'utente è comparso nella conversazione; non è mai stato scritto in file né usato da me. Da revocare a fine prova.
+
+## 2026-10-21 — S05 su Jira reale
+
+- Dopo la perdita accidentale delle variabili d'ambiente (finestra chiusa), l'utente le ha reimpostate ed eseguito `jira-check` (stato pulito: 9 issue, tutte invariate) e `jira-s05-live --apply`.
+- **Esito: PASS, 8 controlli su 8** (17,6 s, 0 USD, nessun LLM): primo claim = KAN-4 (priorità High); tre claim concorrenti distinti (KAN-5, KAN-9, KAN-6); KAN-4 dopo la PR «In revisione»; KAN-7 resa pronta ma non presa con KAN-4 in revisione; presa dopo «Completata» su KAN-4; riconciliate KAN-5, KAN-6, KAN-7, KAN-9; ticket non del benchmark invariati; cleanup eseguito senza errori. File: `results/S05-jira-live-6a5eeb8f.json`.
+- Limiti: n=1; l'ordine dei tre claim concorrenti è arbitrario (distinti, non ordinati); nessun webhook; il campo `mode` del JSON dice MOCK perché indica l'assenza di LLM, mentre il Jira era reale (scritto nelle note). La verifica visiva del ripristino su Jira è chiesta all'utente.

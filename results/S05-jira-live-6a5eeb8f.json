@@ -1,0 +1,32 @@
+{
+  "run_id": "58093f02-8d76-41fa-9a47-51adca884c68",
+  "candidate": "reference-queue-controller+jira-cloud",
+  "candidate_version": null,
+  "scenario_id": "S05",
+  "mode": "MOCK",
+  "model": null,
+  "baseline_commit": null,
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T09:09:25.781Z",
+  "finished_at_utc": "2026-10-21T09:09:43.372Z",
+  "duration_seconds": 17.591,
+  "input_tokens": null,
+  "output_tokens": null,
+  "cache_tokens": null,
+  "estimated_cost_usd": 0,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "first_claim_is_highest_priority": true,
+    "concurrent_claims_distinct": true,
+    "complete_moves_to_review": true,
+    "blocked_not_taken_while_in_review": true,
+    "unblocked_after_done": true,
+    "reconcile_releases_in_progress": true,
+    "duplicate_event_idempotent": true,
+    "user_tickets_untouched": true
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "Jira Cloud reale, progetto KAN, nessun LLM. Issue: KAN-4,KAN-5,KAN-6,KAN-7,KAN-8,KAN-9. "
+}
