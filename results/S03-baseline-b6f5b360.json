@@ -1,0 +1,71 @@
+{
+  "run_id": "b6f5b360-9ccf-4f30-a3da-d85d35fbe48e",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T19:39:19.863Z",
+  "finished_at_utc": "2026-10-21T19:39:52.478Z",
+  "duration_seconds": 32.615,
+  "input_tokens": 6,
+  "output_tokens": 1404,
+  "cache_tokens": 27826,
+  "estimated_cost_usd": 0.055904800000000004,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-stable-key-only",
+    "kind": "mutant",
+    "style": "subtle",
+    "issue": "HARD-2",
+    "mutant": "stable-key-only",
+    "ground_truth": "request_changes",
+    "known_defect": "nessuna guardia contro le pay() concorrenti",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "La modifica cambia solo la idempotency key in PaymentService.collect. La chiave `order:${id}` è stabile per ordine, quindi il retry dopo un timeout ora funziona. Però `OrderService.pay()` è rimasto com'era e non soddisfa gli altri criteri dell'issue: i pay() concorrenti falliscono, e pay() su un ordine già pagato lancia un errore.",
+    "defects": [
+      {
+        "location": "src/orders.js:115-124 (pay)",
+        "description": "I pay() concorrenti non sono gestiti. Due chiamate sullo stesso ordine superano entrambe il controllo `status !== 'created'`, perché lo stato cambia solo dopo l'await. Con il FakeGateway la seconda charge trova la stessa chiave in corso e lancia GatewayError('idempotency_in_progress'). Quella promise viene quindi rifiutata, mentre il criterio vuole che tutte risolvano con l'ordine pagato. Serve una promise in-flight per ordine, condivisa dalle chiamate concorrenti."
+      },
+      {
+        "location": "src/orders.js:117 (pay)",
+        "description": "pay() su un ordine già pagato (paid, shipped, delivered) lancia `Cannot pay order in status ...`. L'issue vuole che risolva con l'ordine senza contattare il gateway. Resta corretto lanciare l'errore solo per gli ordini cancellati (e refunded)."
+      },
+      {
+        "location": "src/orders.js:118-123 (pay)",
+        "description": "Non c'è protezione contro l'evento order.paid doppio. Se due chiamate arrivano a `#transition` (per esempio il retry dopo un timeout, oppure una chiamata concorrente che ottiene una risposta replayed), la seconda lancia 'Invalid transition paid -> paid' invece di risolvere. Manca un controllo di stato dopo l'await, oppure la condivisione della promise. Il diff non aggiunge nessun test per i casi concorrente e già-pagato."
+      }
+    ],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 16,
+    "turns": 8,
+    "tools_used": 7,
+    "files_read": [
+      "src\\orders.js",
+      "src\\payments.js",
+      "src\\gateway-fake.js",
+      "docs\\adr\\ADR-004-idempotency-key-stabile-per-ordine.md"
+    ],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 4151,
+    "execution_error": false,
+    "defect_match_manual": "si: manca la guardia per pay() concorrenti"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-stable-key-only-1792611592480.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-stable-key-only-1792611592480.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

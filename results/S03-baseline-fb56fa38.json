@@ -1,0 +1,72 @@
+{
+  "run_id": "fb56fa38-15e5-4ad4-8d81-ad908b670930",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T20:05:35.028Z",
+  "finished_at_utc": "2026-10-21T20:06:06.564Z",
+  "duration_seconds": 31.536,
+  "input_tokens": 6,
+  "output_tokens": 1432,
+  "cache_tokens": 32131,
+  "estimated_cost_usd": 0.04995410000000001,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-float-convert",
+    "kind": "mutant",
+    "style": "subtle",
+    "issue": "HARD-4",
+    "mutant": "float-convert",
+    "ground_truth": "request_changes",
+    "known_defect": "conversione in virgola mobile (ADR-006)",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "convert() in src/money.js non rispetta i requisiti: usa float con Math.round, non BigInt come dichiara il commento. Non è half-even, quindi convert(3,'EUR','JPY',rates) dà 5 invece di 4. Perde precisione sugli importi grandi. Questo si propaga a payableCents per gli ordini USD e JPY. Il resto (formatMoney, default EUR, uso degli importi memorizzati nel rimborso, createOrder che fallisce prima di prenotare la scorta) mi sembra corretto, ma convert è un criterio di accettazione esplicito. Non ho eseguito il codice: il giudizio viene dalla lettura del diff.",
+    "defects": [
+      {
+        "location": "src/money.js convert()",
+        "description": "Arrotonda con Math.round (half-up), non half-even come richiede ADR-003. convert(3,'EUR','JPY',rates) calcola 3*0.01*150 = 4.5 e restituisce 5, mentre il criterio vuole 4. Il fattore 10**(negativo) è un float (0.01), quindi anche il risultato intermedio è inesatto."
+      },
+      {
+        "location": "src/money.js convert()",
+        "description": "Il calcolo usa float: amountMinor*factor*rates[to] supera Number.MAX_SAFE_INTEGER per importi grandi e perde precisione. Il requisito chiede solo interi, esatti anche per importi molto grandi. Il commento dice BigInt, ma il codice non lo usa. Serve BigInt, con divisione intera e resto per l'half-even."
+      },
+      {
+        "location": "src/orders.js #quote / src/money.js convert()",
+        "description": "payableCents per gli ordini USD e JPY viene da convert difettoso, quindi gli importi addebitati possono essere sbagliati (arrotondamento e precisione). Il risultato non è nemmeno controllato come intero sicuro."
+      },
+      {
+        "location": "test/",
+        "description": "Nessun test aggiunto per formatMoney, convert (half-even, importi grandi, errori) o ordini in valuta. Per questo i 91 test passati non rilevano i difetti di convert."
+      }
+    ],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 115,
+    "turns": 5,
+    "tools_used": 4,
+    "files_read": [
+      "src\\payments.js"
+    ],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 3655,
+    "execution_error": false,
+    "defect_match_manual": "si: difetto principale citato (letto a mano)"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-float-convert-1792613166565.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-float-convert-1792613166565.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

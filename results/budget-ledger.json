@@ -1,5 +1,5 @@
 {
-  "spent_usd": 4.560626,
+  "spent_usd": 6.830626,
   "runs": [
     {
       "issue": "ISSUE-1",
@@ -467,6 +467,16 @@
       "result_file": "results/S01-openclaw-live-f1bc408a.json",
       "at": "2026-10-21T18:36:29.027Z",
       "note": "OpenClaw gateway in bwrap; include heartbeat/ripresa stimati; riepiloghi Haiku (<=0,1) non misurati"
+    },
+    {
+      "issue": "S03/S08",
+      "scenario": "S03+S08",
+      "cost_usd": 2.27,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "reports/s03-s08-baseline.md",
+      "at": "2026-10-21T20:13:47.132Z",
+      "note": "S03 (22 review + 3 prove di ruolo) 1,14; S08 1,13; dettaglio in results/raw/s03-s08-spend.json"
     }
   ]
 }

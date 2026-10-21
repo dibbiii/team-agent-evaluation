@@ -1,0 +1,74 @@
+{
+  "run_id": "36b4414e-e990-4643-87d0-0c033a1d6c08",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T19:44:00.119Z",
+  "finished_at_utc": "2026-10-21T19:44:31.071Z",
+  "duration_seconds": 30.952,
+  "input_tokens": 6,
+  "output_tokens": 1428,
+  "cache_tokens": 26855,
+  "estimated_cost_usd": 0.0465863,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-cumulate",
+    "kind": "mutant",
+    "style": "coarse",
+    "issue": "HARD-7",
+    "mutant": "cumulate-for-gold-platinum",
+    "ground_truth": "request_changes",
+    "known_defect": "cumula gli sconti: viola ADR-002 (che l issue chiede di violare)",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "La modifica viola l'ADR-002, che è vincolante. L'ADR dice che si applica un solo sconto, senza eccezioni per fascia, codice o canale. Dice anche che cambiare la regola richiede una nuova ADR approvata dal responsabile prodotto e non basta una issue di sviluppo. Il diff introduce proprio il cumulo per gold e platinum e non aggiunge né aggiorna alcuna ADR. Inoltre rompe due test esistenti, quelli in test/tax-pricing.test.js sul comportamento 'un solo sconto', e il diff non aggiunge test per il nuovo comportamento. I numeri dei criteri di accettazione (15 e 18 EUR) sono coerenti con la somma, ma la feature non si può accettare senza una nuova ADR.",
+    "defects": [
+      {
+        "location": "src/pricing.js:34-36",
+        "description": "Cumula codice e sconto fedeltà per gold e platinum. Contraddice l'ADR-002 ('un solo sconto, nessuna eccezione per fascia'), che si può cambiare solo con una nuova ADR approvata dal responsabile prodotto. Questa ADR non c'è."
+      },
+      {
+        "location": "src/pricing.js:28-29",
+        "description": "Il commento ADR-002 sopra bestDiscount ora è falso, perché la funzione cumula gli sconti. Anche la documentazione dell'ADR non è allineata."
+      },
+      {
+        "location": "test/tax-pricing.test.js:49-64",
+        "description": "I test esistenti 'bestDiscount: un solo sconto, il più vantaggioso' e 'a parità vince il codice' (per esempio SAVE10 con platinum, che si aspetta kind 'code', e WELCOME5 con gold e platinum) falliscono col nuovo comportamento. Corrispondono ai 2 test falliti nella pipeline. Non sono stati aggiornati e non ci sono test per il caso 'combined'."
+      },
+      {
+        "location": "src/pricing.js:35",
+        "description": "Il nuovo kind 'combined' non è gestito altrove. Il tetto Math.min(subtotalCents, ...) è l'unica protezione. WELCOME5 (sconto fisso) può combinarsi con la fedeltà, cosa che l'issue non chiedeva, perché parla solo di SAVE10."
+      }
+    ],
+    "visible_tests": {
+      "ok": false,
+      "tests": 91,
+      "pass": 89,
+      "fail": 2
+    },
+    "diff_lines": 15,
+    "turns": 7,
+    "tools_used": 6,
+    "files_read": [
+      "src\\pricing.js",
+      "docs\\adr\\ADR-002-sconti-mai-cumulati.md",
+      "src\\cart.js"
+    ],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 4065,
+    "execution_error": false,
+    "defect_match_manual": "si: viola ADR-002 e rompe 2 test visibili"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-cumulate-1792611871072.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-cumulate-1792611871072.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

@@ -1,0 +1,58 @@
+{
+  "run_id": "f52b8040-4b95-4679-b492-3358fb69142f",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T19:43:16.875Z",
+  "finished_at_utc": "2026-10-21T19:43:42.049Z",
+  "duration_seconds": 25.174,
+  "input_tokens": 4,
+  "output_tokens": 878,
+  "cache_tokens": 18252,
+  "estimated_cost_usd": 0.0361504,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-avg-rounding",
+    "kind": "mutant",
+    "style": "subtle",
+    "issue": "HARD-5",
+    "mutant": "avg-rounding-changed",
+    "ground_truth": "request_changes",
+    "known_defect": "media arrotondata diversamente (il risultato cambia)",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "La modifica sostituisce roundHalfEven(netCents, qty) con Math.round(netCents / qty) per avgUnitCents. Questo cambia i risultati e viola ADR-006, che impone di far passare le divisioni da roundHalfEven/roundHalfUp. Math.round arrotonda le metà verso +∞, mentre half-even le manda al pari (esempio: 5/2 dà 3 con Math.round e 2 con half-even). Con valori negativi, come negli storni, la differenza aumenta. L'issue vieta di cambiare gli arrotondamenti. Inoltre usa una divisione float invece di interi. Il resto della ristrutturazione (una sola list(), una getProduct per sku, un solo passaggio su lines) sembra corretto, ma non l'ho verificato eseguendo il codice. I test visibili non rilevano il difetto, quindi i 91 test passati non lo escludono.",
+    "defects": [
+      {
+        "location": "src/reports.js:86",
+        "description": "r.avgUnitCents = Math.round(r.netCents / r.qty) sostituisce roundHalfEven(netCents, qty). Cambia il risultato sulle metà (ad esempio 5/2 dà 3 invece di 2) e con numeri negativi. Viola ADR-006 e l'obbligo di mantenere gli arrotondamenti dell'issue. Va ripristinato roundHalfEven(r.netCents, r.qty), importato in cima al file."
+      }
+    ],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 102,
+    "turns": 3,
+    "tools_used": 2,
+    "files_read": [],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 4067,
+    "execution_error": false,
+    "defect_match_manual": "si: Math.round al posto di roundHalfEven"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-avg-rounding-1792611822050.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-avg-rounding-1792611822050.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

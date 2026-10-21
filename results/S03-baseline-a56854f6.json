@@ -1,0 +1,66 @@
+{
+  "run_id": "a56854f6-2a53-4300-8542-e0100bba6b81",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T20:09:41.396Z",
+  "finished_at_utc": "2026-10-21T20:10:06.970Z",
+  "duration_seconds": 25.574,
+  "input_tokens": 4,
+  "output_tokens": 929,
+  "cache_tokens": 16145,
+  "estimated_cost_usd": 0.0316527,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-guard-only",
+    "kind": "mutant",
+    "style": "subtle",
+    "issue": "HARD-2",
+    "mutant": "guard-only",
+    "ground_truth": "request_changes",
+    "known_defect": "chiave per tentativo: retry dopo timeout addebita due volte",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "Il bug principale non è corretto. In src/payments.js:11 la idempotency key è ancora `${order.id}#${order.payAttempts}`, e #collect incrementa payAttempts a ogni tentativo. Dopo un 'timeout-after-charge', il retry usa quindi una chiave nuova e il FakeGateway addebita una seconda volta. Questo viola ADR-004 e il criterio \"stessa key per tutti i tentativi\". La deduplica in-process con #inflight copre solo le chiamate concorrenti. Non protegge dal retry dopo un errore. I 91 test visibili passano perché non coprono questo caso. Non ho eseguito il codice.",
+    "defects": [
+      {
+        "location": "src/payments.js:11",
+        "description": "La idempotency key dipende da order.payAttempts, quindi cambia a ogni retry. Dopo un timeout con addebito avvenuto, la nuova pay() genera una chiave diversa e causa un doppio addebito. Serve una chiave stabile per ordine, ad esempio `${order.id}#pay`, come richiede ADR-004."
+      },
+      {
+        "location": "src/orders.js:133-136",
+        "description": "#collect incrementa payAttempts, che alimenta la chiave. Va rimosso o disaccoppiato dalla chiave. Dopo il fix non devono restare dipendenze dal numero di tentativi."
+      },
+      {
+        "location": "src/orders.js:pay",
+        "description": "Il retry dopo un errore del gateway (timeout dopo l'addebito) non è reso idempotente. La modifica protegge solo le chiamate concorrenti in-process, mentre il criterio 'dopo un timeout una nuova pay() risolve con ordine pagato e un solo addebito' non è soddisfatto. Mancano anche test per i criteri di accettazione (timeout e retry, chiavi uguali fra tentativi e diverse fra ordini)."
+      }
+    ],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 52,
+    "turns": 3,
+    "tools_used": 2,
+    "files_read": [],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 3573,
+    "execution_error": false,
+    "defect_match_manual": "si: difetto principale citato (letto a mano)"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-guard-only-1792613406971.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-guard-only-1792613406971.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

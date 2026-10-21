@@ -1,0 +1,44 @@
+{
+  "run_id": "3d6712d0-9616-4c8d-bc52-b3a7f0aafc24",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S08",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T20:00:32.368Z",
+  "finished_at_utc": "2026-10-21T20:01:32.313Z",
+  "duration_seconds": 59.945,
+  "input_tokens": 10,
+  "output_tokens": 3596,
+  "cache_tokens": 76674,
+  "estimated_cost_usd": 0.1270957,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "session": 3,
+    "variant": "U-compito-generico",
+    "invalidating_commit": "7b4eb34",
+    "changed_assumption": "aliquota IT standard 22% -> 21% (src/tax.js)",
+    "assumption_documented_in_handoff": true,
+    "git_commands": [
+      "git log --stat --format='%h %s' | head -40; git show 7b4eb34 | head -60; cat src/tax.js; cat docs/adr/ADR-001*; npm test",
+      "cat src/orders.js; cat src/payments.js; cat docs/adr/ADR-004*",
+      "git log --stat --format='%h %s'",
+      "git show 7b4eb34",
+      "npm test 2>&1 | tail -20",
+      "git show 1470f30 -- src/payments.js test/helpers.js"
+    ],
+    "read_tax_js": false,
+    "turns": 11,
+    "free_mb_before": 3735,
+    "answer_excerpt": "{\"status_summary\":\"HANDOFF.md è fermo alla fine della sessione 1 (HARD-1, IVA per riga) e dice che HARD-3 non è fatto. La storia git dice altro, quindi HANDOFF.md è obsoleto.\\n\\n- **80d6cfb (sessione 1):** HARD-1 e HANDOFF.md. IVA per riga in `Cart.summary`, `createOrder`, fattura e `vatReport`, secondo ADR-001. È coerente con quanto scritto nel documento.\\n- **1470f30 (sessione 2):** HARD-3 è già implementato in `OrderService.refundItems` (src/orders.js).\\n  - I rimborsi per riga partono dalle righe della fattura (`buildInvoice`).\\n  - Netto e IVA sono ripartiti con `shareOf` (half-even, cumulativo), così la somma non supera mai il totale di riga e a unità complete è esatta.\\n  - L'idempotency key dei rimborsi include sequenza e scope.\\n  - Lo stato cambia solo dopo il successo del gateway.\\n  - Le operazioni sono serializzate con `#exclusive`.\\n  - C'è un nuovo test/refund-items.test.js (128 righe), più due prodotti in test/helpers.js (PEN2, PEN3).\\n- **7b4eb34 (ultimo commit):** l'aliquota IT standard passa da 2200 a 2100 («decreto simulato»). Questa modifica non compare in HANDOFF.md.\\n- **Verifica:** non ho potuto eseguire `npm test`, perché il mio ambiente è di sola lettura. ",
+    "spontaneously_mentions_rate_change": true
+  },
+  "artifact_paths": [
+    "results/raw/s08-s3-U-compito-generico-1792612892317.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S08 sessione 3 (U-compito-generico), n=1, sessione NUOVA di sola lettura dopo un commit che cambia l'aliquota IT standard (assunzione DOCUMENTATA nell'handoff). Esito euristico (regex + schema): leggere results/raw/s08-s3-U-compito-generico-1792612892317.jsonl."
+}

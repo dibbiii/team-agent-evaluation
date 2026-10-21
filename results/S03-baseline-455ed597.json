@@ -1,0 +1,69 @@
+{
+  "run_id": "455ed597-36e7-47b5-9616-9191b275f3be",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T20:04:33.719Z",
+  "finished_at_utc": "2026-10-21T20:05:16.759Z",
+  "duration_seconds": 43.04,
+  "input_tokens": 6,
+  "output_tokens": 2417,
+  "cache_tokens": 42360,
+  "estimated_cost_usd": 0.0825656,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-discount-ignored",
+    "kind": "mutant",
+    "style": "subtle",
+    "issue": "HARD-3",
+    "mutant": "discount-ignored",
+    "ground_truth": "request_changes",
+    "known_defect": "rimborso a prezzo pieno: sconto non ripartito",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "Ho riscontrato un difetto bloccante sugli ordini con sconto. L'imponibile rimborsato non è quello scontato, e questo rompe i criteri principali dell'issue. Ci sono anche due difetti minori su tolleranza e concorrenza. Non ho potuto eseguire codice, quindi tutto deriva dalla lettura.",
+    "defects": [
+      {
+        "location": "src/orders.js:185",
+        "description": "Il netto rimborsato usa `order.lines[idx].netCents`. In src/cart.js:48 quel campo è il netto PRIMA dello sconto. L'imponibile scontato è `taxableCents`, che la fattura espone come `netCents` (orders.js:41). Con uno sconto, netto e IVA non sono coerenti: l'IVA (riga 186) è calcolata sull'imponibile scontato, il netto no. La somma dei rimborsi supera l'importo pagato e scatta 'Refund exceeds paid amount' proprio sull'ultimo rimborso. L'issue chiede di partire dalle righe della fattura, quindi qui andava usato `invoice.lines[idx].netCents`. Il criterio sui rimborsi di un ordine con sconto non è soddisfatto."
+      },
+      {
+        "location": "src/orders.js:184-187",
+        "description": "Netto e IVA vengono arrotondati cumulativamente in modo separato, poi sommati. Ognuno può scostarsi fino a quasi 1 centesimo dalla quota esatta, quindi `amountCents` della riga può scostarsi di 2 centesimi. L'issue richiede che la quota rimborsata di una riga stia entro 1 centesimo dalla quota esatta. Va ripartito il lordo della riga (netto+IVA) con arrotondamento cumulativo, derivando poi la quota IVA o netto in modo coerente."
+      },
+      {
+        "location": "src/orders.js:168-194",
+        "description": "La validazione (quantità residue) avviene prima di `await this.payments.refund`, mentre `refundedQty` e `refundedCents` cambiano solo dopo. Due chiamate concorrenti sullo stesso sku passano entrambe il controllo con lo stesso `sequence` e quindi la stessa idempotency key. Il gateway risponde con il replay e il codice applica due volte `refundedQty`/`refundedCents`. Questo può portare a rimborsare una riga oltre la quantità ordinata nello stato locale. Serve serializzare per ordine o rivalidare dopo l'await."
+      }
+    ],
+    "visible_tests": {
+      "ok": true,
+      "tests": 93,
+      "pass": 93,
+      "fail": 0
+    },
+    "diff_lines": 111,
+    "turns": 7,
+    "tools_used": 6,
+    "files_read": [
+      "src\\orders.js",
+      "src\\payments.js"
+    ],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 3635,
+    "execution_error": false,
+    "defect_match_manual": "si: difetto principale citato (letto a mano)"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-discount-ignored-1792613116760.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-discount-ignored-1792613116760.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

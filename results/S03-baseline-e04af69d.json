@@ -1,0 +1,64 @@
+{
+  "run_id": "e04af69d-0cec-47c6-8cfb-1e7fc465a88f",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T19:41:08.592Z",
+  "finished_at_utc": "2026-10-21T19:41:33.593Z",
+  "duration_seconds": 25.001,
+  "input_tokens": 4,
+  "output_tokens": 940,
+  "cache_tokens": 17387,
+  "estimated_cost_usd": 0.034616900000000006,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-half-up",
+    "kind": "mutant",
+    "style": "subtle",
+    "issue": "HARD-1",
+    "mutant": "half-up",
+    "ground_truth": "request_changes",
+    "known_defect": "arrotondamento half-up al posto di half-even (ADR-001)",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "La modifica allinea carrello e report al calcolo per riga, ma cambia anche lineTax da roundHalfEven a roundHalfUp. Questo viola ADR-001 e il criterio sulle metà esatte. Il commento sopra la funzione dice ancora half-even. Ho letto solo src/tax.js e i punti d'uso di lineTax e roundHalf* via Grep; non ho letto il testo dell'ADR né il test fallito. Il giudizio si basa sul testo dell'issue, che cita ADR-001 come half-even, e sul commento nel codice.",
+    "defects": [
+      {
+        "location": "src/tax.js:1,20",
+        "description": "lineTax usa roundHalfUp invece di roundHalfEven. ADR-001 e l'issue richiedono half-even per l'IVA di riga. Le metà esatte vengono quindi arrotondate per eccesso, per esempio un'IVA di riga di 0,5 centesimi dà 1 invece di 0. Questo cambia anche la fattura (orders.js:36) e gli ordini a riga singola, che non dovevano cambiare. Probabilmente è la causa del test fallito (1 su 91). Va ripristinato roundHalfEven."
+      },
+      {
+        "location": "src/reports.js:1",
+        "description": "Dopo la modifica roundHalfEven non è più usato per l'IVA, ma resta importato e serve ancora per avgUnitCents. Non è un difetto in sé. Mancano comunque test nuovi che coprano i tre articoli da 0,75 EUR e le metà esatte, e quindi il bug di tax.js non è stato intercettato."
+      }
+    ],
+    "visible_tests": {
+      "ok": false,
+      "tests": 91,
+      "pass": 90,
+      "fail": 1
+    },
+    "diff_lines": 64,
+    "turns": 4,
+    "tools_used": 3,
+    "files_read": [
+      "src\\tax.js"
+    ],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 4116,
+    "execution_error": false,
+    "defect_match_manual": "si: half-up in lineTax contro ADR-001"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-half-up-1792611693597.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-half-up-1792611693597.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

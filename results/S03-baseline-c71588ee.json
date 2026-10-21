@@ -1,0 +1,58 @@
+{
+  "run_id": "c71588ee-fff7-43f8-9f9e-7b5df391cca4",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T20:06:25.576Z",
+  "finished_at_utc": "2026-10-21T20:06:50.104Z",
+  "duration_seconds": 24.528,
+  "input_tokens": 4,
+  "output_tokens": 961,
+  "cache_tokens": 20823,
+  "estimated_cost_usd": 0.047155199999999994,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-sort-ties",
+    "kind": "mutant",
+    "style": "subtle",
+    "issue": "HARD-5",
+    "mutant": "sort-ties-unstable",
+    "ground_truth": "request_changes",
+    "known_defect": "ordine a parita di ricavo cambiato",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "Il refactoring è lineare e rispetta i vincoli sulle chiamate. orders.list() è chiamato una volta, getProduct una volta per sku distinto (cache in Map) e lines è letta una volta per ordine. Però cambia l'ordinamento delle righe in caso di parità, quindi il risultato non è identico a quello originale, come richiede l'issue. Le ADR non risultano violate. Non ho letto i test, ma probabilmente non coprono questo caso, dato che passano tutti.",
+    "defects": [
+      {
+        "location": "src/reports.js, rows.sort(...) in salesReport",
+        "description": "È stato rimosso il tie-break per sku. L'originale ordinava per `b.netCents - a.netCents || (a.sku < b.sku ? -1 : a.sku > b.sku ? 1 : 0)`. Ora il comparatore è solo `b.netCents - a.netCents`. A parità di netCents l'ordine segue l'inserimento nella Map (primo sku incontrato negli ordini) e non più lo sku in ordine alfabetico. Questo cambia l'ordine delle righe del report rispetto al comportamento attuale e viola il criterio \"stesso ordine delle righe\". Va ripristinato il tie-break per sku."
+      }
+    ],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 103,
+    "turns": 3,
+    "tools_used": 2,
+    "files_read": [],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 3607,
+    "execution_error": false,
+    "defect_match_manual": "si: difetto principale citato (letto a mano)"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-sort-ties-1792613210106.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-sort-ties-1792613210106.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

@@ -1,0 +1,53 @@
+{
+  "run_id": "dde01eb9-1885-424e-ab1d-baf46d9da7ba",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T20:11:15.577Z",
+  "finished_at_utc": "2026-10-21T20:11:42.042Z",
+  "duration_seconds": 26.465,
+  "input_tokens": 4,
+  "output_tokens": 1482,
+  "cache_tokens": 18340,
+  "estimated_cost_usd": 0.042530700000000005,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "R-HARD-5",
+    "kind": "reference",
+    "style": "correct",
+    "issue": "HARD-5",
+    "mutant": null,
+    "ground_truth": "approve",
+    "known_defect": null,
+    "verdict": "approve",
+    "correct": true,
+    "reasons": "Ho confrontato il nuovo salesReport con l'originale riga per riga e non ho trovato difetti concreti. Non ho potuto eseguire il codice.\n\n- **Chiamate alle sorgenti:** `orders.list()` è chiamato una volta. `o.lines` è letto una volta per ordine. `catalog.getProduct` passa dalla cache `lookup`, che viene interrogata solo alla prima comparsa di uno sku, quindi una volta per sku distinto.\n- **Righe del report:** `qty` e `netCents` sono sommati come prima. `orders` conta una volta per ordine anche con sku duplicato, grazie al `Set seen`. `name` e `category` ripiegano su sku e null come nell'originale. `avgUnitCents` e `shareBp` sono calcolati con gli stessi arrotondamenti. L'ordinamento finale è identico, con la stessa chiave e lo stesso spareggio per sku, e `bySku` mantiene l'ordine di prima comparsa come `skus` prima.\n- **Report per paese:** gli ordini senza righe sono contati. Il netto è la somma di tutte le righe e il confronto tra stringhe equivale al `sort()` di default. L'unica differenza è per paesi non stringa o undefined mescolati a stringhe, un caso irrilevante per i dati attesi.\n- **ADR:** non ci sono conflitti. I valori restano la somma degli imponibili di riga e l'ADR-001 non viene toccata.",
+    "defects": [],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 102,
+    "turns": 3,
+    "tools_used": 2,
+    "files_read": [],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 3462,
+    "execution_error": false,
+    "defect_match_manual": null
+  },
+  "artifact_paths": [
+    "results/raw/s03-R-HARD-5-1792613502046.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-R-HARD-5-1792613502046.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

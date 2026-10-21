@@ -1,0 +1,64 @@
+{
+  "run_id": "495eacaa-1137-4f44-9682-c3836b28963a",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T19:44:51.970Z",
+  "finished_at_utc": "2026-10-21T19:45:22.156Z",
+  "duration_seconds": 30.186,
+  "input_tokens": 6,
+  "output_tokens": 948,
+  "cache_tokens": 25618,
+  "estimated_cost_usd": 0.0343189,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-no-formula-defense",
+    "kind": "mutant",
+    "style": "coarse",
+    "issue": "HARD-6",
+    "mutant": "no-formula-defense",
+    "ground_truth": "request_changes",
+    "known_defect": "nessuna neutralizzazione delle formule CSV (ADR-005)",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "Il formato CSV, gli importi, il campo refunded e l'RFC 4180 sono corretti. Manca però la neutralizzazione delle formule richiesta da ADR-005, che è vincolante. In src/export.js la costante FORMULA_START è definita ma mai usata, e text() chiama solo csvEscape. Nome, email e note controllati dal cliente che iniziano con =, +, -, @, tab o CR arrivano quindi al CSV senza apice. Questo apre a CSV/formula injection nei fogli di calcolo della contabilità.",
+    "defects": [
+      {
+        "location": "src/export.js:21-25 (FORMULA_START e text())",
+        "description": "ADR-005 impone di neutralizzare le celle di testo del cliente che un foglio di calcolo tratterebbe come formula (iniziano con = + - @ tab CR), per esempio anteponendo un apice. FORMULA_START è dichiarata ma non usata, e text() applica solo csvEscape. Un nome o una nota come =HYPERLINK(...) o @SUM(...) viene esportato invariato: formula injection. L'apice va aggiunto solo ai campi di testo (id, createdAt, status, nome, email, country, note) e non agli importi. In particolare refunded deve restare -12.50."
+      },
+      {
+        "location": "test/",
+        "description": "Non sono stati aggiunti test per exportOrdersCsv: né per il quoting RFC 4180, né per la neutralizzazione delle formule, né per l'immutabilità degli ordini."
+      }
+    ],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 74,
+    "turns": 5,
+    "tools_used": 4,
+    "files_read": [
+      "docs\\adr\\ADR-005-testo-dei-clienti-non-fidato.md"
+    ],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 4041,
+    "execution_error": false,
+    "defect_match_manual": "si: FORMULA_START mai usata, nessuna neutralizzazione"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-no-formula-defense-1792611922157.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-no-formula-defense-1792611922157.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

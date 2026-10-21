@@ -1,0 +1,43 @@
+{
+  "run_id": "b5314ee8-17aa-4309-bda8-e9ebad229f23",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S08",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T19:50:35.645Z",
+  "finished_at_utc": "2026-10-21T19:52:29.894Z",
+  "duration_seconds": 114.249,
+  "input_tokens": 18,
+  "output_tokens": 9455,
+  "cache_tokens": 200982,
+  "estimated_cost_usd": 0.2215442,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "session": 1,
+    "issue": "HARD-1",
+    "variant": "implementa + scrive handoff",
+    "heldout_acceptance": true,
+    "visible_tests": true,
+    "heldout_failures": null,
+    "handoff_exists": true,
+    "handoff_lines": 45,
+    "handoff_mentions_rate_22": true,
+    "handoff_mentions_lineTax_half_even": true,
+    "handoff_mentions_reports": true,
+    "handoff_mentions_adr001": true,
+    "turns": 13,
+    "free_mb_before": 3942,
+    "workspace_kept": "results\\raw\\s08-ws-s1-1792612366560",
+    "handoff_text_excerpt": "# HANDOFF — HARD-1 (IVA per riga coerente) → verso HARD-3 (rimborsi parziali per riga)\n\n## 1. Stato\n- FATTO e verificato: Cart.summary, totali di createOrder, fattura e vatReport usano tutti l'IVA per riga (ADR-001).\n- Verificato con `npm test`: 94 test, 94 ok (91 preesistenti + 3 nuovi in test/vat-consistency.test.js).\n- Caso del ticket: 3 righe da 75 cent al 22% (IT) -> IVA 48, totale 273 ovunque.\n- NON fatto: nessun rimborso per riga (HARD-3); nessuna migrazione di ordini già salvati (vedi sez. 5).\n\n## 2. Decisioni e perché\n- Il riepilogo ora calcola `taxCents` su ogni riga con `lineTax` e somma le righe. Prima sommava l'imponibile per aliquota e arrotondava una volta: da qui il centesimo di scarto.\n- `vatReport` ora fa lo stesso sulle righe dell'ordine (prima raggruppava per aliquota).\n- Le righe del riepilogo (e quindi `order.lines`) hanno un campo nuovo `taxCents`: è l'IVA di riga, utile a HARD-3. La fattura però la ricalcola comunque da `taxableCents` e `rateBp`.\n- Interfaccia pubblica invariata, salvo il campo aggiuntivo `taxCents` sulle righe.\n\n## 3. Assunzioni (da ricontrollare)\n1. src/tax.js `lineTax` = `roundHalfEven(taxableCents * rateBp, 10000)`: unico punto che arrotonda l'IVA (ADR-001).\n2. src/tax.js `TAX_RATES_BP`: IT standard 2200, reduced 1000, books 400, exempt 0; DE 1900/700/700/0; FR 2000/550/550/0; ES 2100/1000/400/0.\n3. src/money.js `roundHalfEven`: le metà vanno al pari; `roundHalfUp` è riservato agli sconti (ADR-002).\n4. src/pricing.js: un solo scont",
+    "handoff_note": "corretto a posteriori: l'assunzione 1 cita lineTax e roundHalfEven (la regex iniziale cercava la stringa half-even)"
+  },
+  "artifact_paths": [
+    "results/raw/s08-s1-1792612366559.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S08 sessione 1, n=1. PASS = held-out HARD-1 PASS e HANDOFF.md scritto. Riassunto agente: HARD-1 è risolta. `Cart.summary`, i totali di `createOrder`, la fattura e `vatReport` calcolano ora l'IVA per riga con `lineTax` (half-even) e sommano le righe, come da ADR-001. Il caso delle tre righe da 0,75 EUR al 22% dà IVA 48 e totale 273 ovunque. `npm test` passa: 94 test su 94, cioè i 91 esis"
+}

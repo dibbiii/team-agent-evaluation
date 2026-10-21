@@ -1,0 +1,58 @@
+{
+  "run_id": "70d095ec-488a-4d23-be45-5367bcb587b8",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T19:41:51.966Z",
+  "finished_at_utc": "2026-10-21T19:42:15.891Z",
+  "duration_seconds": 23.925,
+  "input_tokens": 4,
+  "output_tokens": 749,
+  "cache_tokens": 19590,
+  "estimated_cost_usd": 0.0351034,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-free-shipping-strict",
+    "kind": "mutant",
+    "style": "subtle",
+    "issue": "HARD-9",
+    "mutant": "free-shipping-strict",
+    "ground_truth": "request_changes",
+    "known_defect": "spedizione gratuita con > invece di >= sulla soglia",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "Il refactoring cambia un risultato, e l'issue vieta qualsiasi cambiamento. Nel codice originale la spedizione gratuita scattava con subtotale >= 10000. Ora scatta solo con > 10000. Per un ordine italiano con subtotale esattamente 10000 centesimi, prima la spedizione costava 0 e adesso costa il prezzo dello scaglione. Questo contraddice anche la specifica dell'issue (\"subtotale >= minSubtotalCents\"). Con ogni probabilità è anche l'unico test visibile che fallisce (1 su 91). Le tabelle di zone, scaglioni, inclusività, arrotondamento e tariffe extra per kg corrispondono al codice originale. Non ho aperto le ADR: la regressione sulla soglia basta per respingere la modifica.",
+    "defects": [
+      {
+        "location": "src/shipping.js, riga con `orderSubtotalCents > free.minSubtotalCents`",
+        "description": "L'operatore di confronto è `>` ma deve essere `>=`. Il comportamento originale e l'issue prevedono spedizione gratuita se subtotale >= minSubtotalCents. Con un subtotale di 10000 centesimi in Italia ora si paga la spedizione invece di 0. Regressione sul valore di soglia."
+      }
+    ],
+    "visible_tests": {
+      "ok": false,
+      "tests": 91,
+      "pass": 90,
+      "fail": 1
+    },
+    "diff_lines": 134,
+    "turns": 3,
+    "tools_used": 2,
+    "files_read": [],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 4099,
+    "execution_error": false,
+    "defect_match_manual": "si: > invece di >="
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-free-shipping-strict-1792611735893.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-free-shipping-strict-1792611735893.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

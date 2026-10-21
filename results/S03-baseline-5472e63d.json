@@ -1,0 +1,56 @@
+{
+  "run_id": "5472e63d-fcaa-479f-80ac-807315706825",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T20:10:24.587Z",
+  "finished_at_utc": "2026-10-21T20:10:57.562Z",
+  "duration_seconds": 32.975,
+  "input_tokens": 8,
+  "output_tokens": 1249,
+  "cache_tokens": 38681,
+  "estimated_cost_usd": 0.0456709,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "R-HARD-6",
+    "kind": "reference",
+    "style": "correct",
+    "issue": "HARD-6",
+    "mutant": null,
+    "ground_truth": "approve",
+    "known_defect": null,
+    "verdict": "approve",
+    "correct": true,
+    "reasons": "Ho letto il diff, src/money.js e ADR-005. Non ho eseguito codice né i test, quindi il giudizio si basa sulla lettura.\n\n- L'intestazione ha le 12 colonne richieste, nell'ordine richiesto. I record sono separati da CRLF. Con orders vuoto il risultato è solo l'intestazione.\n- Gli importi usano `toDecimalString` (1098 → 10.98). I nomi dei campi `totals.subtotalCents`, `discountCents`, `taxCents` e `totalCents` corrispondono a quelli creati in src/orders.js.\n- `refunded` è `-12.50` per 1250 e `0.00` quando `refundedCents` è 0 o assente. Non nasce un \"-0.00\".\n- Il quoting RFC 4180 copre virgola, virgolette doppie, CR e LF, e raddoppia le virgolette.\n- Il testo innocuo resta identico. La neutralizzazione con l'apice scatta solo se il testo inizia con `= + - @ \\t \\r`, come richiede ADR-005. Gli importi non vengono toccati da questa difesa, anch'essa prevista da ADR-005.\n- Gli ordini ricevuti non vengono modificati: il codice non scrive sugli oggetti in ingresso.\n- `exportOrdersCsv` e `ORDER_CSV_COLUMNS` sono esportate da src/index.js. `exportProductsCsv` non è stata alterata, quindi non ci sono regressioni.",
+    "defects": [],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 75,
+    "turns": 6,
+    "tools_used": 5,
+    "files_read": [
+      "src\\money.js",
+      "docs\\adr\\ADR-005-testo-dei-clienti-non-fidato.md"
+    ],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 3594,
+    "execution_error": false,
+    "defect_match_manual": null
+  },
+  "artifact_paths": [
+    "results/raw/s03-R-HARD-6-1792613457563.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-R-HARD-6-1792613457563.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

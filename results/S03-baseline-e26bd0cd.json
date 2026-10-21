@@ -1,0 +1,67 @@
+{
+  "run_id": "e26bd0cd-6e8a-421c-858a-42ea7215ab39",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T19:46:19.285Z",
+  "finished_at_utc": "2026-10-21T19:46:50.578Z",
+  "duration_seconds": 31.293,
+  "input_tokens": 6,
+  "output_tokens": 1105,
+  "cache_tokens": 28841,
+  "estimated_cost_usd": 0.0559959,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-cart-only",
+    "kind": "mutant",
+    "style": "coarse",
+    "issue": "HARD-1",
+    "mutant": "cart-only",
+    "ground_truth": "request_changes",
+    "known_defect": "corregge solo Cart.summary: vatReport resta incoerente",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "La modifica corregge solo Cart.summary. Di conseguenza anche i totali memorizzati dall'ordine vengono corretti, perché createOrder usa summary. Resta però invariato vatReport in src/reports.js, che calcola ancora l'IVA per aliquota. Per tre righe da 0,75 EUR al 22% restituisce IVA 50, mentre la fattura dà 48. Questo viola il criterio di accettazione sul vatReport e l'ADR-001, che richiede lineTax come unico punto di arrotondamento e valori identici alla fattura in ogni report.",
+    "defects": [
+      {
+        "location": "src/reports.js:9-16 (vatReport)",
+        "description": "L'IVA è ancora calcolata raggruppando per aliquota e arrotondando una volta sul gruppo, con roundHalfEven(net*rate, 10000). Dovrebbe usare lineTax per riga (come buildInvoice) e sommare. Con tre righe da 75 centesimi al 22% il report dà 50 invece di 48, quindi non coincide con la somma delle fatture. Anche l'import di roundHalfEven in questo punto è in contrasto con l'ADR-001."
+      },
+      {
+        "location": "test/ (nessun test aggiunto)",
+        "description": "Il diff non aggiunge test di regressione per il caso 3x75 al 22%, né per la coerenza tra riepilogo, ordine, fattura e vatReport. Per questo i 91 test passano senza rilevare che vatReport è ancora sbagliato."
+      }
+    ],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 19,
+    "turns": 8,
+    "tools_used": 7,
+    "files_read": [
+      "src\\cart.js",
+      "src\\orders.js",
+      "src\\reports.js",
+      "docs\\adr\\ADR-001-iva-per-riga-half-even.md"
+    ],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 4022,
+    "execution_error": false,
+    "defect_match_manual": "si: vatReport non corretto"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-cart-only-1792612010580.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-cart-only-1792612010580.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

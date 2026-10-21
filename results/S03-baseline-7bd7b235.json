@@ -1,0 +1,53 @@
+{
+  "run_id": "7bd7b235-8f33-413e-a4d1-b3c72dacd8c0",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T19:48:03.835Z",
+  "finished_at_utc": "2026-10-21T19:48:35.986Z",
+  "duration_seconds": 32.151,
+  "input_tokens": 4,
+  "output_tokens": 1398,
+  "cache_tokens": 17086,
+  "estimated_cost_usd": 0.0375951,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "R-HARD-10",
+    "kind": "reference",
+    "style": "correct",
+    "issue": "HARD-10",
+    "mutant": null,
+    "ground_truth": "approve",
+    "known_defect": null,
+    "verdict": "approve",
+    "correct": true,
+    "reasons": "Ho letto solo src/events.js, non ho eseguito codice. Ho cercato nei sorgenti gli usi di EventBus e non ho letto le ADR, che trattano IVA, sconti, valuta, idempotency, testo dei clienti e importi in centesimi e non toccano il bus di eventi. La modifica soddisfa l'issue e i criteri.\n\n- **Errori degli handler:** un handler che lancia non interrompe emit. L'errore va a onError(error, { type, payload }) una volta per handler, oppure in bus.errors se onError non c'è. Il contatore `called` viene incrementato prima della chiamata, quindi conta anche chi ha lanciato.\n- **Handler asincroni:** una promise rifiutata viene agganciata con `.then(undefined, ...)` e segnalata allo stesso modo, e emit resta sincrono.\n- **onError difettoso:** un onError che lancia viene intercettato da un try/catch e non rompe il bus.\n- **Ordine:** ogni sottoscrizione è un oggetto distinto in un array copy-on-write, quindi l'ordine è mantenuto anche con lo stesso handler registrato più volte.\n- **Disiscrizione durante emit:** emit itera su una fotografia dell'array. La disiscrizione imposta `active=false` e sostituisce l'array con una copia filtrata. Nessun handler viene saltato e chi è stato disiscritto prima del proprio turno non viene chiamato.\n- **Sottoscrizione durante emit:** `on` crea un nuovo array, quindi la fotografia in corso non cambia e il nuovo handler scatta dall'emit successivo.\n- **Funzione restituita da on():** rimuove solo la propria sottoscrizione ed è idempotente grazie al controllo su `active`.\n- **off(type, handler):** rimuove la prima sottoscrizione con quell'handler, come faceva `indexOf`.\n- **Regressioni:** listenerCount resta corretto e l'export in src/index.js non cambia. I test esistenti usano `new EventBus()` senza argomenti, che il costruttore accetta.\n\nRestano solo casi limite minori, che non bloccano. Un onError che restituisce una promise rifiutata genera un unhandledRejection. bus.errors cresce senza limite.",
+    "defects": [],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 89,
+    "turns": 4,
+    "tools_used": 3,
+    "files_read": [],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 3990,
+    "execution_error": false,
+    "defect_match_manual": null
+  },
+  "artifact_paths": [
+    "results/raw/s03-R-HARD-10-1792612115987.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-R-HARD-10-1792612115987.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

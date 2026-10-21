@@ -1,0 +1,64 @@
+{
+  "run_id": "f71c55c5-8e4b-4e7d-a620-ee4718777627",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T19:45:39.561Z",
+  "finished_at_utc": "2026-10-21T19:46:01.411Z",
+  "duration_seconds": 21.85,
+  "input_tokens": 4,
+  "output_tokens": 838,
+  "cache_tokens": 16570,
+  "estimated_cost_usd": 0.029938899999999997,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-silent-swallow",
+    "kind": "mutant",
+    "style": "coarse",
+    "issue": "HARD-10",
+    "mutant": "silent-swallow",
+    "ground_truth": "request_changes",
+    "known_defect": "errori degli handler ingoiati senza onError ne bus.errors",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "In src/events.js, `#report()` non fa nulla. Inizia con `return;` e non dichiara parametri. Gli errori degli handler non arrivano mai a `onError` e non finiscono in `bus.errors`, quindi si perdono in silenzio. Questo viola i criteri sugli errori sincroni, sulle promise rifiutate e su `bus.errors`. Il resto del codice (snapshot, flag `active`, `off` e funzione restituita da `on()`) sembra corretto. I 91 test visibili passano, ma evidentemente non coprono il percorso di segnalazione degli errori.",
+    "defects": [
+      {
+        "location": "src/events.js:57-58 (#report)",
+        "description": "Il metodo ha `return;` come prima istruzione, quindi tutto il resto è codice morto. Gli errori non vengono mai passati a `onError` né accumulati in `bus.errors`, e vanno persi. Questo contraddice l'issue (\"senza onError gli errori non si perdono\") e i criteri di accettazione sugli handler che lanciano e sulle promise rifiutate."
+      },
+      {
+        "location": "src/events.js:57 (#report firma)",
+        "description": "`#report()` è dichiarato senza parametri, ma emit lo chiama con `(error, type, payload)` e il corpo usa `error`, `type` e `payload`. Se si togliesse il `return;`, il corpo lancerebbe un ReferenceError. Il ReferenceError verrebbe lanciato anche dentro il `catch` di emit, e a quel punto `emit` lancerebbe. La firma va corretta in `#report(error, type, payload)`."
+      }
+    ],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 90,
+    "turns": 3,
+    "tools_used": 2,
+    "files_read": [
+      "src\\events.js"
+    ],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 4010,
+    "execution_error": false,
+    "defect_match_manual": "si: #report() con return iniziale"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-silent-swallow-1792611961413.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-silent-swallow-1792611961413.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

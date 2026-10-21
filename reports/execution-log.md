@@ -171,3 +171,9 @@
 - Lettura codice e sonde a costo zero fatte; build in userland dentro bwrap (Go 1.26.2 e Dolt 2.0.7 con sha256 verificato, `bd` v1.0.5, `gt` 649b832 senza CGO/ICU); `gt doctor` 86 ok, 6 warning, 0 fail. Report: `reports/s01-gastown-live.md`; risultato `results/S01-gastown-live-blocked.json`. Costo modello 0.
 - Gas Town lancia `claude --dangerously-skip-permissions` dentro tmux: confinabile solo mettendo l'intero Gas Town in bwrap (`exec_wrapper` e alias aggirabili da un polecat: accettati, ripristinati). Dolt di Gas Town senza password. La run si è fermata prima per il dialogo di fiducia di Claude Code 2.1.306, che Gas Town 649b832 non sa accettare.
 - **Incidente:** il login di Claude Code nella distribuzione è scaduto (`loggedIn false`, verificato da me). Il wrapper «copia e cancella» aveva buttato i token rinnovati nella copia in sandbox, e una versione intermedia ha sovrascritto `~/.claude/.credentials.json` (ora 323 byte, mai letto). Wrapper corretto (non sovrascrive l'originale, conserva `.credentials.json.refreshed`). Serve un nuovo login dell'utente per ogni ulteriore run LIVE.
+
+## 2026-10-21 (notte) — S03 e S08 con la baseline
+
+- **S03:** 22 review indipendenti di sola lettura: 17/17 mutanti respinti (13 sottili, 4 grossolani), 0/5 falsi positivi, 0,044 USD a review. Vincolo di ruolo: 3 prove PASS (Edit/Write e `node -e` rifiutati dal sistema dei permessi, codice invariato). Effetto soffitto: il test non discrimina questa baseline. DAG e planning non eseguiti.
+- **S08 (HARD-1 poi HARD-3):** handoff PASS/PASS, ma il controllo senza handoff passa uguale (nessun vantaggio misurabile, soffitto); la sessione 3 rileva il cambio di aliquota 22%→21% senza falsi allarmi.
+- Spesa 2,27 USD (ledger ~6,83 su 15). Report: `reports/s03-s08-baseline.md`. n=1, un solo modello, nessun candidato multi-agente.

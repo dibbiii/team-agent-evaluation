@@ -1,0 +1,66 @@
+{
+  "run_id": "1a627039-85f6-4904-a76a-447b2f0edd8f",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T20:07:07.901Z",
+  "finished_at_utc": "2026-10-21T20:07:26.511Z",
+  "duration_seconds": 18.61,
+  "input_tokens": 2,
+  "output_tokens": 1179,
+  "cache_tokens": 7933,
+  "estimated_cost_usd": 0.0301295,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-rescan-per-sku",
+    "kind": "mutant",
+    "style": "subtle",
+    "issue": "HARD-5",
+    "mutant": "rescan-per-sku",
+    "ground_truth": "request_changes",
+    "known_defect": "una scansione per sku: non lineare",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "La modifica risolve solo in parte l'issue. orders.list() ora è chiamato una sola volta e getProduct una volta per sku distinto. Però il report resta O(ordini × prodotti distinti), che è proprio il problema dell'issue. Per ogni sku il codice scorre di nuovo tutti gli ordini in `all`, e per ogni ordine rilegge `o.lines` con `o.lines.filter(...)`. Quindi `lines` viene letta un numero di volte proporzionale agli sku distinti, e ogni ordine viene visitato altrettante volte. Questo viola due criteri di accettazione: la visita costante degli ordini e la lettura costante di `lines`. I test visibili contano solo i risultati, quindi non possono rilevarlo (91 su 91 passano). Non ho letto le ADR e non ho eseguito il codice, quindi il giudizio sull'equivalenza dei risultati si basa solo sulla lettura del diff.",
+    "defects": [
+      {
+        "location": "src/reports.js, salesReport, ciclo `for (const o of all)` dentro `skus.map`",
+        "description": "Per ogni sku distinto si riscorrono tutti gli ordini e si esegue `o.lines.filter(...)`. Il costo è ordini × sku e `o.lines` è letta una volta per sku, in contrasto con i criteri 'ogni ordine visitato un numero costante di volte' e 'lines letta un numero costante di volte'. Serve un'unica passata su ordini e righe che accumuli per sku (Map sku → {qty, netCents, orderCount}), contando l'ordine una sola volta per sku con un Set locale o con l'ultimo ordine visto. L'ordine delle righe va mantenuto con l'ordine di prima apparizione, come fa ora il Set."
+      },
+      {
+        "location": "src/reports.js, byCountry",
+        "description": "Per ogni paese si fa `all.filter(o => o.country === country)` e poi si rileggono le `lines` degli ordini. Gli ordini sono visitati una volta per paese, e il costo cresce con il numero di paesi. Va raggruppato in una sola passata, sommando taxableCents e contando gli ordini per paese in una Map, e ordinando poi i paesi."
+      },
+      {
+        "location": "src/reports.js, intestazione di salesReport",
+        "description": "Sono stati rimossi i commenti che documentavano il contratto (ordini venduti, intervallo con estremi inclusi, ricavo = imponibile di riga dopo lo sconto). Il refactor non ne ha bisogno e il codice perde documentazione."
+      }
+    ],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 79,
+    "turns": 2,
+    "tools_used": 1,
+    "files_read": [],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 3617,
+    "execution_error": false,
+    "defect_match_manual": "si: difetto principale citato (letto a mano)"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-rescan-per-sku-1792613246513.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-rescan-per-sku-1792613246513.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

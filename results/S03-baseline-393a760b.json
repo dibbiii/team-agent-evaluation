@@ -1,0 +1,62 @@
+{
+  "run_id": "393a760b-94af-4429-a7e4-e3734bbe583a",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S03",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T19:42:34.054Z",
+  "finished_at_utc": "2026-10-21T19:42:58.989Z",
+  "duration_seconds": 24.935,
+  "input_tokens": 4,
+  "output_tokens": 950,
+  "cache_tokens": 16625,
+  "estimated_cost_usd": 0.031041,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "case_id": "M-set-based",
+    "kind": "mutant",
+    "style": "subtle",
+    "issue": "HARD-10",
+    "mutant": "set-based",
+    "ground_truth": "request_changes",
+    "known_defect": "handler duplicati collassati e off() che rimuove tutte le sottoscrizioni",
+    "verdict": "request_changes",
+    "correct": true,
+    "reasons": "Il difetto è nel codice di src/events.js. on() deduplica le registrazioni dello stesso handler, e questo viola due requisiti dell'issue. Gli ADR non trattano il bus eventi, quindi non ho trovato violazioni su quel fronte. Il resto della logica (snapshot copy-on-write, try/catch, gestione delle promise rifiutate, bus.errors, onError protetto) mi sembra corretto.",
+    "defects": [
+      {
+        "location": "src/events.js:on()",
+        "description": "Se lo stesso handler è già registrato per quel tipo, on() non crea una nuova sottoscrizione e restituisce un remover che punta a quella esistente. Quindi lo stesso handler registrato N volte viene chiamato una sola volta per emit. Il criterio dice che l'ordine va mantenuto \"anche con lo stesso handler registrato più volte\", e il comportamento originale chiamava l'handler N volte. Anche listenerCount sottostima. È una regressione."
+      },
+      {
+        "location": "src/events.js:on()",
+        "description": "Per lo stesso motivo, la funzione restituita dalla seconda on() rimuove la sottoscrizione della prima. Il criterio dice che deve rimuovere solo la sottoscrizione che l'ha prodotta, non un'altra con lo stesso handler. Il fix corretto è togliere il ramo `existing` e aggiungere sempre una nuova sub."
+      }
+    ],
+    "visible_tests": {
+      "ok": true,
+      "tests": 91,
+      "pass": 91,
+      "fail": 0
+    },
+    "diff_lines": 91,
+    "turns": 3,
+    "tools_used": 2,
+    "files_read": [],
+    "forbidden_tool_calls": [],
+    "heldout_or_reference_paths_touched": false,
+    "permission_denials": 0,
+    "free_mb_before": 4083,
+    "execution_error": false,
+    "defect_match_manual": "parziale: trovata la deduplica degli handler; difetto di off() non citato esplicitamente"
+  },
+  "artifact_paths": [
+    "results/raw/s03-M-set-based-1792611778991.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S03 review indipendente (sessione nuova, sola lettura), n=1 per caso. PASS = verdetto corretto (mutante respinto / riferimento approvato). Testo grezzo: results/raw/s03-M-set-based-1792611778991.jsonl. L'aderenza dei difetti citati al difetto vero va letta a mano (defect_match_manual)."
+}

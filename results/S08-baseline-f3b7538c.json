@@ -1,0 +1,43 @@
+{
+  "run_id": "f3b7538c-522a-467f-9a39-687f57d572d2",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.306 (Claude Code)",
+  "scenario_id": "S08",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "060e25fa602bfbaff5378782b1574e26fedc1246",
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T20:01:39.705Z",
+  "finished_at_utc": "2026-10-21T20:02:11.690Z",
+  "duration_seconds": 31.985,
+  "input_tokens": 6,
+  "output_tokens": 1388,
+  "cache_tokens": 32104,
+  "estimated_cost_usd": 0.06887489999999999,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "session": 3,
+    "variant": "T-domanda-mirata",
+    "invalidating_commit": "7b4eb34",
+    "changed_assumption": "aliquota IT standard 22% -> 21% (src/tax.js)",
+    "assumption_documented_in_handoff": true,
+    "git_commands": [
+      "cat HANDOFF.md; cat src/tax.js; grep -rniE \"22|0\\.21|21|round|half\" src --include=*.js | head -60; ls docs/adr; git show",
+      "sed -n 35,110p src/orders.js; grep -rn \"Tax\\|tax\" src/orders.js src/cart.js src/reports.js | head -40"
+    ],
+    "read_tax_js": false,
+    "turns": 4,
+    "free_mb_before": 3675,
+    "answer_excerpt": "{\"X\":{\"still_valid\":false,\"evidence\":\"src/tax.js:5 ora ha `IT: { standard: 2100, ... }` (21%). Cambiato dal commit 7b4eb34 «Aliquota IVA IT standard portata al 21% (decreto simulato)», che tocca solo src/tax.js. HANDOFF.md sez. 3 punto 2 e il caso del ticket (3×75 cent al 22% → IVA 48, totale 273) sono quindi obsoleti: al 21% l'IVA per riga diventa 16 per riga (75×0,21=15,75), cioè 48 in totale, e il totale 273 per puro caso regge, ma i numeri vanno riverificati. Non ho eseguito npm test (sola lettura), quindi non so se i test con 22% o con 1250→275 falliscono: 1250×21% = 262,5 → half-even 262, non 275. Il punto 10 dell'handoff è quindi falso.\"},\"Y\":{\"still_valid\":true,\"evidence\":\"src/tax.js:19-21: `lineTax = roundHalfEven(taxableCents * rateBp, 10000)`, con commento ADR-001. Cart.summary (src/cart.js:53), buildInvoice (src/orders.js:37) e vatReport (src/reports.js:14) chiamano tutti lineTax. Nessun altro roundHalf* applicato all'IVA nel calcolo di creazione/fattura/report. Sfumatura: src/orders.js:53-55 `shareOf` usa roundHalfEven per ripartire l'IVA di fattura (inv.taxCents) tra le unità nei rimborsi parziali (orders.js:192): è un secondo punto di arrotondamento, ma opera su un'I",
+    "X_reported_still_valid": false,
+    "Y_reported_still_valid": true,
+    "handoff_needs_update": true,
+    "X_evidence_cites_21_or_commit": true
+  },
+  "artifact_paths": [
+    "results/raw/s08-s3-T-domanda-mirata-1792612931692.jsonl"
+  ],
+  "blockers": [],
+  "notes": "S08 sessione 3 (T-domanda-mirata), n=1, sessione NUOVA di sola lettura dopo un commit che cambia l'aliquota IT standard (assunzione DOCUMENTATA nell'handoff). Esito euristico (regex + schema): leggere results/raw/s08-s3-T-domanda-mirata-1792612931692.jsonl."
+}
