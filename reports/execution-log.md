@@ -91,3 +91,11 @@
 - **Verifica `wsl-isolate.sh verify` come utente `dibbi`: 6 PASS su 6** (C: non montato, `/mnt/c` vuota, PATH senza percorsi Windows, nessun `cmd.exe`, utente non root, nessun socket Docker).
 - **Limite dichiarato:** WSL2 non è un confine di sicurezza forte; le distribuzioni condividono VM e kernel. Per dati finti e nessun segreto reale è accettabile. Non protegge, per esempio, un agente con privilegi dentro la VM da altre distribuzioni.
 - **Anomalie non risolte:** `Failed to start the systemd user session` all'avvio (per `dibbi` e per `root`), non bloccante finora. L'utente ha accettato l'invio di metriche anonime a Canonical al primo avvio. La distribuzione `docker-desktop` risulta di nuovo in esecuzione (Docker Desktop attivo: occupa RAM).
+
+## 2026-10-21 — Warren su repo locale (forge finto) e preparazione della prima run LIVE
+
+- Login di Claude Code completato dall'utente dentro la distribuzione (`claude.ai`, piano **team**, organizzazione Brainy Labs). Chiamata minima riuscita (0,008 USD stimati). Scoperto leggendo il codice che Warren copia `~/.claude/.credentials.json` nella cartella di lavoro di ogni run: non serve `setup-token`.
+- Un agente ha preparato e provato (con un `claude` finto, costo 0) il percorso Warren → forge `fake://` → repository bare locale → branch → PR finta → export → `evaluate.mjs` (PASS in due prove pulite, FAIL sul controllo negativo). Script: `scripts/live/{warren-run,fixture-setup,stub-claude}.sh`, `deploy-to-wsl.ps1`; runbook: `docs/live-warren-runbook.md`. Ho riletto lo script `live` prima di eseguirlo.
+- Isolamento misurato nella sandbox reale di Warren: vedi `reports/comparison.md` (scritture confinate, esca invisibile, rete aperta, control plane raggiungibile).
+- Sistemato prima della run: sessione `claude` interattiva rimasta aperta (PID 446) terminata con SIGTERM dopo averne verificato la riga di comando; installati `nodejs` 22.22.1 e `npm` 9.2.0 nella distribuzione (sull'host la baseline usava Node 24: differenza dichiarata) così il prompt resta identico a quello della baseline.
+- **Run LIVE non ancora lanciata.** Motivo: memoria dell'host sotto pressione (disponibile 948 MB incl. cache, circa 1.200 pagine/s di paginazione; `msedgewebview2` ~4 GB, `chrome` ~3 GB). Una run vera occupa circa 1 GB in più e potrebbe far fermare i comandi a metà. Serve che l'utente liberi memoria.

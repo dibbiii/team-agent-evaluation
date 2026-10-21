@@ -92,3 +92,16 @@ Dettaglio in `reports/live-warren-prep.md`. Questi risultati **correggono in par
 - `bwrap` funziona come utente normale in WSL2 (userns senza restrizioni), senza socket Docker né `SYS_ADMIN`: l'isolamento locale che Warren richiede **è ottenibile su un host Linux/WSL2** (**T**). Il «gate bloccante» sul socket Docker/`SYS_ADMIN` riguardava il runtime `docker` e il container; con il runtime `local` su Linux non si è presentato.
 - `GET /readyz` = 200 con `bwrap: ok` (nelle S00: 503). `warren doctor` verde. Suite: 7.928 pass, 32 skip, 1 fail (test del lint UI, non correlato; causa non indagata).
 - Resta **non provato** il comportamento della sandbox di Warren con un agente reale (run LIVE), il cleanup sotto carico e la rete isolata per run.
+
+### Isolamento di Warren misurato nella sandbox reale (2026-10-21, WSL2 dedicata, con un `claude` **finto** come processo-sonda)
+
+Fonte: `docs/live-warren-runbook.md` §3 (output grezzo). Sono i default di Warren, non modificati. Il processo-sonda è uno script, non il vero Claude Code: misura i **confini della sandbox**, non il comportamento di un agente reale (**T** per i confini, nessuna prova con un agente vero).
+
+| Tentativo dell'agente | Esito |
+|---|---|
+| Scrivere fuori dal workspace | riesce solo su file system **effimeri interni alla sandbox** (`/`, `/tmp`, `/home/...` sono tmpfs); sull'host dopo la run non resta nulla. Negata su `/etc`, `/usr`, `~/.bun` (read-only) |
+| Leggere un file-esca nella home dell'utente | **non riesce** (`No such file or directory`: la home non è montata); `~/.claude`, `~/warren`, `~/fixtures` invisibili; variabili d'ambiente ripulite (nessun token di Warren) |
+| Raggiungere la rete | **riesce** (`1.1.1.1:443`): il built-in `claude-code` ha `network = "open"`; il filtro per dominio (`restricted`) non è attivo di default |
+| Raggiungere il control plane di Warren | **riesce** su `127.0.0.1:18080`: `/healthz` 200; le altre rotte rispondono 401 senza token (l'agente non lo ha) |
+
+Conseguenze: i confini sul filesystem **ci sono davvero** (diverso da «solo nel prompt»); il canale di uscita **non è chiuso**, quindi un agente ostile o manipolato da un'issue potrebbe esfiltrare ciò che vede, comprese le credenziali che Warren gli copia in `/home/sandbox/.claude/.credentials.json` nella run live. Un'altra trappola trovata: Warren non esclude `.claude/` dai commit, quindi un `git add -A` dell'agente può portare file di stato o credenziali nel branch (rimedio adottato: cancellare il repository bare dopo la run e non estrarre mai `.claude/`).
