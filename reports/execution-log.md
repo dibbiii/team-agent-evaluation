@@ -165,3 +165,9 @@
 - Segreti: nell'ambiente di claude ci sono `OPENCLAW_MCP_TOKEN` e altri; il token del Gateway è in chiaro in `~/.openclaw/openclaw.json`, nella HOME dell'agente. `config.patch` via WS con il token è accettata.
 - Costo 2–4× degli altri candidati (prompt di sistema e schema dei tool); Gateway ~1,5 GB RSS. Sandbox nativa non provabile (niente Docker nella distribuzione).
 - Nessun Claude Code fuori da bwrap. Pulizia verificata da me: nessun processo, porta o copia di credenziali.
+
+## 2026-10-21 (notte) — Gas Town: preparazione completata, run con l'agente BLOCKED (login scaduto)
+
+- Lettura codice e sonde a costo zero fatte; build in userland dentro bwrap (Go 1.26.2 e Dolt 2.0.7 con sha256 verificato, `bd` v1.0.5, `gt` 649b832 senza CGO/ICU); `gt doctor` 86 ok, 6 warning, 0 fail. Report: `reports/s01-gastown-live.md`; risultato `results/S01-gastown-live-blocked.json`. Costo modello 0.
+- Gas Town lancia `claude --dangerously-skip-permissions` dentro tmux: confinabile solo mettendo l'intero Gas Town in bwrap (`exec_wrapper` e alias aggirabili da un polecat: accettati, ripristinati). Dolt di Gas Town senza password. La run si è fermata prima per il dialogo di fiducia di Claude Code 2.1.306, che Gas Town 649b832 non sa accettare.
+- **Incidente:** il login di Claude Code nella distribuzione è scaduto (`loggedIn false`, verificato da me). Il wrapper «copia e cancella» aveva buttato i token rinnovati nella copia in sandbox, e una versione intermedia ha sovrascritto `~/.claude/.credentials.json` (ora 323 byte, mai letto). Wrapper corretto (non sovrascrive l'originale, conserva `.credentials.json.refreshed`). Serve un nuovo login dell'utente per ogni ulteriore run LIVE.

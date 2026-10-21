@@ -219,3 +219,20 @@ Etichette corrette o precisate dalla prova:
 - **Doctor**: resta il failure `claude-settings` dopo `gt doctor --fix --no-start`, coerente con «Known issues» di `docs/docker.md` (richiede `gt up`).
 
 Prima prova consigliata una volta autorizzato un agente reale: provare Refinery in modalità `pr` con `require_review=true` e verificare che il merge non avvenga senza approvazione; verificare l'effetto reale di `gt estop` su Claude Code; ripetere D di #4819 uccidendo Dolt a metà di `gt done`.
+
+## Risultati sperimentali S01 LIVE (2026-10-21): BLOCKED dopo preparazione e prove a costo zero
+
+Dettaglio in `reports/s01-gastown-live.md`; dati in `results/S01-gastown-live-blocked.json`; grezzi in `results/raw/gastown-*`. **Nessuna run con l'agente vero**, costo delle chiamate al modello 0 USD.
+
+| Affermazione | Etichetta | Evidenza |
+|---|---|---|
+| Gas Town lancia `claude` in una sessione tmux con `exec env ... claude --dangerously-skip-permissions --settings <rig>/polecats/.claude/settings.json "<beacon>"` (interattivo, prompt posizionale, percorso assoluto del binario, `CLAUDE_CODE_EFFORT_LEVEL=high` di default) | CODE + TESTED | `session_manager.go:320-625`, `loader.go`, `env.go`; campionatore in bwrap (`ps` con padre tmux) |
+| `exec_wrapper` per rig / alias di agente esistono ma non sono un confine: percorsi che lo saltano (`handoff.go:881`, `daemon/lifecycle.go:569`, `execRuntime`) e un polecat puo' cambiarli (`gt rig settings set ... runtime.exec_wrapper`, `gt config agent set` accettati) | CODE + TESTED (accettazione) | sonde a costo zero in bwrap |
+| Confinamento dell'intero Gas Town (tmux, Dolt, bd, gt, claude) in `bwrap`: processi nel pid/mnt namespace della sandbox, nulla fuori | TESTED | campioni con `ns-pid`/`ns-mnt` uguali a quelli della sandbox |
+| `gt sling <bead> <rig> --no-boot` avvia solo il polecat (nessun Mayor/Deacon/Witness/Refinery); `gt sling` senza `--no-boot` esegue `gt rig boot` | TESTED (con `--no-boot`) / CODE (senza) | `gt status`, `sling_helpers.go:898-925` |
+| `gt` compila senza gcc/ICU con `CGO_ENABLED=0 -tags gms_pure_go` (62 s) al commit 649b832; `bd` v1.0.5 14 s; Dolt 2.0.7 sha256 verificato; Go 1.26.2 sha256 verificato | TESTED | `results/raw/gastown-build.log` |
+| Un polecat non puo' fare `gt sling` ("polecats cannot sling"), ma puo' leggere/scrivere tutti i bead su Dolt senza password | TESTED | `results/raw/gastown-probe-control-surface.txt` |
+| Claude Code 2.1.306 in HOME nuova richiede onboarding e fiducia preimpostati; il dialogo di fiducia ha "No, exit" preselezionato e **Gas Town 649b832 non lo accetta** (`startup blocked ... workspace trust prompt`, rollback automatico dello spawn); la fiducia e' per percorso esatto, non ereditata dalla cartella padre | TESTED | run1 e prove di onboarding |
+| Run LIVE su ISSUE-1: durata, costo, token, modello, esito, merge, identita' del commit, ripresa dopo riavvio, spese di fondo (daemon, Deacon, Witness) | BLOCKED | login di Claude Code nella distribuzione scaduto e non rinnovabile (`OAuth session expired and could not be refreshed`); serve un nuovo login interattivo dell'utente |
+
+Nota di processo: il wrapper "copia le credenziali e cancella all'uscita" usato per tutti i candidati e' fragile quando il token scade durante la sessione (la copia rinnovata viene cancellata e l'originale resta con un refresh token invalidato); e' la causa probabile della perdita del login. Il wrapper di Gas Town ora conserva la copia cambiata come `.credentials.json.refreshed` e non sovrascrive mai l'originale.
