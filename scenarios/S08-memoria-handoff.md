@@ -40,4 +40,4 @@ Evidenza **indiretta** (non è S08): OpenClaw, dopo lo stop e il riavvio del Gat
 Misurato per la baseline: 1,13 USD (stima a listino; 5 sessioni). Stima precedente di `reports/completamento-vs-traccia.md`: circa 0,5-1 USD per sessione nuova, handoff e invalidazione sulla baseline.
 
 ## Stato e motivo
-**PARZIALE.** Fatti: handoff fra sessioni nuove e invalidazione sulla baseline. Mancano: i candidati, memoria persistente/Context Pack, secondo sviluppatore umano, subentro nella stessa sessione, multiutente con audit.
+**PARZIALE.** Fatti: handoff fra sessioni nuove e invalidazione sulla baseline. Finding: F66 (nessun vantaggio misurabile dell'handoff; l'invalidazione è un comportamento dell'agente, non del sistema). Mancano: i candidati, memoria persistente/Context Pack, secondo sviluppatore umano, subentro nella stessa sessione, multiutente con audit.

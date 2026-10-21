@@ -39,4 +39,4 @@ Evidenza **indiretta** (non è S03): sul requisito R04.3 (permessi di ruolo impo
 Misurato per la baseline: 1,14 USD (22 review 0,97 + vincolo di ruolo 0,17, stima a listino). Stima precedente di `reports/completamento-vs-traccia.md`: circa 1,5-3 USD per DAG, Reviewer e permessi di ruolo.
 
 ## Stato e motivo
-**PARZIALE.** Fatti: Reviewer indipendente sulla baseline e permessi di ruolo di sola lettura. Mancano: DAG da un piano con confronto piano/esecuzione, Reviewer sui candidati multi-agente, confini a livello di sistema operativo, difetti non noti in anticipo (la prova è a soffitto).
+**PARZIALE.** Fatti: Reviewer indipendente sulla baseline e permessi di ruolo di sola lettura. Finding: F67 (il test non discrimina), F68 (vincolo di ruolo dai permessi di Claude Code). Mancano: DAG da un piano con confronto piano/esecuzione, Reviewer sui candidati multi-agente, confini a livello di sistema operativo, difetti non noti in anticipo (la prova è a soffitto).
