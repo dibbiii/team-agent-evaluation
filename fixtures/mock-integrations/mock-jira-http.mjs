@@ -26,6 +26,7 @@ export function createMockJira(catalog = [], { projectKey = 'KAN', auth = null, 
   const issues = new Map();
   let counter = 0;
   let linkCounter = 0;
+  let subCounter = 0;
   const add = (key, fields) => {
     issues.set(key, { id: String(10000 + issues.size), key, fields, comments: [], remotelinks: [] });
   };
@@ -107,6 +108,19 @@ export function createMockJira(catalog = [], { projectKey = 'KAN', auth = null, 
         return;
       }
 
+      const dm = path.match(/^\/rest\/api\/3\/issue\/([A-Z]+-\d+)\/(comment|remotelink)\/(\d+)$/);
+      if (req.method === 'DELETE' && dm) {
+        const it = issues.get(dm[1]);
+        if (!it) return json(res, 404, { errorMessages: ['Issue does not exist'] });
+        const list = dm[2] === 'comment' ? it.comments : it.remotelinks;
+        const idx = list.findIndex((x) => x.id === dm[3]);
+        if (idx < 0) return json(res, 404, { errorMessages: ['not found'] });
+        list.splice(idx, 1);
+        log.push({ op: `delete-${dm[2]}`, key: it.key });
+        res.writeHead(204).end();
+        return;
+      }
+
       const lm = path.match(/^\/rest\/api\/3\/issueLink\/(\d+)$/);
       if (req.method === 'DELETE' && lm) {
         for (const i of issues.values()) i.fields.issuelinks = i.fields.issuelinks.filter((l) => l.id !== lm[1]);
@@ -121,6 +135,15 @@ export function createMockJira(catalog = [], { projectKey = 'KAN', auth = null, 
       if (!issue) return json(res, 404, { errorMessages: ['Issue does not exist'] });
       const sub = m[2];
       if (req.method === 'GET' && !sub) return json(res, 200, publicIssue(issue));
+      if (req.method === 'PUT' && !sub) {
+        const { fields = {} } = await readBody(req);
+        if (fields.labels) issue.fields.labels = fields.labels;
+        log.push({ op: 'update', key: issue.key });
+        res.writeHead(204).end();
+        return;
+      }
+      if (req.method === 'GET' && sub === 'comment') return json(res, 200, { comments: issue.comments });
+      if (req.method === 'GET' && sub === 'remotelink') return json(res, 200, issue.remotelinks.map((r) => ({ id: r.id, object: { url: r.url, title: r.title } })));
       if (req.method === 'GET' && sub === 'transitions') {
         const cur = issue.fields.status.name;
         return json(res, 200, {
@@ -139,15 +162,17 @@ export function createMockJira(catalog = [], { projectKey = 'KAN', auth = null, 
       if (req.method === 'POST' && sub === 'comment') {
         const { body } = await readBody(req);
         if (!isAdf(body)) return json(res, 400, { errors: { comment: 'Comment body is not valid! (ADF required)' } });
-        issue.comments.push(body);
+        const cid = String(++subCounter);
+        issue.comments.push({ id: cid, body });
         log.push({ op: 'comment', key: issue.key });
-        return json(res, 201, { id: String(issue.comments.length) });
+        return json(res, 201, { id: cid });
       }
       if (req.method === 'POST' && sub === 'remotelink') {
         const { object } = await readBody(req);
-        issue.remotelinks.push(object);
+        const rid = String(++subCounter);
+        issue.remotelinks.push({ id: rid, ...object });
         log.push({ op: 'remotelink', key: issue.key, url: object?.url });
-        return json(res, 201, { id: issue.remotelinks.length });
+        return json(res, 201, { id: Number(rid) });
       }
       return json(res, 405, { errorMessages: ['method not allowed'] });
     } catch (e) {

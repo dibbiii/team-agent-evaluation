@@ -67,3 +67,12 @@
 - Il controller era troppo ottimista: ID di transizione fissi, commenti in testo semplice, Done alla PR. Corretto: transizioni scoperte a runtime, stati anche localizzati, ADF, "In Review", dipendenze soddisfatte solo da "Done", paginazione, `projectKey`.
 - Il mock ora rifiuta ciò che rifiuterebbe Jira (commenti non ADF, ID di transizione sbagliati, richieste non autenticate).
 - Nuovo `scripts/jira-seed.mjs` (118 righe): dry-run di default, idempotente, verifica la direzione del collegamento "blocca" (dubbio mio sul comportamento reale). 21 test PASS. **Mai eseguito contro un Jira vero.**
+
+## 2026-10-21 — Jira reale: creazione delle issue e preparazione di S05 live
+
+- L'utente ha eseguito `jira-seed --apply` sul progetto KAN: create `KAN-4`…`KAN-9`. Primo esito: `DIREZIONE DEL LINK INATTESA`. Corretto lo script (rileva, elimina e ricrea il link, poi verifica) e rieseguito: **`COMPLETATO: direzione dei collegamenti verificata`**, confermato a vista in Jira (`KAN-7` «è bloccato da» `KAN-4`) e con `jira-check` (`KAN-4 outwardIssue=KAN-7`, `KAN-7 inwardIssue=KAN-4`).
+- Il test sul Jira reale ha smentito due ipotesi del mio mock: la direzione dell'`issueLink` e il fatto che `reconcile` potesse toccare ticket non del benchmark (`KAN-2` era «In corso»). Corretti entrambi; il controller ora opera solo su `tae-benchmark`.
+- Workflow reale osservato: Da completare [new], In corso, In revisione, Completata [done]; priorità accettata; stile `next-gen`.
+- Un primo `jira-check` ha dato `fetch failed` (rete): aggiunto retry sulle sole letture.
+- Aggiunti `scripts/jira-check.mjs` (sola lettura) e `scripts/jira-s05-live.mjs` (prova S05 su Jira reale con cleanup). 29 test PASS sul mock. **S05 su Jira reale non ancora eseguita.**
+- Il token API dell'utente è comparso nella conversazione; non è mai stato scritto in file né usato da me. Da revocare a fine prova.

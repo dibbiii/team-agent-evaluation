@@ -258,3 +258,43 @@ test('check: mostra i collegamenti con il lato e il testo', async () => {
   assert.ok(lines.some((l) => /collegamento \[Blocks\] inwardIssue=ISSUE-1/.test(l)));
   await jira.close();
 });
+
+// ---- scripts/jira-s05-live.mjs contro il mock (la stessa prova che l'utente esegue su Jira reale) ----
+import { runS05Live } from '../../scripts/jira-s05-live.mjs';
+
+test('S05 live (su mock): passa, rimette tutto a posto e non tocca i ticket dell\'utente', async () => {
+  const auth = 'Basic ' + Buffer.from('a@b.c:tok').toString('base64');
+  const jira = createMockJira([], { projectKey: 'KAN', auth });
+  const baseUrl = await jira.listen();
+  const args = { baseUrl, email: 'a@b.c', token: 'tok', project: 'KAN', log: () => {} };
+  await seed({ ...args, catalog, apply: true, mapPath: null });
+  jira.addIssue('USR-1', { summary: 'ticket utente', status: { name: 'In Progress', statusCategory: { key: 'indeterminate' } } });
+  const labelsBefore = JSON.stringify([...jira.issues.values()].map((i) => [i.key, i.fields.labels]));
+
+  const dry = await runS05Live({ ...args, apply: false });
+  assert.equal(dry.applied, false);
+
+  const r = await runS05Live({ ...args, apply: true });
+  assert.equal(r.record.status, 'PASS', JSON.stringify(r.record.checks) + r.record.notes);
+  assert.equal(Object.keys(r.record.checks).length >= 8, true);
+  // cleanup completo
+  for (const i of jira.issues.values()) {
+    if (i.key === 'USR-1') { assert.equal(i.fields.status.name, 'In Progress'); continue; }
+    assert.equal(i.fields.status.name, 'To Do', `${i.key} non rimessa a To Do`);
+    assert.equal(i.comments.length, 0, `${i.key} ha ancora commenti`);
+    assert.equal(i.remotelinks.length, 0, `${i.key} ha ancora link`);
+  }
+  assert.equal(JSON.stringify([...jira.issues.values()].map((i) => [i.key, i.fields.labels])), labelsBefore);
+  await jira.close();
+});
+
+test('S05 live: rifiuta di partire se il progetto non ha le 6 issue o non sono tutte To Do', async () => {
+  const jira = createMockJira([], { projectKey: 'KAN' });
+  const baseUrl = await jira.listen();
+  const args = { baseUrl, email: 'a', token: 'b', project: 'KAN', log: () => {} };
+  await assert.rejects(() => runS05Live({ ...args, apply: true }), /Attese 6 issue/);
+  await seed({ ...args, catalog, apply: true, mapPath: null });
+  jira.setStatus([...jira.issues.keys()][0], 'In Progress');
+  await assert.rejects(() => runS05Live({ ...args, apply: true }), /Stato non pulito/);
+  await jira.close();
+});

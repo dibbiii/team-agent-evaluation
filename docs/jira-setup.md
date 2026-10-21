@@ -47,3 +47,14 @@ Revoca il token dalla stessa pagina. Le issue `tae-*` si possono cancellare filt
 - Il controller riconosce gli stati per nome (inglese e italiano) e usa gli ID di transizione scoperti a runtime. Se il tuo workflow usa altri nomi, vanno aggiunti in `NAMES` di `fixtures/mock-integrations/queue-controller.mjs`.
 - Le transizioni del tuo progetto potrebbero richiedere campi obbligatori: non verificato.
 - I webhook non sono stati provati su Jira reale.
+
+## Esito della creazione (2026-10-21, eseguita dall'utente sul progetto KAN)
+Create `KAN-4` … `KAN-9` ([ISSUE-1] … [ISSUE-6]). Il collegamento «blocca» è risultato inizialmente invertito; lo script lo ha rilevato, corretto e verificato. Confermato a vista: `KAN-7` «è bloccato da» `KAN-4`. Le issue di esempio `KAN-1`, `KAN-2`, `KAN-3` non sono state modificate. Workflow reale: Da completare [new] → In corso → In revisione → Completata [done].
+
+## Prova S05 su Jira reale (nessun LLM, nessun costo)
+```powershell
+node scripts/jira-s05-live.mjs            # anteprima, nessuna rete
+node scripts/jira-s05-live.mjs --apply    # esegue la prova e poi rimette tutto a posto
+```
+Prerequisiti: le 6 issue `tae-benchmark` devono esistere e stare tutte in «Da completare». La prova tocca solo quelle: claim per priorità, claim concorrenti senza doppioni, «In revisione» alla PR, dipendenza sbloccata solo da «Completata», riconciliazione, ticket dell'utente invariati. Alla fine ripristina stati ed etichetta `ready` e cancella i commenti e i link `example.invalid` che ha creato. Scrive `results/S05-jira-live-*.json`.
+Se qualcosa va storto a metà, il ripristino parte comunque; se segnala errori di cleanup, controlla a mano le issue `KAN-4` … `KAN-9`.
