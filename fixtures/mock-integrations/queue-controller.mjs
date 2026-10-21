@@ -20,11 +20,13 @@ const NAMES = {
 const adf = (text) => ({ type: 'doc', version: 1, content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] });
 
 export class QueueController {
-  constructor({ baseUrl, statePath, authHeader = null, projectKey = 'KAN', readyLabel = 'ready' }) {
+  constructor({ baseUrl, statePath, authHeader = null, projectKey = 'KAN', readyLabel = 'ready', scopeLabel = 'tae-benchmark' }) {
     this.baseUrl = baseUrl;
     this.statePath = statePath;
     this.projectKey = projectKey;
     this.readyLabel = readyLabel;
+    // Il controller tocca SOLO le issue con questa etichetta: i ticket dell'utente nello stesso progetto restano intatti.
+    this.scopeLabel = scopeLabel;
     this.headers = { 'content-type': 'application/json', ...(authHeader ? { authorization: authHeader } : {}) };
     this.state = existsSync(statePath)
       ? JSON.parse(readFileSync(statePath, 'utf8'))
@@ -46,12 +48,12 @@ export class QueueController {
     let nextPageToken;
     do {
       const r = await this.#call('POST', '/rest/api/3/search/jql', {
-        jql: `project = ${this.projectKey} ORDER BY created ASC`,
+        jql: `project = ${this.projectKey} AND labels = "${this.scopeLabel}" ORDER BY created ASC`,
         fields: FIELDS,
         maxResults: 100,
         ...(nextPageToken ? { nextPageToken } : {}),
       });
-      out.push(...r.issues);
+      out.push(...r.issues.filter((i) => i.fields.labels?.includes(this.scopeLabel))); // difesa in profondità
       nextPageToken = r.nextPageToken;
     } while (nextPageToken);
     return out;

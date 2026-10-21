@@ -11,7 +11,17 @@ export async function check({ baseUrl, email, token, project = 'KAN', log = cons
     authorization: 'Basic ' + Buffer.from(`${email}:${token}`).toString('base64'),
   };
   const call = async (method, path, body) => {
-    const res = await fetch(baseUrl + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    // Sola lettura: un errore di rete momentaneo ('fetch failed') viene ritentato fino a 3 volte.
+    let res;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        res = await fetch(baseUrl + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+        break;
+      } catch (e) {
+        if (attempt >= 3) throw e;
+        await new Promise((r) => setTimeout(r, 500 * attempt));
+      }
+    }
     if (!res.ok) {
       const hint = { 401: 'email e token non corrispondono (o token scaduto/revocato)', 403: 'il tuo account non ha i permessi necessari', 404: 'URL o chiave progetto sbagliati, oppure nessun accesso a quel progetto' }[res.status] ?? '';
       throw new Error(`${method} ${path} -> ${res.status}${hint ? ` (${hint})` : ''}`);
@@ -26,12 +36,16 @@ export async function check({ baseUrl, email, token, project = 'KAN', log = cons
 
   const found = await call('POST', '/rest/api/3/search/jql', {
     jql: `project = ${project} ORDER BY created ASC`,
-    fields: ['summary', 'status', 'issuetype', 'labels'],
+    fields: ['summary', 'status', 'issuetype', 'labels', 'issuelinks'],
     maxResults: 50,
   });
   log(`Issue esistenti: ${found.issues.length}`);
   for (const i of found.issues) {
     log(`  ${i.key} | ${i.fields.issuetype?.name ?? '?'} | ${i.fields.status?.name ?? '?'} (${i.fields.status?.statusCategory?.key ?? '?'}) | ${i.fields.summary}`);
+    for (const l of i.fields.issuelinks ?? []) {
+      const side = l.inwardIssue ? `inwardIssue=${l.inwardIssue.key} ("${l.type?.inward}")` : `outwardIssue=${l.outwardIssue?.key} ("${l.type?.outward}")`;
+      log(`      collegamento [${l.type?.name}] ${side}`);
+    }
   }
 
   let transitions = [];

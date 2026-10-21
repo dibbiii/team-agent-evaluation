@@ -198,3 +198,63 @@ test('check: token sbagliato -> 401 con messaggio chiaro; progetto sbagliato -> 
   await assert.rejects(() => check({ baseUrl, email: 'a@b.c', token: 'tok', project: 'ZZZ', log: () => {} }), /404/);
   await jira.close();
 });
+
+// ---- ambito del controller e direzione del link osservata su Jira reale ----
+test('ambito: i ticket dell\'utente senza etichetta tae-benchmark non vengono mai toccati (nemmeno da reconcile)', async () => {
+  const { jira, mk } = await setup();
+  // come il KAN-2 reale: In corso, senza lease, non del benchmark
+  jira.addIssue('KAN-2', { summary: 'Task 2', status: { name: 'In Progress', statusCategory: { key: 'indeterminate' } } });
+  const qc = mk();
+  const before = jira.log.length;
+  assert.deepEqual(await qc.reconcile(10 ** 12), []);
+  assert.equal(status(jira, 'KAN-2'), 'In Progress');
+  assert.equal(jira.log.length, before, 'nessuna scrittura su KAN-2');
+  const taken = [];
+  let k;
+  while ((k = await qc.claim('w1'))) taken.push(k);
+  assert.ok(!taken.includes('KAN-2'));
+  await jira.close();
+});
+
+test('seed con Jira che inverte la direzione: la rileva, ricrea il link e lo verifica', async () => {
+  const auth = 'Basic ' + Buffer.from('a@b.c:tok').toString('base64');
+  const jira = createMockJira([], { projectKey: 'KAN', auth, invertLinks: true });
+  const baseUrl = await jira.listen();
+  const lines = [];
+  const r = await seed({ baseUrl, email: 'a@b.c', token: 'tok', project: 'KAN', catalog, apply: true, mapPath: null, log: (l) => lines.push(l) });
+  assert.equal(r.warnings.length, 0, r.warnings.join('; '));
+  assert.ok(lines.some((l) => /direzione invertita/.test(l)), 'ha segnalato e corretto l\'inversione');
+  const blocked = jira.issues.get(r.map['ISSUE-4']);
+  assert.ok(blocked.fields.issuelinks.some((l) => l.inwardIssue?.key === r.map['ISSUE-1']));
+  assert.equal([...jira.issues.values()].flatMap((i) => i.fields.issuelinks).length, 2, 'un solo collegamento (visto dai due lati)');
+  // e il controller, con quel link, non sceglie ISSUE-4 prima del Done di ISSUE-1
+  jira.issues.get(r.map['ISSUE-4']).fields.labels.push('ready');
+  const qc = new QueueController({ baseUrl, statePath: join(mkdtempSync(join(tmpdir(), 'qc-')), 's.json'), authHeader: auth });
+  const taken = [];
+  let k;
+  while ((k = await qc.claim('w1'))) taken.push(k);
+  assert.ok(!taken.includes(r.map['ISSUE-4']));
+  await jira.close();
+});
+
+test('seed: una seconda esecuzione su Jira con direzione invertita non duplica né rompe i link', async () => {
+  const auth = 'Basic ' + Buffer.from('a@b.c:tok').toString('base64');
+  const jira = createMockJira([], { projectKey: 'KAN', auth, invertLinks: true });
+  const baseUrl = await jira.listen();
+  const args = { baseUrl, email: 'a@b.c', token: 'tok', project: 'KAN', catalog, apply: true, mapPath: null, log: () => {} };
+  await seed(args);
+  const r2 = await seed(args);
+  assert.equal(r2.warnings.length, 0);
+  assert.equal(jira.issues.size, 6);
+  assert.equal([...jira.issues.values()].flatMap((i) => i.fields.issuelinks).length, 2);
+  await jira.close();
+});
+
+test('check: mostra i collegamenti con il lato e il testo', async () => {
+  const jira = createMockJira(catalog, {});
+  const baseUrl = await jira.listen();
+  const lines = [];
+  await check({ baseUrl, email: 'a', token: 'b', log: (l) => lines.push(l) });
+  assert.ok(lines.some((l) => /collegamento \[Blocks\] inwardIssue=ISSUE-1/.test(l)));
+  await jira.close();
+});

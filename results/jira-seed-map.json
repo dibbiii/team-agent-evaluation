@@ -1,0 +1,11 @@
+{
+  "project": "KAN",
+  "map": {
+    "ISSUE-1": "KAN-4",
+    "ISSUE-2": "KAN-5",
+    "ISSUE-3": "KAN-6",
+    "ISSUE-4": "KAN-7",
+    "ISSUE-5": "KAN-8",
+    "ISSUE-6": "KAN-9"
+  }
+}

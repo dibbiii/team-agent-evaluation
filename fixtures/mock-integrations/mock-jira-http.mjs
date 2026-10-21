@@ -20,9 +20,12 @@ const statusObj = (name) => {
 };
 const isAdf = (b) => b && typeof b === 'object' && b.type === 'doc' && b.version === 1 && Array.isArray(b.content);
 
-export function createMockJira(catalog = [], { projectKey = 'KAN', auth = null } = {}) {
+// invertLinks: simula il comportamento osservato su Jira reale (progetto KAN dell'utente), dove con
+// POST issueLink {inwardIssue: X, outwardIssue: Y} X risulta il BLOCCANTE (X blocca Y).
+export function createMockJira(catalog = [], { projectKey = 'KAN', auth = null, invertLinks = false } = {}) {
   const issues = new Map();
   let counter = 0;
+  let linkCounter = 0;
   const add = (key, fields) => {
     issues.set(key, { id: String(10000 + issues.size), key, fields, comments: [], remotelinks: [] });
   };
@@ -32,7 +35,7 @@ export function createMockJira(catalog = [], { projectKey = 'KAN', auth = null }
       description: c.description,
       status: statusObj('To Do'),
       priority: { name: c.priority },
-      labels: c.ready ? ['ready'] : [],
+      labels: ['tae-benchmark', ...(c.ready ? ['ready'] : [])],
       issuelinks: c.blocked_by.map((k) => ({ type: { name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }, inwardIssue: { key: k } })),
     });
   }
@@ -89,16 +92,26 @@ export function createMockJira(catalog = [], { projectKey = 'KAN', auth = null }
       }
 
       if (req.method === 'POST' && path === '/rest/api/3/issueLink') {
-        // outwardIssue "blocks" inwardIssue: l'inward è il bloccato, l'outward è il bloccante.
+        // Modalità normale: outwardIssue "blocks" inwardIssue. Con invertLinks: inwardIssue blocca outwardIssue.
         const { type, inwardIssue, outwardIssue } = await readBody(req);
-        const blocked = issues.get(inwardIssue?.key);
-        const blocker = issues.get(outwardIssue?.key);
-        if (!blocked || !blocker || type?.name !== 'Blocks') return json(res, 404, { errorMessages: ['link target not found'] });
+        const a = issues.get(inwardIssue?.key);
+        const b = issues.get(outwardIssue?.key);
+        if (!a || !b || type?.name !== 'Blocks') return json(res, 404, { errorMessages: ['link target not found'] });
+        const [blocked, blocker] = invertLinks ? [b, a] : [a, b];
         const t = { name: 'Blocks', inward: 'is blocked by', outward: 'blocks' };
-        blocked.fields.issuelinks.push({ type: t, inwardIssue: { key: blocker.key } });
-        blocker.fields.issuelinks.push({ type: t, outwardIssue: { key: blocked.key } });
+        const id = String(++linkCounter);
+        blocked.fields.issuelinks.push({ id, type: t, inwardIssue: { key: blocker.key } });
+        blocker.fields.issuelinks.push({ id, type: t, outwardIssue: { key: blocked.key } });
         log.push({ op: 'link', blocked: blocked.key, blocker: blocker.key });
         res.writeHead(201).end();
+        return;
+      }
+
+      const lm = path.match(/^\/rest\/api\/3\/issueLink\/(\d+)$/);
+      if (req.method === 'DELETE' && lm) {
+        for (const i of issues.values()) i.fields.issuelinks = i.fields.issuelinks.filter((l) => l.id !== lm[1]);
+        log.push({ op: 'unlink', id: lm[1] });
+        res.writeHead(204).end();
         return;
       }
 
@@ -147,6 +160,7 @@ export function createMockJira(catalog = [], { projectKey = 'KAN', auth = null }
     log,
     projectKey,
     // Simula l'azione umana (es. merge della PR): cambia stato senza passare dal controller.
+    addIssue: (key, fields) => add(key, { description: null, priority: { name: 'Medium' }, labels: [], issuelinks: [], ...fields }),
     setStatus: (key, name) => { issues.get(key).fields.status = statusObj(name); },
     listen: () => new Promise((r) => server.listen(0, '127.0.0.1', () => r(`http://127.0.0.1:${server.address().port}`))),
     close: () => new Promise((r) => server.close(r)),

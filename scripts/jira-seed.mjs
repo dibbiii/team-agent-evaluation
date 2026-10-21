@@ -50,8 +50,19 @@ export async function seed({ baseUrl, email, token, project = 'KAN', apply = fal
     'content-type': 'application/json',
     authorization: 'Basic ' + Buffer.from(`${email}:${token}`).toString('base64'),
   };
+  const isRead = (method, path) => method === 'GET' || path.endsWith('/search/jql');
   const call = async (method, path, body) => {
-    const res = await fetch(baseUrl + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    // Nuovo tentativo SOLO per le letture: ripetere una creazione potrebbe duplicarla.
+    let res;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        res = await fetch(baseUrl + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+        break;
+      } catch (e) {
+        if (!isRead(method, path) || attempt >= 3) throw e;
+        await new Promise((r) => setTimeout(r, 500 * attempt));
+      }
+    }
     const text = await res.text();
     if (!res.ok) throw Object.assign(new Error(`${method} ${path} -> ${res.status} ${text.slice(0, 300)}`), { status: res.status, text });
     return text ? JSON.parse(text) : null;
@@ -84,16 +95,30 @@ export async function seed({ baseUrl, email, token, project = 'KAN', apply = fal
     for (const b of p.blockedBy) {
       const blocked = map[p.catalogKey];
       const blocker = map[b];
-      const cur = await call('GET', `/rest/api/3/issue/${blocked}?fields=issuelinks`);
-      const already = cur.fields.issuelinks.some((l) => (l.inwardIssue ?? l.outwardIssue)?.key === blocker);
-      if (!already) {
-        await call('POST', '/rest/api/3/issueLink', { type: { name: 'Blocks' }, inwardIssue: { key: blocked }, outwardIssue: { key: blocker } });
-        log(`  ~ collegamento: ${blocker} blocca ${blocked}`);
+      // Sul bloccato, il bloccante deve comparire come inwardIssue ("è bloccata da"): è ciò che legge il controller.
+      const readLink = async () =>
+        (await call('GET', `/rest/api/3/issue/${blocked}?fields=issuelinks`)).fields.issuelinks.find(
+          (l) => l.type?.name === 'Blocks' && (l.inwardIssue?.key === blocker || l.outwardIssue?.key === blocker),
+        );
+      const create = (inward, outward) => call('POST', '/rest/api/3/issueLink', { type: { name: 'Blocks' }, inwardIssue: { key: inward }, outwardIssue: { key: outward } });
+      let link = await readLink();
+      if (!link) {
+        await create(blocked, blocker);
+        log(`  ~ collegamento creato tra ${blocker} e ${blocked}`);
+        link = await readLink();
       }
-      // Verifica di direzione: il controller assume che sul bloccato il bloccante compaia come inwardIssue.
-      const chk = await call('GET', `/rest/api/3/issue/${blocked}?fields=issuelinks`);
-      const ok = chk.fields.issuelinks.some((l) => l.type?.name === 'Blocks' && l.inwardIssue?.key === blocker);
-      if (!ok) warnings.push(`DIREZIONE DEL LINK INATTESA tra ${blocker} e ${blocked}: controlla in Jira che ${blocked} risulti "è bloccata da" ${blocker}; in caso contrario il controller va adattato.`);
+      if (link?.outwardIssue?.key === blocker) {
+        // Direzione invertita (il bloccato blocca il bloccante): è un collegamento fra due issue del benchmark, lo correggo.
+        log(`  ! direzione invertita tra ${blocker} e ${blocked}: elimino il collegamento e lo ricreo al contrario`);
+        await call('DELETE', `/rest/api/3/issueLink/${link.id}`);
+        await create(blocker, blocked);
+        link = await readLink();
+      }
+      if (link?.inwardIssue?.key !== blocker) {
+        warnings.push(`DIREZIONE DEL LINK NON VERIFICATA tra ${blocker} e ${blocked} (letto: ${JSON.stringify(link ?? null)}). Controlla in Jira che ${blocked} risulti "è bloccata da" ${blocker}.`);
+      } else {
+        log(`  ✓ ${blocked} è bloccata da ${blocker} (verificato)`);
+      }
     }
   }
   if (mapPath) {
