@@ -1,0 +1,26 @@
+{
+  "run_id": "6f3cb08d-779f-4e66-b75c-3be26c371778",
+  "candidate": "paperclip",
+  "candidate_version": "paperclipai 2026.1012.0 (release npm, commit bba6a45; studio del codice a 05f7079) adapter claude_local engine=cli con wrapper bwrap + Claude Code 2.1.306",
+  "scenario_id": "S01",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": null,
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T14:33:54.298Z",
+  "finished_at_utc": "2026-10-21T14:34:22.332Z",
+  "duration_seconds": 28.034,
+  "input_tokens": 31127,
+  "output_tokens": 1739,
+  "cache_tokens": 147031,
+  "estimated_cost_usd": 0.1565731,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "Run LIVE su ISSUE-1: run Paperclip e63877ac-a713-437d-bc64-6cf34e723e34 (company 41fc4f8b-bf5c-41e5-84a5-0287ed0d4775), stato succeeded; run totali sull'issue: 2 (succeeded, succeeded); costo riportato da Paperclip 0.06845910000000001 USD (costStatus=reported, billingType=subscription_included: stima a listino con abbonamento; Paperclip registra 0 centesimi spesi), modello dall'evento init: claude-sonnet-5-5, permissionMode bypassPermissions. Durata = dall'inizio della prima run riuscita alla fine dell'ultima run riuscita (token e durata sommati sulle run riuscite; costo su tutte) (include avvio del wrapper bwrap e della CLI). Run riuscite: 2. Issue Paperclip a fine run: done. Run n.2 di 2. Paperclip ha avviato da sola una seconda run di continuazione (sorgente automation, sessione ripresa) che ha portato l'issue a done tramite l'API; ho lasciato fare (MAX_RUNS=3)."
+}

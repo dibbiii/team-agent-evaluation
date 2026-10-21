@@ -220,6 +220,24 @@ Esecuzione 2026-10-20, modalità `MOCK`, esito **PARTIAL**. Dettagli, comandi e 
 
 **Non provato**: runner nativo Rust, UI dal sorgente, sandbox plugin, modalità `authenticated`, adapter locali reali, crash con run in volo (S06), Jira. Come sbloccare: host con ≥4-6 GiB di RAM e toolchain Rust (o `PAPERCLIP_RUNNER_BINARY` compatibile); credenziali di prova con budget massimo per gli adapter reali.
 
+## Risultati sperimentali S01 LIVE (2026-10-21)
+
+Dettagli, comandi e limiti in `reports/s01-paperclip-live.md`; JSON `results/S01-paperclip-live-587f9843.json` e `...-6f3cb08d.json`. Ambiente: distribuzione WSL2 dedicata `Ubuntu-26.04`, release npm `paperclipai@2026.1012.0` (commit bba6a45; il codice studiato nel resto della scheda e' 05f7079), Node 24.22.0, Claude Code 2.1.306 con login in abbonamento (piano Team). Variante dichiarata: l'agente gira dentro un wrapper `bwrap` (stessi montaggi della sandbox di Warren) impostato come `command`, con `engine: "cli"`.
+
+| Voce | Etichetta | Risultato |
+|---|---|---|
+| Run LIVE ISSUE-1, n=2 | `TESTED` | 2/2 PASS (test visibili + held-out lato Windows), `claude-sonnet-5-5` (evento `init`), run di lavoro 13,3 s e 13,5 s, 0,0667 e 0,0685 USD a listino; con la continuazione automatica di Paperclip in c2 totale 0,1566 USD / 28 s |
+| Cosa fa Paperclip a fine run | `TESTED` | solo commento dell'agente e stato dell'issue (c1 resta `in_progress`; c2 va a `done` in una run di continuazione avviata da Paperclip stessa); **nessun commit, nessuna PR, nessun work product**; modifiche lasciate nel workspace |
+| Budget con login in abbonamento | `TESTED` | Paperclip riporta costo e token (`subscription_included`, `costStatus reported`) ma registra 0 centesimi: i tetti in centesimi non si consumano; nessun hard stop (il costo non e' `unpriced`); con chiave API: non provato |
+| Motore predefinito di `claude_local` | `TESTED` + `CODE` | nella release npm e' **`acp`** (`claude-agent-acp`), che ignora `command`; il wrapper funziona solo con `engine: "cli"` esplicito. Un tentativo senza `engine` ha lanciato Claude Code sull'host (senza login, costo 0, 4 s): vedi report §4.1 |
+| #16935 con `claude_local`, `local_trusted` | `TESTED` | **riprodotta**: l'agente alza il proprio budget (200), spegne `dangerouslySkipPermissions` (200), cambia budget e config di un altro agente (200). `command`, `extraArgs`, `env`, `cwd`, `args`, `filesystemSandboxCommand`, `hermesCommand`: 403 |
+| #16935, modalita' `authenticated` (private, loopback, istanza nuova) | `TESTED` | **stessi esiti**: il difetto non dipende dalla modalita' di deploy |
+| Fuga dal wrapper da parte dell'agente | `TESTED` (richieste accettate), esecuzione non provata | 200 su `adapterConfig.engine="acp"`, `agentCommand="/bin/true"` (campo non protetto), `replaceAdapterConfig:true` senza `command` (la guardia controlla solo i campi presenti: `command` e `cwd` spariscono), cambio `adapterType`, `networkScope`/`filesystemScope` |
+
+Correzioni alla scheda: (a) §5 «Claude Code (`claude_local`)»: nella release 2026.1012.0 il motore predefinito e' ACP, non la CLI con `command`; la CLI e' `engine: "cli"`. (b) §7b: esiste un confinamento nativo `filesystemScope`/`networkScope` + `filesystemSandboxCommand` (default `bwrap`) per `engine: "cli"` (`CODE`, non provato), ma i primi due campi sono modificabili dall'agente. (c) §7a e #16935: `command` e' protetto da PATCH dell'agente, ma la protezione e' aggirabile (vedi sopra). (d) §8 «Budget»: con login in abbonamento il budget non si consuma. (e) Comportamento di continuazione: dopo una run riuscita con issue ancora aperta Paperclip ne avvia un'altra da sola (`automation`), con costo aggiuntivo.
+
+Non provato: motore ACP con credenziali, esecuzione di un agente dopo l'aggiramento del wrapper, `filesystemScope`/`networkScope` nativi, chiave API e budget in centesimi reali, issue difficili, PR/forge reali, 24/7.
+
 ## Segnalazioni dalle issue (consultate 2026-10-20 con `gh`; non riprodotte)
 
 Etichetta: `UNVERIFIED` (segnalazione di terzi, non provata qui) per tutte tranne **#16935, ora `TESTED` e riprodotta in S00** (vedi «Risultati sperimentali S00»). Le altre servono come ipotesi da verificare in S07/S09.

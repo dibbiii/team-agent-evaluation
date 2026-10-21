@@ -1,5 +1,5 @@
 {
-  "spent_usd": 3.681726,
+  "spent_usd": 3.905426,
   "runs": [
     {
       "issue": "ISSUE-1",
@@ -407,6 +407,26 @@
       "status": "PASS",
       "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-3de6c8c3.json",
       "at": "2026-10-21T14:04:10.459Z"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.0667,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-paperclip-live-587f9843.json",
+      "at": "2026-10-21T14:47:36.243Z",
+      "note": "Paperclip claude_local in bwrap, run 1 (continuazione cancellata)"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.157,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-paperclip-live-6f3cb08d.json",
+      "at": "2026-10-21T14:47:36.244Z",
+      "note": "Paperclip claude_local in bwrap, run 2 (incl. continuazione automatica 0,0881)"
     }
   ]
 }
