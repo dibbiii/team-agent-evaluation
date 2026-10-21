@@ -202,6 +202,11 @@ ledger.runs.push({
 });
 writeFileSync(ledgerPath, JSON.stringify(ledger, null, 2));
 
+// Conserva il lavoro dell'agente (solo src/ e test/) in results/raw/ (ignorata da git) per diagnosticare i fallimenti.
+try {
+  const keep = join(root, 'results', 'raw', `ws-${issueKey}-${Date.now()}`);
+  for (const sub of ['src', 'test']) if (existsSync(join(ws, sub))) cpSync(join(ws, sub), join(keep, sub), { recursive: true });
+} catch { /* la conservazione è facoltativa */ }
 rmSync(ws, { recursive: true, force: true });
 console.log(JSON.stringify({ issue: issueKey, status: record?.status ?? 'FAIL', cost_usd: costUsd, turns: numTurns, checks: record?.checks, spent_total_usd: ledger.spent_usd, result_file: resultFile }, null, 2));
 process.exit(record?.status === 'PASS' ? 0 : 1);

@@ -1,5 +1,5 @@
 {
-  "spent_usd": 1.721194,
+  "spent_usd": 2.539869,
   "runs": [
     {
       "issue": "ISSUE-1",
@@ -308,6 +308,51 @@
       "status": "PASS",
       "result_file": "results/S01-warren-live-d5b289ef.json",
       "at": "2026-10-21T11:30:46.174Z"
+    },
+    {
+      "issue": "HARD-1",
+      "scenario": "H-CAL",
+      "cost_usd": 0.13796280000000002,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-31fb6615.json",
+      "at": "2026-10-21T13:23:17.663Z"
+    },
+    {
+      "issue": "HARD-2",
+      "scenario": "H-CAL",
+      "cost_usd": 0.1556902,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-1cbb3a7e.json",
+      "at": "2026-10-21T13:25:07.085Z"
+    },
+    {
+      "issue": "HARD-4",
+      "scenario": "H-CAL",
+      "cost_usd": 0.2618871,
+      "execution_error": false,
+      "status": "FAIL",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-33587fb2.json",
+      "at": "2026-10-21T13:27:34.300Z"
+    },
+    {
+      "issue": "HARD-5",
+      "scenario": "H-CAL",
+      "cost_usd": 0.140761,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-9de01c6b.json",
+      "at": "2026-10-21T13:29:20.717Z"
+    },
+    {
+      "issue": "HARD-6",
+      "scenario": "H-CAL",
+      "cost_usd": 0.12237410000000001,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "C:\\Users\\brain\\OneDrive\\team-agent-evaluation\\results\\H-CAL-baseline-claude-code-b6aa6e56.json",
+      "at": "2026-10-21T13:31:07.033Z"
     }
   ]
 }

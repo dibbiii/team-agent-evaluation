@@ -41,6 +41,10 @@ try {
   const held = run(sandbox, `acceptance/${issue}.acceptance.test.js`);
   checks.visible_tests = visible.status === 0;
   checks.heldout_acceptance = held.status === 0;
+  // Diagnosi: se qualcosa fallisce, tieni le righe che dicono PERCHÉ (nessun segreto: sono output di test).
+  const tail = (r) => ((r.stdout || '') + '\n' + (r.stderr || '')).split('\n').filter((l) => /^\s*(not ok|# Subtest|error:|expected|actual|message:|failureType)/i.test(l) || /✖/.test(l)).slice(0, 40);
+  if (held.status !== 0) checks.heldout_failures = tail(held);
+  if (visible.status !== 0) checks.visible_failures = tail(visible);
 } catch (e) {
   checks.error = String(e.message);
 } finally {
