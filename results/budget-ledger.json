@@ -1,5 +1,5 @@
 {
-  "spent_usd": 7.266926,
+  "spent_usd": 8.040926,
   "runs": [
     {
       "issue": "ISSUE-1",
@@ -497,6 +497,16 @@
       "result_file": "results/S01-gastown-live-3d14c1b6.json",
       "at": "2026-10-21T23:07:35.882Z",
       "note": "Gas Town intero in bwrap, polecat; run2 con workaround .git/info/exclude"
+    },
+    {
+      "issue": "S09/S07/S04",
+      "scenario": "S09+S07+S04",
+      "cost_usd": 0.774,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "reports/s09-s07-s04-warren-live.md",
+      "at": "2026-10-21T23:28:04.901Z",
+      "note": "8 run Warren LIVE (0,090-0,101 USD ciascuna)"
     }
   ]
 }

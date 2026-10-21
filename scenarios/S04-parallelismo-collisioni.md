@@ -32,7 +32,7 @@ Il controller è in-process o via HTTP finto: nessuna risorsa da pulire. Su Jira
 | Paseo Hub | `PASS` per l'idempotenza | 1 | 6 richieste concorrenti con la stessa `deliveryKey` = 1 sola esecuzione, stessa ricevuta | `reports/s00-paseo-hub.md` |
 | OpenClaw | `PARTIAL` | 1 | Workboard: claim con TTL, token, idempotency key su schede locali (senza LLM) | `reports/s00-openclaw.md` |
 | Paperclip | non eseguito | 0 | lock per run (DOC/CODE) | `reports/comparison.md` §4 |
-| Warren | non eseguito | 0 | nessun lease per issue (CODE); run concorrenti non esercitate | `reports/s01-warren-live.md`, `reports/comparison.md` aggiornamento sera |
+| Warren | `PASS` (parallelismo); **nessun rilevamento dei conflitti**; idempotenza solo con chiave HTTP | 4 run LIVE + 1 prova stub (costo 0) | (a) ISSUE-1 e ISSUE-6 insieme: finestre sovrapposte, nessuna collisione di porte/workspace/branch, due PR, held-out PASS x2, ma **conflitto di merge in `test/cart.test.js`** (entrambi aggiungono test in coda); (b) ISSUE-2 e ISSUE-3 insieme (stesso file): entrambe `succeeded`, due branch e due PR `open`, nessun lock/serializzazione/avviso; il conflitto (`src/pricing.js`, `test/cart.test.js`) emerge solo al merge di prova. Stessa issue due volte senza chiave = due run, due PR (nessun lease); con la stessa `Idempotency-Key` = una sola run (in memoria, TTL 10 min, stub) | `reports/s09-s07-s04-warren-live.md`, `results/S04-warren-s04a-parallel-*.json`, `S04-warren-s04b-conflict-*.json` |
 | Gas Town | non eseguito | 0 | duplicazione task non provata | `reports/comparison.md` §4 |
 | Baseline | non eseguito | 0 | - | - |
 

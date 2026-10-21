@@ -1,0 +1,26 @@
+{
+  "run_id": "01fdcf92-4da5-4476-97be-885778425867",
+  "candidate": "warren",
+  "candidate_version": "warren 0.19.3 @ ce088e8 (runtime local, bwrap reale, forge fake) + claude-code (login Team)",
+  "scenario_id": "S07",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": null,
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T23:18:37.222Z",
+  "finished_at_utc": "2026-10-21T23:18:50.399Z",
+  "duration_seconds": 13.177,
+  "input_tokens": 8,
+  "output_tokens": 1266,
+  "cache_tokens": 111176,
+  "estimated_cost_usd": 0.09388439999999999,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "s07a-ticket: run Warren run_0mwg44tpf93g, stato succeeded, failureReason null, costUsd 0.09388439999999999 (stima a listino), tetto 1, modello init claude-sonnet-5-5. "
+}
