@@ -177,3 +177,10 @@
 - **S03:** 22 review indipendenti di sola lettura: 17/17 mutanti respinti (13 sottili, 4 grossolani), 0/5 falsi positivi, 0,044 USD a review. Vincolo di ruolo: 3 prove PASS (Edit/Write e `node -e` rifiutati dal sistema dei permessi, codice invariato). Effetto soffitto: il test non discrimina questa baseline. DAG e planning non eseguiti.
 - **S08 (HARD-1 poi HARD-3):** handoff PASS/PASS, ma il controllo senza handoff passa uguale (nessun vantaggio misurabile, soffitto); la sessione 3 rileva il cambio di aliquota 22%→21% senza falsi allarmi.
 - Spesa 2,27 USD (ledger ~6,83 su 15). Report: `reports/s03-s08-baseline.md`. n=1, un solo modello, nessun candidato multi-agente.
+
+## 2026-10-22 — Gas Town LIVE (intero Gas Town in bwrap): concluso dopo il nuovo login
+
+- Login rifatto dall'utente (credenziali 551 byte). 2 run su ISSUE-1, entrambe PASS (visibili + held-out lato Windows), `claude-sonnet-5-5`: run1 0,29 USD, run2 0,14 USD (+ ping 0,0013); spesa registrata 0,44 USD (ledger ~7,27 su 15). Report: `reports/s01-gastown-live.md` (sezione 11).
+- **run1:** codice e test OK, ma `gt done` bloccato da file di Gas Town non tracciati (`.beads/redirect`, `.runtime/`, `.claude/commands/`, `CLAUDE.md`): nessun push né MR; il polecat è rimasto fermo fino al limite di 8 minuti. **run2** con workaround dichiarato (pattern in `.repo.git/info/exclude`): `gt done` riuscito, branch pushato sull'origin locale, MR in coda, nessun merge (Refinery non avviato). Commit: autore = polecat, committer = `tae-gt`.
+- Solo il polecat creato (`--no-boot`); spese di fondo di daemon/Deacon/Witness non misurate. Ripresa dopo riavvio solo a riposo. Nessun Claude Code fuori da bwrap; credenziali originali integre (cmp dopo ogni run).
+- Pulizia verificata da me.

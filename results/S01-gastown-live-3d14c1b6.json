@@ -1,0 +1,26 @@
+{
+  "run_id": "3d14c1b6-ed88-48cb-a15c-4b13c1d2cc10",
+  "candidate": "gastown-live",
+  "candidate_version": "gt 1.2.1+649b832 (build pure-Go gms_pure_go), bd v1.0.5, Dolt 2.0.7, tmux 3.6, Claude Code 2.1.306 interattivo in tmux; tutto dentro bwrap; sling --no-boot (solo polecat)",
+  "scenario_id": "S01",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": null,
+  "status": "PASS",
+  "started_at_utc": "2026-10-21T23:02:53.479Z",
+  "finished_at_utc": "2026-10-21T23:03:11.596Z",
+  "duration_seconds": 18.117,
+  "input_tokens": 14,
+  "output_tokens": 2256,
+  "cache_tokens": 265135,
+  "estimated_cost_usd": 0.1423,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "Run LIVE su ISSUE-1 (messaggi del modello: 7). Token dalle trascrizioni: in 14, out 2256, cache read 236133, cache write 29002; costo STIMATO a listino 0.1423 USD (cache write assunto 2,50: non verificato; chiamate Haiku accessorie non misurate). Durata = primo-ultimo messaggio del modello. run2 (con workaround dichiarato: file di Gas Town aggiunti a .repo.git/info/exclude): gt done riuscito in ~28 s dal sling, branch polecat/obsidian/se-25t+mvipwmgi pushato sull'origin locale (autore obsidian, committer tae-gt), MR in coda (MQ:1, refinery non avviato: nessun merge su main), bead chiuso, sessione tmux terminata da sola. INCIDENTE (stesso giorno, prima di queste run): un primo tentativo (run1 bloccata, 44 s, costo 0) fu fermato dal dialogo di fiducia di Claude Code 2.1.306 e il login della distribuzione scadde; il wrapper \"copia e cancella\" aveva scartato il token rinnovato e una versione intermedia sovrascrisse ~/.claude/.credentials.json (551->323 byte). L utente ha rifatto il login; il wrapper corretto non sovrascrive piu l originale (verificato con cmp dopo ogni run). Dettagli in reports/s01-gastown-live.md."
+}

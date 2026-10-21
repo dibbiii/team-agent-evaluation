@@ -1,5 +1,5 @@
 {
-  "spent_usd": 6.830626,
+  "spent_usd": 7.266926,
   "runs": [
     {
       "issue": "ISSUE-1",
@@ -477,6 +477,26 @@
       "result_file": "reports/s03-s08-baseline.md",
       "at": "2026-10-21T20:13:47.132Z",
       "note": "S03 (22 review + 3 prove di ruolo) 1,14; S08 1,13; dettaglio in results/raw/s03-s08-spend.json"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.29400000000000004,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-gastown-live-10e4e5cc.json",
+      "at": "2026-10-21T23:07:35.881Z",
+      "note": "Gas Town intero in bwrap, polecat; run2 con workaround .git/info/exclude"
+    },
+    {
+      "issue": "ISSUE-1",
+      "scenario": "S01",
+      "cost_usd": 0.1423,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-gastown-live-3d14c1b6.json",
+      "at": "2026-10-21T23:07:35.882Z",
+      "note": "Gas Town intero in bwrap, polecat; run2 con workaround .git/info/exclude"
     }
   ]
 }

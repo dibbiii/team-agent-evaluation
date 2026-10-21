@@ -5,7 +5,7 @@
 set -euo pipefail
 [ "${WSL_DISTRO_NAME:-}" = "Ubuntu-26.04" ] || { echo "STOP: non sei in Ubuntu-26.04"; exit 3; }
 LABEL="${1:?etichetta}"; MAX="${2:?secondi}"; ISSUE="${3:?ISSUE-N}"; CAP="${4:?tetto}"; shift 4
-if ps -eo args --no-headers | grep -E 'bwrap|claude|tmux|dolt' | grep -v grep >/dev/null; then echo "STOP: processi bwrap/claude/tmux/dolt gia' presenti"; exit 1; fi
+if ps -eo args --no-headers | grep -E 'bwrap|tmux|dolt' | grep -v grep >/dev/null; then echo "STOP: processi bwrap/tmux/dolt gia' presenti"; exit 1; fi
 printf '%s\n' "$CAP" > "$HOME/gt-sbhome/obs-cap"
 setsid nohup bash "$HOME/gastown-sandboxed.sh" --creds -- bash /home/sandbox/gastown-monitor-inner.sh "$LABEL" "$MAX" "$ISSUE" "$@" > "$HOME/gt-run-$LABEL.out" 2>&1 < /dev/null &
 echo $! > "$HOME/gt-run-$LABEL.pid"

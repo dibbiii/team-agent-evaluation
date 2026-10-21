@@ -220,9 +220,9 @@ Etichette corrette o precisate dalla prova:
 
 Prima prova consigliata una volta autorizzato un agente reale: provare Refinery in modalità `pr` con `require_review=true` e verificare che il merge non avvenga senza approvazione; verificare l'effetto reale di `gt estop` su Claude Code; ripetere D di #4819 uccidendo Dolt a metà di `gt done`.
 
-## Risultati sperimentali S01 LIVE (2026-10-21): BLOCKED dopo preparazione e prove a costo zero
+## Risultati sperimentali S01 LIVE (2026-10-21): 2 run PASS (dopo un blocco iniziale per login scaduto)
 
-Dettaglio in `reports/s01-gastown-live.md`; dati in `results/S01-gastown-live-blocked.json`; grezzi in `results/raw/gastown-*`. **Nessuna run con l'agente vero**, costo delle chiamate al modello 0 USD.
+Dettaglio in `reports/s01-gastown-live.md`; dati in `results/S01-gastown-live-blocked.json`; grezzi in `results/raw/gastown-*`. Prima fase: nessuna run (login scaduto, vedi nota di processo). **Fase ripresa: 2 run con l'agente vero, entrambe PASS** (visibili e held-out, `claude-sonnet-5-5`), stima a listino 0,2927 e 0,1423 USD (totale ~0,44 USD), tutto in bwrap con `gt sling --no-boot`. Dati: `results/S01-gastown-live-10e4e5cc.json`, `...-3d14c1b6.json`; dettaglio in sez. 11 del report.
 
 | Affermazione | Etichetta | Evidenza |
 |---|---|---|
@@ -233,6 +233,8 @@ Dettaglio in `reports/s01-gastown-live.md`; dati in `results/S01-gastown-live-bl
 | `gt` compila senza gcc/ICU con `CGO_ENABLED=0 -tags gms_pure_go` (62 s) al commit 649b832; `bd` v1.0.5 14 s; Dolt 2.0.7 sha256 verificato; Go 1.26.2 sha256 verificato | TESTED | `results/raw/gastown-build.log` |
 | Un polecat non puo' fare `gt sling` ("polecats cannot sling"), ma puo' leggere/scrivere tutti i bead su Dolt senza password | TESTED | `results/raw/gastown-probe-control-surface.txt` |
 | Claude Code 2.1.306 in HOME nuova richiede onboarding e fiducia preimpostati; il dialogo di fiducia ha "No, exit" preselezionato e **Gas Town 649b832 non lo accetta** (`startup blocked ... workspace trust prompt`, rollback automatico dello spawn); la fiducia e' per percorso esatto, non ereditata dalla cartella padre | TESTED | run1 e prove di onboarding |
-| Run LIVE su ISSUE-1: durata, costo, token, modello, esito, merge, identita' del commit, ripresa dopo riavvio, spese di fondo (daemon, Deacon, Witness) | BLOCKED | login di Claude Code nella distribuzione scaduto e non rinnovabile (`OAuth session expired and could not be refreshed`); serve un nuovo login interattivo dell'utente |
+| Run LIVE su ISSUE-1 (n=2): PASS/PASS; commit con autore = nome del polecat e committer = identita' git della sandbox; run1 con `gt done` BLOCCATO dai file di Gas Town non tracciati (nessun push/MR), run2 (workaround `.repo.git/info/exclude`) con push del branch sull'origin locale, MR in coda, bead chiuso, nessun merge (Refinery non avviato); costo 0,2927/0,1423 USD a listino; `gt costs` (prezzi hardcoded) 0,98 USD per run1 | TESTED | report sez. 11 |
+| Stato dopo riavvio della sandbox (Dolt, bead, MR in coda, branch) | TESTED | `gt mq list`, `gt status`; ripresa a meta' lavoro non provata |
+| Spese di fondo di daemon/Deacon/Witness, merge del Refinery, E-stop su Claude Code reale | UNVERIFIED | non avviati |
 
 Nota di processo: il wrapper "copia le credenziali e cancella all'uscita" usato per tutti i candidati e' fragile quando il token scade durante la sessione (la copia rinnovata viene cancellata e l'originale resta con un refresh token invalidato); e' la causa probabile della perdita del login. Il wrapper di Gas Town ora conserva la copia cambiata come `.credentials.json.refreshed` e non sovrascrive mai l'originale.

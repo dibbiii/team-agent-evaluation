@@ -1,6 +1,6 @@
-# S01 - Gas Town, prove LIVE con Claude Code reale: BLOCKED (login scaduto) dopo preparazione e prove a costo zero
+# S01 - Gas Town, prove LIVE con Claude Code reale: 2 run PASS (dopo un blocco iniziale per login scaduto, riportato sotto)
 
-Data: 2026-10-21 (UTC circa 18:35-19:05). Esito complessivo: **BLOCKED** per la parte 2 (nessuna run con l'agente vero). Fatte per intero la parte 1 (lettura del codice e prove a costo zero), la preparazione completa dell'ambiente confinato e la parte 4 (pulizia). Costo delle chiamate al modello: **0 USD misurato** (nessun prompt e' mai arrivato al modello). Dati: `results/S01-gastown-live-blocked.json`; grezzi in `results/raw/gastown-*` (non versionati). Etichette: **TESTED** = eseguito qui con comando e risultato; **CODE** = letto nel sorgente (clone al commit `649b832`), non eseguito; **UNVERIFIED/BLOCKED** = non provato.
+Data: 2026-10-21 (UTC circa 18:35-19:05). Esito complessivo: **2 run con l'agente, entrambe PASS** (visibili e held-out), riprese dopo che l'utente ha rifatto il login. La prima fase (sez. 1-10) si era fermata in BLOCKED e resta come cronologia; i risultati veri sono nella sez. 11 (dati: `results/S01-gastown-live-10e4e5cc.json`, `...-3d14c1b6.json`).
 
 ## Esito in breve (le 5 parti)
 
@@ -88,6 +88,41 @@ Letti **solo i nomi** da `/proc/<pid>/environ` (`results/raw/gastown-obs-nocred1
 
 ## 9. Limiti e non provato
 Nessuna run con l'agente; nessuna misura di avvio, durata, costo, token, modello effettivo, esito sui test, commit/identita'/merge del polecat, ripresa dopo riavvio, `gt costs` con sessioni reali, comportamento del Refinery (`direct`), spese di fondo di daemon/Deacon/Witness, E-stop su Claude Code reale. Il build `gms_pure_go` non confrontato con quello ICU. Il dialogo "Bypass Permissions" nel flusso reale di `gt sling` non e' stato osservato. Solo ISSUE-1 prevista.
+
+## 11. Run riprese (2026-10-21, UTC 22:45-23:10): 2 run PASS
+
+Dopo il nuovo login dell'utente: ricreati fixture, town e rig (`gastown-setup-inner.sh`, doctor 86/6/0), `~/.claude.json` preimpostato (`gastown-seed-inner.sh`: onboarding, tema, fiducia per i percorsi **esatti** dei worktree `.../polecats/<nome>/seedapp` con i primi 10 nomi del pool), copia di riferimento dell'originale delle credenziali (`gt-cred-ref`, solo per `cmp`), **ping** Haiku nel wrapper corretto: `is_error:false`, 0,0013 USD, nessun file `.refreshed`, originale invariato (`cmp`). Il dialogo di fiducia **non** e' comparso e `gt sling` e' riuscito. Comando: `gastown-start-run.sh run<N> 480 ISSUE-1 0.9` (setsid, tetto cumulativo 0,9 USD stimato, limite 480 s, guardia sul modello `*opus*`), che lancia dentro bwrap `gt sling <bead> seedapp --no-boot`. Prompt = quello di `run-baseline.mjs` (descrizione del bead). Esportazione di `package.json src test` senza `.claude/`, `.beads/`, `CLAUDE.md` (`gastown-export.sh`); valutazione `node scripts/evaluate.mjs <cartella> ISSUE-1 gastown-live S01 LIVE claude-sonnet-5-5`; JSON completati con `gastown-record-run.mjs` (senza ledger).
+
+| | run1 (predefinito meno boot) | run2 (con 1 workaround dichiarato) |
+|---|---|---|
+| Esito valutazione | **PASS / PASS** (visibili, held-out) | **PASS / PASS** |
+| Modello | `claude-sonnet-5-5` (trascrizione) | `claude-sonnet-5-5` |
+| Attivita' del modello (primo-ultimo messaggio) | 40,0 s, 12 messaggi | 18,1 s, 7 messaggi; sling -> `gt done` ~28 s |
+| Token (in / out / cache read / cache write) | 24 / 4.273 / 548.773 / 56.071 | 14 / 2.256 / 236.133 / 29.002 |
+| Costo STIMATO a listino (cache write 2,50 assunto) | **0,2927 USD** | **0,1423 USD** |
+| `gt costs` (sessione viva) | 0,98 USD (prezzi hardcoded di Gas Town: non confrontabile) | n/d (sessione gia' chiusa) |
+| Fine del lavoro | `gt done` **bloccato**: `cannot complete: uncommitted changes would be lost` per i file di Gas Town non tracciati (`.beads/redirect`, `.runtime/`, `.claude/commands/`, `CLAUDE.md`). Il polecat ha scritto al Witness (non avviato) e atteso fino al limite di 480 s (costo fermo da t+103 s: nessuna spesa durante l'attesa). Nessun push, nessuna MR, bead HOOKED | `gt done` riuscito: branch `polecat/obsidian/se-25t+mvipwmgi` pushato sull'**origin locale**, MR in coda (`gt mq list`: 1 elemento `ready`, `MQ:1`), bead CLOSED, sessione tmux terminata da sola |
+| Commit / identita' | commit locale `2fda14b`: autore `obsidian <tae-gt@example.invalid>`, committer `tae-gt` | commit `e4c035e`: stessa identita' (autore = nome del polecat da `GIT_AUTHOR_NAME`, committer = identita' git globale della sandbox) |
+| Merge su main | no | **no**: il Refinery (che con `direct` fa il merge) non era avviato (`--no-boot`); `main` resta `73f78fa` |
+
+- **Workaround di run2 (differenza dal predefinito)**: aggiunti i pattern dei file di Gas Town a `.repo.git/info/exclude` (`gastown-exclude-inner.sh`). Il blocco di `gt done` nel predefinito e' quindi un difetto/lacuna di questo commit con una fixture priva di `.gitignore` (in un repository con quei pattern ignorati non scatterebbe; non provato). L'agente ha scelto da solo di non committare quei file.
+- **Qualita'**: entrambe le run correggono `percentOff` con aritmetica intera/`Math.round` e aggiungono 2 test (7/7).
+- **Agenti e spese automatiche**: solo il polecat (nessun Mayor/Deacon/Witness/Refinery/daemon, `gt status`). La mail al Witness inesistente non ha avuto effetti di costo. **Spese di fondo di daemon/Deacon/Witness non misurate** (non avviati). Chiamate Haiku accessorie non misurate.
+- **Spesa totale Gas Town (stima a listino)**: 0,2927 + 0,1423 + ping 0,0013 = **~0,44 USD** su 1,5 (2 run su 2).
+- **Segreti nell'ambiente**: stessi nomi della sez. 5 (verificato: lista identica a quella del polecat della prova a costo zero), nessun nome da segreto.
+- **Ripresa dopo riavvio (parziale, costo zero)**: dopo l'uscita del bwrap e un riavvio completo della sandbox (`gastown-restart-inner.sh`, `results/raw/gastown-restart-check.txt`) Dolt riparte e lo stato e' intatto: bead CLOSED, MR in coda, polecat `idle` (`reuse: idle-recovery-needed`), branch su origin. La ripresa di una sessione di agente **a meta' lavoro** NON e' stata provata.
+- **Credenziali**: dopo ogni run `cmp` contro la copia di riferimento: **originale invariato** (551 byte), nessun `.refreshed`, nessuna copia residua. Pulizia dopo le run: rimossi `~/gt-sbhome`, `~/gt-cred-ref`, tar in `~/out`, log; la sessione `claude` (pid 449) dell'utente non e' stata toccata. Grezzi: `results/raw/gastown-obs-run1|run2`, `gastown-transcripts-all`, `gastown-run1.tar|run2.tar`, `gastown-restart-check.txt`, log del wrapper.
+- **Confronto NON isolato** (stesso prompt/modello; versioni e prompt di sistema diversi, n piccolo, issue facile, effetto soffitto):
+
+| | Baseline | Warren | Paperclip | Paseo | OpenClaw | **Gas Town** |
+|---|---|---|---|---|---|---|
+| ISSUE-1 | PASS | 3/3 | 2/2 | 2/2 | 2/2 | **2/2 PASS** (run1 senza completare la consegna) |
+| Costo per run (listino) | ~0,05 | 0,0945 | 0,067/0,157 | 0,073/0,072 | 0,245/0,121 (+0,128 non richiesti) | **0,293 / 0,142** |
+| Durata del lavoro | n/d | 13-17 s | 13-28 s | 12 s | 17-22 s | **18-40 s** (sling->done 28 s in run2) |
+| Commit/PR | no | commit + PR finta | no | no | no | **commit + push di un branch sull'origin locale + MR in coda** (run2); merge solo col Refinery |
+| Processi | 0 | 1 | 1 | 1 | Gateway ~1,5 GB | dolt ~110 MB + tmux + 1 claude |
+
+Limiti aggiuntivi: Refinery (`direct`), Witness/Deacon/daemon ed E-stop su un Claude Code reale restano non provati; `gt done` e MR provati solo col workaround; il modello viene dal `.claude/settings.json` del repo (confermato dalla trascrizione: `claude-sonnet-5-5`).
 
 ## 10. Per riprendere (dopo il nuovo login dell'utente)
 ```powershell
