@@ -53,3 +53,6 @@ Data: 2026-10-22 (aggiornato dopo le run LIVE di **tutti e cinque** i candidati,
 2. [Fatto] Studio del codice per il §8 (Paperclip→Warren), a costo zero: `docs/integration-paperclip-warren.md`.
 3. [Fatto] Prove piccole a costo basso: S09, S07 e S04 su Warren (0,77 USD), S03 sui mutanti e S08 sulla baseline (2,27 USD).
 4. Ancora fattibile a costo zero: prototipo dell'adapter Paperclip→Warren contro un finto Warren (non eseguito: serve avviare Paperclip in un container); aggiornare le schede dei candidati e la tracciabilità con le run LIVE.
+
+## Aggiornamento 2026-10-22 (sera)
+Fatti dopo la tabella sopra: n=3 sulla fixture difficile (`reports/hard-n3.md`), forge GitHub reale con protezione del ramo per Warren (`reports/s01-warren-github.md`), webhook Jira reali (S05, `docs/jira-setup.md`). Non fatti: VM remota («PC spento»), S02 sui candidati, S06 con agente vero e run in volo, S10, spike del runner A (D34), agente che sonda attivamente i confini, rete limitata. Le righe sopra che li indicano come «serve» per forge e webhook sono superate.
