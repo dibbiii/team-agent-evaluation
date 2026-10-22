@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const TOTAL_CAP_USD = 15.0;
+const TOTAL_CAP_USD = 35.0; // alzato da 15 a 35 il 2026-10-22 (approvazione dell utente alle tre fasi: docs/next-phase-plan.md)
 const RUN_CAP_USD = 1.5;
 const MAX_TURNS = 25;
 
