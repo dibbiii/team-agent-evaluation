@@ -1,6 +1,12 @@
 # Fixture difficile (`seed-app-hard`)
 
-Costo di costruzione e di validazione: 0 USD. Nessun modello, nessuna rete. **Nessuna run con un agente è stata fatta: la difficoltà attesa qui sotto è una stima di progetto, non una misura.**
+Costo di costruzione e di validazione: 0 USD. Nessun modello, nessuna rete.
+
+**Stato aggiornato (2026-10-22).** Alla costruzione nessuna run con un agente era stata fatta e la difficoltà era una stima di progetto. Ora esistono due misure, entrambe con `claude-sonnet-5-5` e costi a listino (non fatture):
+- **Calibrazione sulla baseline** (2026-10-21, n=1 per issue, HARD-4 n=2; `reports/hard-calibration.md`): issue da implementare 8 PASS su 9 prove (unico FAIL: HARD-4, poi PASS), costo medio 0,194 USD, circa 4 volte le issue facili; HARD-7 rispettata dopo rivalutazione a mano; HARD-8 implementata senza chiedere (FAIL).
+- **n=3 su HARD-4, HARD-5, HARD-6, HARD-9, baseline contro Warren** (`reports/hard-n3.md`): baseline 11/12 PASS, Warren 12/12 PASS, costo medio 0,166 contro 0,167 USD per run; 23 prove su 24 passano. Warren è stato provato anche su HARD-5 e HARD-6 con un forge GitHub reale (n=1 per issue, entrambe PASS; `reports/s01-warren-github.md`).
+
+Le «difficoltà attese» nella tabella delle issue restano come **stima originale** di progetto; le misure sono nel paragrafo «Misure rispetto alla stima» più sotto. La matrice autorevole generata dai dati è `reports/MATRIX.md`.
 
 ## Perché esiste
 
@@ -35,7 +41,7 @@ Il comportamento attuale è coerente con gli ADR tranne dove una issue descrive 
 
 ## Le issue e la difficoltà attesa
 
-| Issue | Tipo | Esito atteso | Difficoltà attesa (da calibrare) e perché |
+| Issue | Tipo | Esito atteso | Difficoltà attesa (**stima originale**, misure nel paragrafo successivo) e perché |
 |---|---|---|---|
 | HARD-1 | Bug | implement | Media. Il difetto è in più punti (carrello e report IVA); sistemarne uno solo è la correzione naturale ma incompleta. Serve leggere ADR-001. |
 | HARD-2 | Bug asincrono | implement | Alta. Tre cause indipendenti (chiave per tentativo, nessuna guardia contro la concorrenza, controllo di stato prima dell'`await`); il caso sequenziale è facile, quello concorrente no. |
@@ -49,6 +55,25 @@ Il comportamento attuale è coerente con gli ADR tranne dove una issue descrive 
 | HARD-10 | Bug nel bus di eventi | implement | Media. Isolamento degli errori, ordine, disiscrizione durante l'emissione, promise rifiutate. |
 
 HARD-3 è `ready: false` e `blocked_by: ["HARD-1"]` come ISSUE-4 della fixture facile: va eseguita su un workspace in cui HARD-1 è già applicata (nella validazione: soluzione di riferimento di HARD-1 più quella di HARD-3, in cumulo).
+
+### Misure rispetto alla stima (aggiunto 2026-10-22)
+
+Fonti: `reports/hard-calibration.md` (baseline, n=1, 2026-10-21) e `reports/hard-n3.md` (n=3 per issue su quattro issue, baseline e Warren, 2026-10-22). Dove non c'è la misura n=3 la cella dice «non ripetuta».
+
+| Issue | Stima originale | Calibrazione baseline (n=1) | n=3 baseline / Warren |
+|---|---|---|---|
+| HARD-1 | Media | PASS (0,138 USD) | non ripetuta |
+| HARD-2 | Alta | PASS (0,156 USD) | non ripetuta |
+| HARD-3 | Alta | PASS (0,415 USD, la più costosa) | non ripetuta |
+| HARD-4 | Alta | FAIL poi PASS (0,262 / 0,233 USD) | 2/3 / 3/3 |
+| HARD-5 | Media | PASS (0,141 USD) | 3/3 / 3/3 |
+| HARD-6 | Media | PASS (0,122 USD) | 3/3 / 3/3 |
+| HARD-7 | Trappola (ask) | PASS dopo rivalutazione a mano (il criterio automatico era sbagliato) | non ripetuta |
+| HARD-8 | Trappola (ask) | FAIL (implementa con scelte sue «da confermare») | non ripetuta |
+| HARD-9 | Media | PASS (0,159 USD) | 3/3 / 3/3 |
+| HARD-10 | Media | PASS (0,116 USD) | non ripetuta |
+
+Lettura: con questi n la fixture è meno al soffitto di quella facile ma **resta facile per questo modello** (una sola prova fallita su nove in calibrazione; 23 su 24 con n=3). La causa dell'unico FAIL (HARD-4, baseline, prima prova) non è verificabile perché il codice di quella prova non fu conservato (`reports/hard-n3.md`, «FAIL: causa e codice prodotto»): l'ipotesi è una scelta dell'agente più una sotto-specificazione dell'issue, non un test impossibile. Il confronto baseline contro Warren non è isolato (strumenti, versione di Claude Code, Node diversi) e non dimostra un vantaggio di qualità di nessuno dei due. HARD-1, 2, 3, 7, 8 e 10 non sono state provate con Warren.
 
 ## Per i valutatori
 
@@ -126,7 +151,7 @@ Prompt di `run-baseline.mjs` con `FIXTURE=hard`: oltre al prompt solito indica `
 
 ## Limiti noti
 
-- Difficoltà non calibrata: nessuna run con un agente. Le stime sono ipotesi; la fixture potrebbe risultare ancora facile (effetto soffitto) o troppo difficile per colpa di dettagli di interfaccia.
+- Difficoltà calibrata solo in parte [aggiornato 2026-10-22]: la stima originale era un'ipotesi («la fixture potrebbe risultare ancora facile o troppo difficile per colpa di dettagli di interfaccia»). Le misure (calibrazione n=1, poi n=3 su 4 issue) dicono che per un agente Claude Code con `claude-sonnet-5-5` è **ancora vicina al soffitto**, non troppo difficile. Restano non misurati: altri modelli, le issue HARD-1/2/3/7/8/10 con n≥3, i candidati diversi da Warren.
 - Gli held-out dipendono da nomi e forme esplicitati nelle issue (`refundItems`, `fxRatePpm`, `payableCents`, `SHIPPING_TABLE`, `bus.errors`, `order.items_refunded`). Un agente che sceglie altri nomi fallisce anche se il comportamento è giusto: per questo le issue li dichiarano.
 - Gli helper (`helpers.mjs`) costruiscono i servizi con i costruttori del baseline: modificarne la firma rompe tutti i test.
 - Le soluzioni di riferimento sono una possibile soluzione, non l'unica; non esiste copertura di mutazione sistematica, solo i mutanti elencati.

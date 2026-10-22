@@ -3,6 +3,8 @@
 // Uso: node scripts/evaluate.mjs <workspace-dir> <ISSUE-KEY> <candidate> <scenario> <mode> [model]
 // Copia il solo `src/` del workspace in una cartella temporanea insieme ai test di accettazione,
 // così l'agente non può alterare i test né influenzare l'ambiente di valutazione.
+// Opzioni facoltative (consegna, vedi docs/results-schema.md): --pr=created|none --ci=passed|failed|none
+//   --review=approved|pending|none --tracker=updated|none --notes=testo. Senza opzioni workflow_acceptance resta «non misurato» (null).
 // FIXTURE=hard usa la fixture difficile: fixtures/seed-app-hard + fixtures/acceptance-hard (cartella intera, con helper e golden).
 import { cpSync, mkdtempSync, mkdirSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -10,15 +12,24 @@ import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
+import { splitArgs, buildWorkflowAcceptance } from './lib/workflow-acceptance.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const hard = process.env.FIXTURE === 'hard';
 const seedName = hard ? 'seed-app-hard' : 'seed-app';
 const accName = hard ? 'acceptance-hard' : 'acceptance';
-const [workspace, issue, candidate = 'unknown', scenario = 'S01', mode = 'MOCK', model = null] =
-  process.argv.slice(2);
+// I flag `--x=y` vengono separati dagli argomenti posizionali: così gli script che chiamano evaluate.mjs
+// con soli argomenti posizionali continuano a funzionare identici.
+let positional, flags;
+try {
+  ({ positional, flags } = splitArgs(process.argv.slice(2)));
+} catch (e) {
+  console.error(e.message);
+  process.exit(2);
+}
+const [workspace, issue, candidate = 'unknown', scenario = 'S01', mode = 'MOCK', model = null] = positional;
 if (!workspace || !issue) {
-  console.error('usage: evaluate.mjs <workspace> <ISSUE-KEY> [candidate] [scenario] [mode] [model]');
+  console.error('usage: evaluate.mjs <workspace> <ISSUE-KEY> [candidate] [scenario] [mode] [model] [--pr=..] [--ci=..] [--review=..] [--tracker=..] [--notes=..]');
   process.exit(2);
 }
 
@@ -61,7 +72,10 @@ const record = {
   mode,
   model,
   baseline_commit: null,
+  // `status` = SOLO il codice (test visibili + held-out). La consegna sta in `workflow_acceptance`.
   status: pass ? 'PASS' : 'FAIL',
+  code_acceptance: pass ? 'PASS' : 'FAIL', // stesso valore di `status`, nome esplicito
+  workflow_acceptance: buildWorkflowAcceptance(flags), // tutto null = «non misurato»
   started_at_utc: started.toISOString(),
   finished_at_utc: finished.toISOString(),
   duration_seconds: (finished - started) / 1000,
@@ -80,5 +94,5 @@ const outDir = join(root, 'results');
 mkdirSync(outDir, { recursive: true });
 const out = join(outDir, `${scenario}-${candidate}-${record.run_id.slice(0, 8)}.json`);
 writeFileSync(out, JSON.stringify(record, null, 2));
-console.log(JSON.stringify({ status: record.status, checks, result_file: out }, null, 2));
+console.log(JSON.stringify({ status: record.status, code_acceptance: record.code_acceptance, workflow_acceptance: record.workflow_acceptance, checks, result_file: out }, null, 2));
 process.exit(pass ? 0 : 1);

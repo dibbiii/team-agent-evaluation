@@ -7,7 +7,7 @@ Stato: **PARZIALE (solo baseline)**. Eseguita il 2026-10-21 sulla baseline Claud
 - **Obiettivo (§6):** un agente lavora su una issue e registra decisioni, scoperte e riferimenti ai commit; una **nuova sessione indipendente** per la issue successiva recupera il contesto utile senza leggere la chat precedente; una modifica rende obsoleta una conoscenza (invalidazione/revisione dopo merge simulato o commit); passaggio a un secondo sviluppatore (stato, blocchi, piano, diff, decisioni); distinguere handoff strutturato da subentro nella stessa sessione attiva.
 
 ## Setup e condizioni iniziali
-Non realizzati. Materiale riutilizzabile: fixture difficile con ADR in `fixtures/seed-app-hard/docs/adr/` (6 decisioni approvate); catalogo `fixtures/issue-catalog/hard-issues.json` con dipendenza HARD-3 dopo HARD-1.
+Realizzato solo sulla baseline (vedi Stato; setup e comandi in `reports/s03-s08-baseline.md`), non sui candidati. Materiale usato e riutilizzabile: fixture difficile con ADR in `fixtures/seed-app-hard/docs/adr/` (6 decisioni approvate); catalogo `fixtures/issue-catalog/hard-issues.json` con dipendenza HARD-3 dopo HARD-1.
 
 ## Input
 HARD-1 (sessione 1, scrive HANDOFF.md) -> HARD-3 (sessione 2 nuova, con handoff; controllo senza) -> sessione 3 nuova di sola lettura dopo un commit che porta l'aliquota IT standard da 22% a 21% (domanda generica U e mirata T).

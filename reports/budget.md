@@ -60,7 +60,7 @@ L'utente ha delegato la scelta del budget (che «viene preso dall'abbonamento»)
 
 Regole di arresto: stop dopo 2 run consecutive in errore di esecuzione; stop se `scripts/wsl-isolate.sh verify` non passa; stop se una run tenta di leggere o scrivere fuori dal worktree o di raggiungere il disco Windows; stop se il login scade.
 
-Rischio accettato dall'utente: il token di accesso dell'abbonamento resta salvato nella distribuzione dedicata e può essere letto dai processi che girano lì (codice di terzi, agenti con i permessi disattivati). Non è denaro, ma un accesso al suo account. Mitigazioni: distribuzione senza disco Windows né interop, utente non root, `claude logout` e `wsl --unregister Ubuntu-26.04` a fine prova, e nessun altro uso di quella distribuzione.
+Rischio accettato dall'utente: il token di accesso dell'abbonamento resta salvato nella distribuzione dedicata e può essere letto dai processi che girano lì (codice di terzi, agenti con i permessi disattivati). Non è denaro, ma un accesso al suo account. Mitigazioni: distribuzione senza disco Windows né interop, utente non root, `claude logout` e `wsl --unregister Ubuntu-26.04` a fine prova (eseguiti il 2026-10-22), e nessun altro uso di quella distribuzione.
 
 Costi: con l'abbonamento `total_cost_usd` è una stima a listino. Warren può avere un proprio tetto per run (da configurare); in ogni caso il registro del benchmark è la fonte per il totale.
 

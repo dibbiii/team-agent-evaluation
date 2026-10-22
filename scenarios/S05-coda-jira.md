@@ -1,6 +1,6 @@
 # S05 — Coda continua e integrazione Jira
 
-Stato: **PARZIALE**. Il controller di riferimento (adapter minimo nostro) è `PASS` su mock e su **Jira Cloud reale** (n=1); **nessun candidato è stato provato con la coda**; webhook non provati.
+Stato: **PARZIALE**. Il controller di riferimento (adapter minimo nostro) è `PASS` su mock e su **Jira Cloud reale** (n=1); **nessun candidato è stato provato con la coda**. **[Aggiornato 2026-10-22 sera]** I **webhook sono stati provati su Jira reale** (n=1: 2 eventi ricevuti, duplicato scartato); restano non provati i ritentativi veri di Jira, le consegne fuori ordine e i webhook che comandano il controller (sezione in fondo).
 
 ## ID e obiettivo
 - **ID:** S05. **Requisiti:** R01.1-R01.6, R05.1.
@@ -33,7 +33,8 @@ Primo claim = issue a priorità più alta e non bloccata; claim concorrenti dist
 |---|---|---|---|---|
 | Controller di riferimento, mock | `PASS` | test | coda drenata in ordine; bloccata e ambigua mai scelte; evento duplicato idempotente anche dopo riavvio; rollback se Jira rifiuta la transizione | `fixtures/mock-integrations/queue-controller.test.mjs` |
 | Controller di riferimento, **Jira Cloud reale** | `PASS` | 1 | 8 controlli su 8, 17,6 s, 0 USD, nessun LLM; il campo `mode` del JSON dice MOCK perché indica l'assenza di LLM, ma il Jira era reale (scritto nelle note) | `results/S05-jira-live-6a5eeb8f.json`, `reports/execution-log.md` |
-| Warren | `PARTIAL` | 1 | conformance di `fake-jira` 8 gruppi (TESTED); estensione Jira sperimentale: sola lettura, stati, blockedBy, close (CODE); niente lease né webhook | `reports/s00-warren.md`, `reports/comparison.md` §1 |
+| Webhook Jira reali (ricevitore nostro + tunnel temporaneo, nessun candidato) | `PASS` come ricezione (non è uno scenario completo) | 1 | regola di Automation → POST verso `scripts/jira-webhook-receiver.mjs`: 2 eventi (KAN-4 → In Progress → To Do) in ~0,14 s, duplicato rispedito a mano scartato, richieste senza segreto → 404. Il ricevitore registra, non guida il controller; nessun ritentativo vero di Jira né consegna fuori ordine provati | `docs/jira-setup.md`, `results/S05-jira-webhook-events.jsonl` |
+| Warren | `PARTIAL` | 1 | conformance di `fake-jira` 8 gruppi (TESTED); estensione Jira sperimentale: sola lettura, stati, blockedBy, close (CODE); niente lease; nessun ricevitore di webhook Jira nativo provato (il ricevitore sopra è nostro) | `reports/s00-warren.md`, `reports/comparison.md` §1 |
 | OpenClaw | `PARTIAL` | 1 | Workboard con claim/TTL/idempotency su schede locali, spento di default; Jira assente | `reports/s00-openclaw.md` |
 | Paseo Hub | `PARTIAL` | 1 | dispatch idempotente per `deliveryKey`, coda con daemon offline; Jira assente | `reports/s00-paseo-hub.md` |
 | Paperclip, Gas Town | non eseguito | 0 | nessun connettore Jira (spec in bozza per Paperclip; CODE) | `reports/comparison.md` §1 |
@@ -49,8 +50,8 @@ Primo claim = issue a priorità più alta e non bloccata; claim concorrenti dist
 **PARZIALE.**
 - Il controller (`fixtures/mock-integrations/queue-controller.mjs`) è codice nostro: 133 righe contate nel file (i report citano 131 o 97 a seconda della data), più 193 del finto REST e 145 dello script di creazione (`wc -l`). Non attribuisce la capacità ai prodotti.
 - Il test sul Jira reale ha **smentito due ipotesi del mock** (direzione dell'`issueLink`; `reconcile` poteva toccare ticket non del benchmark), corrette.
-- Non provati: webhook reali (serve un endpoint raggiungibile da Jira), riavvio del controller con persistenza reale (Postgres), qualunque candidato con Jira reale.
+- *Fase precedente:* webhook reali non provati (serviva un endpoint raggiungibile da Jira). **[Aggiornato 2026-10-22 sera]** ricezione provata con un tunnel temporaneo (sezione in fondo). Ancora non provati: webhook che comandano il controller, ritentativi veri di Jira, consegne fuori ordine, riavvio del controller con persistenza reale (Postgres), qualunque candidato con Jira reale.
 
 
 ## Aggiornamento 2026-10-22 — webhook reali
-Provati su Jira Cloud reale (progetto KAN): regola di Automation → richiesta web verso un ricevitore locale attraverso un tunnel temporaneo; 2 eventi di transizione ricevuti in circa 0,14 s, duplicato scartato (TESTED, n=1). Dettagli e limiti in `docs/jira-setup.md`; dati in `results/S05-jira-webhook-events.jsonl`. Resta non provato: webhook che comandano il controller, ritentativi reali, consegne fuori ordine, riavvio con persistenza reale, qualunque candidato con Jira reale.
+Provati su Jira Cloud reale (progetto KAN): regola di Automation → richiesta web verso un ricevitore locale attraverso un tunnel temporaneo; 2 eventi di transizione ricevuti in circa 0,14 s, duplicato scartato (TESTED, n=1). Dettagli e limiti in `docs/jira-setup.md`; dati in `results/S05-jira-webhook-events.jsonl`. Un evento rispedito a mano (simula un ritentativo) è stato scartato come duplicato, ma **ritentativi veri di Jira e consegne fuori ordine non sono stati provati**. Limiti dichiarati: nessuna autenticazione oltre al segreto nell'URL (Automation non firma il corpo), tunnel `trycloudflare` non adatto alla produzione; tunnel e ricevitore fermati, la regola in Jira va disattivata o cancellata dall'utente (l'URL contiene il segreto). Resta non provato: webhook che comandano il controller, riavvio con persistenza reale, qualunque candidato con Jira reale.

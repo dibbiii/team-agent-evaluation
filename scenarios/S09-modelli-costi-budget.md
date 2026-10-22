@@ -8,7 +8,7 @@ Stato: **PARZIALE**. Costi e token misurati per baseline e candidati nelle run L
 
 ## Setup e condizioni iniziali
 - Un solo modello in tutte le run: `claude-sonnet-5-5`, con login `claude.ai` (abbonamento Team): `total_cost_usd` è una **stima a listino**, `costBasis: "list"` (`reports/budget.md`).
-- Registro cumulativo `results/budget-ledger.json` (tetto 15 USD; `spent_usd` 4,560626 al momento della lettura).
+- Registro cumulativo `results/budget-ledger.json` (tetto 15 USD; `spent_usd` 4,560626 al momento della lettura iniziale; [aggiornato 2026-10-22] valore finale 11,36 USD su 15, `spent_usd` 11,356626).
 
 ## Input
 Le run di S01 (e S02/S07 sulla baseline).
@@ -40,7 +40,7 @@ Non applicabile (nessuna risorsa persistente oltre al registro).
 `results/budget-ledger.json`, campi `estimated_cost_usd`/`input_tokens`/`output_tokens`/`cache_tokens` nei JSON di `results/`.
 
 ## Costi
-Spesa del registro 4,56 USD su 15. Lotto S09/S07/S04 su Warren (8 run, `reports/s09-s07-s04-warren-live.md`): 0,774 USD su 1,5, non nel registro; le 2 run S09 costano 0,1010 (tetto 0,01) e 0,0968 (tetto 0,5). Gas Town: circa 0,44 USD (2 run più ping).
+Spesa del registro: 4,56 USD su 15 alla stesura iniziale della scheda (fase precedente); **11,36 USD su 15 a fine prove** ([aggiornato 2026-10-22]: dopo S09/S07/S04 8,04, poi fixture difficile n=3 circa 3,07 USD con 0,166 e 0,167 USD medi per run di baseline e Warren, poi forge reale circa 0,24 USD; `reports/execution-log.md`, `reports/hard-n3.md`, `reports/s01-warren-github.md`). Il comportamento del tetto per run di Warren non è stato rimisurato in questi lotti (nelle 2 run con forge reale il tetto era 1 USD e non è stato raggiunto: 0,1247 e 0,1180 USD). Lotto S09/S07/S04 su Warren (8 run, `reports/s09-s07-s04-warren-live.md`): 0,774 USD su 1,5, non nel registro; le 2 run S09 costano 0,1010 (tetto 0,01) e 0,0968 (tetto 0,5). Gas Town: circa 0,44 USD (2 run più ping).
 
 ## Stato e motivo
 **PARZIALE.** Provato in negativo: il tetto di Warren con Claude Code non arresta la run (10,1 volte il tetto, nessun budget cumulativo: F60, D28). Non provati: il tetto di Pi a metà run (serve un harness Pi); budget con chiave API su Paperclip; budget superato che blocchi nuove esecuzioni (per Warren non esiste, CODE); escalation a un modello superiore; routing per task; costo per issue accettata con fallimenti (nessuna run valida è fallita a livello di test, quindi il costo dei fallimenti è 0 nei dati, salvo la run Warren `cancelled` per tetto e la run1 di Gas Town non consegnata); confronto fra modelli diversi. Il costo con abbonamento non equivale a una fattura.

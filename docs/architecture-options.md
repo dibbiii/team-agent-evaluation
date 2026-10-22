@@ -108,4 +108,4 @@ Fonti: `reports/comparison.md` (§2.1, §2.2), `reports/s01-*-live.md`, `reports
 | Lock e collisioni | da costruire nel controller | nessun lock: va nel controller | idem, più continuazioni di Paperclip |
 | Recovery | non provato | run in volo non riprese (agente finto); workspace distrutto | doppio stato da riconciliare |
 | Costo sulla baseline (ISSUE-1) | ~1,0× | 2,1× | ≥2,1× (Paperclip aggiunge continuazioni) |
-| Cosa resta non provato | recovery, runner come sistema | forge reale, recovery con agente vero, fixture difficile | adapter e tutta l'integrazione |
+| Cosa resta non provato | recovery, runner come sistema | recovery con agente vero, CI rossa con agente vero e CI letta da Warren, rete limitata. [Aggiornato 2026-10-22 sera: forge reale e fixture difficile (n=3) **provati** con Warren: `reports/s01-warren-github.md`, `reports/hard-n3.md`] | adapter e tutta l'integrazione |

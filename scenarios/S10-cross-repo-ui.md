@@ -34,4 +34,4 @@ Nessuno.
 0 USD.
 
 ## Stato e motivo
-**NON ESEGUITO.** Per `reports/completamento-vs-traccia.md` si può solo documentare l'adapter richiesto. Nessun candidato è stato provato con un forge reale (la CI di `tae-sandbox` non è stata usata con alcun candidato).
+**NON ESEGUITO.** Per `reports/completamento-vs-traccia.md` si può solo documentare l'adapter richiesto. *Fase precedente:* nessun candidato era stato provato con un forge reale. **[Aggiornato 2026-10-22 sera]** `tae-sandbox` (con la sua CI `npm test` e la protezione del ramo `main`) è stato usato con **Warren** per S01 (5 PR, 2 con agente vero: `reports/s01-warren-github.md`); non è stato usato con gli altri candidati, e S10 resta non eseguito (serve un secondo repository, che non esiste).
