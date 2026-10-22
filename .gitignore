@@ -17,3 +17,6 @@ results/raw/
 
 # Stato locale degli strumenti
 .serena/
+
+# configurazione locale di Claude Code dell utente (non fa parte della valutazione)
+.claude/settings.json
