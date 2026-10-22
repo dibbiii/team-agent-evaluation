@@ -1,5 +1,5 @@
 {
-  "spent_usd": 11.113926,
+  "spent_usd": 11.356626,
   "runs": [
     {
       "issue": "ISSUE-1",
@@ -517,6 +517,26 @@
       "result_file": "reports/hard-n3.md",
       "at": "2026-10-22T00:33:52.757Z",
       "note": "n=3 fixture difficile: 7 run baseline (1,069) + 12 run Warren (2,003)"
+    },
+    {
+      "issue": "HARD-5/6",
+      "scenario": "S01-github-forge",
+      "cost_usd": 0.1247,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-warren-github-live-57cffed1.json",
+      "at": "2026-10-22T08:07:07.236Z",
+      "note": "Warren con forge GitHub reale tae-sandbox"
+    },
+    {
+      "issue": "HARD-5/6",
+      "scenario": "S01-github-forge",
+      "cost_usd": 0.118,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "results/S01-warren-github-live-6aefa272.json",
+      "at": "2026-10-22T08:07:07.237Z",
+      "note": "Warren con forge GitHub reale tae-sandbox"
     }
   ]
 }

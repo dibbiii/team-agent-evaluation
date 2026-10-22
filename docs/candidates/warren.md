@@ -218,3 +218,19 @@ Etichette corrette o precisate dalla prova:
 | Identità reale dell'utente nei commit dell'agente (F30) | TESTED | 12 commit su 12 |
 | Credenziali: originale invariato, nessuna nei branch | TESTED | `cmp` identico prima e dopo ognuna delle 12 run; nessun `ATTENZIONE` dello script |
 | Funzioni multi-agente, forge reale, CI | UNVERIFIED | non esercitate (una issue, un agente) |
+
+## Risultati sperimentali con forge GitHub reale (2026-10-22: stub a costo zero + 2 run con agente vero)
+
+3 run di Warren con `WARREN_FORGE=github` su `dibbiii/tae-sandbox` (repo privato, protezione del ramo con revisione obbligatoria e controllo `test`, PAT fine-grained Contents + Pull requests) con un `claude` finto: costo 0. Dettaglio, comandi e limiti in `reports/s01-warren-github.md`; dati in `results/S01-warren-github-stub-*.json`. In piu' 2 run con Claude Code vero in bwrap (HARD-5 e HARD-6, PR 4 e 5): held-out PASS 2/2, 0,243 USD, commit firmati `tae-warren-bot`, nulla di sensibile nel branch, merge rifiutato dalla protezione, credenziali invariate (`cmp`).
+
+| Affermazione | Etichetta | Evidenza |
+|---|---|---|
+| Warren apre PR reali con un PAT a scope minimo (titolo = messaggio di commit; corpo con run, costo, commit, diffstat e prompt completo) | TESTED (stub) | PR 1-3, poi chiuse e branch cancellati |
+| Nessun merge e nessun arming dell'auto-merge senza opt-in `pr.autoMerge` | TESTED (stub) + CODE | `auto_merge: null`, `merged: false`, nessun evento oltre `reap.*` |
+| La protezione del ramo rifiuta il merge con il token dell'agente | TESTED | HTTP 405 «At least 1 approving review is required»; su PR con test rotto anche «Required status check "test" is failing» |
+| La CI esterna parte da sola sulle PR di Warren e distingue buono/rotto | TESTED (indiretto) | desunto dal messaggio di merge; check-runs/status/actions danno 403 con questo PAT |
+| Warren non vede la CI con il PAT e non reagisce a una CI rossa: run `succeeded`, PR aperta, nessun retry/commento | TESTED (stub, 120 s) | PR 3; con un agente vero e con token con permesso Checks: UNVERIFIED |
+| `WARREN_GIT_AUTHOR_*` da' autore e committer di macchina ai commit (la PR resta del proprietario del token) | TESTED | `tae-warren-bot`; senza la variabile l'agente vero usava l'identita' dell'utente (F30) |
+| `.claude/` (e, con l'agente vero, le credenziali copiate) puo' finire nel branch remoto con un commit largo | TESTED per `.claude/settings.local.json`; credenziali: UNVERIFIED | broad/break: file nel diff della PR |
+| Agente vero su forge reale: HARD-5 e HARD-6 PASS held-out, 0,12 USD e 25-30 s a run, commit con identita' di macchina, CI verde sulle PR | TESTED (n=1 per issue) | `results/S01-warren-github-live-*.json`; costi e turni come sul forge finto |
+| CI rossa con agente vero | UNVERIFIED | non eseguita |

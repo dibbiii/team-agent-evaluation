@@ -196,3 +196,10 @@
 
 - HARD-4, 5, 6, 9 (indipendenti): **baseline 11/12 PASS** (unico FAIL: HARD-4 della calibrazione), **Warren 12/12 PASS**. Costo medio per run 0,166 (baseline) contro 0,167 USD (Warren): sulla fixture difficile il sovraccosto di Warren non si vede (causa non indagata). Spesa 3,07 USD (ledger ~11,11 su 15). Report: `reports/hard-n3.md`.
 - Effetto soffitto: 23 prove su 24 passano; nessuna differenza di qualità dimostrata. Confronto non isolato (Claude Code 2.1.306 contro 2.1.307, strumenti, turni, Node). In tutti i 12 commit Warren l'agente firma con nome ed email reali dell'utente (F30). Credenziali originali integre (24/24 cmp). Pulizia verificata.
+
+## 2026-10-22 — Warren con forge GitHub reale (`dibbiii/tae-sandbox`)
+
+- Protezione del ramo `main` impostata via `gh` con il token dell'utente: 1 revisione obbligatoria, controllo `test` obbligatorio, `enforce_admins`, no force-push. Il PAT fine-grained (solo `tae-sandbox`, Contents e Pull requests) non può leggerla né modificarla (403); l'altro repository risulta non raggiungibile (404).
+- 3 run con `claude` finto e **2 run LIVE** (HARD-5, HARD-6, entrambe PASS held-out lato Windows, 0,125 e 0,118 USD, `tae-warren-bot` come identità, nessun `.claude` o credenziale nel diff). Spesa 0,24 USD (ledger ~11,36 su 15). Report: `reports/s01-warren-github.md`.
+- Merge senza revisione rifiutato dalla protezione (HTTP 405, anche per il controllo `test` rosso); Warren non tenta il merge. Con `git add -A` (stub) `.claude/settings.local.json` finisce nel branch e nella PR (F27 su forge reale). Con CI rossa Warren non reagisce (PR aperta, nessun retry): non vede la CI con questo PAT (403 su check-runs); con l'agente vero non provato.
+- Pulizia: PR 1–5 chiuse, 5 branch cancellati, `main` invariato (`00b8069`); file token e copie di credenziali rimossi. **Il PAT va revocato dall'utente.** Il ping di rinnovo credenziali fuori da bwrap è stato negato dal controllo permessi e non aggirato. Incidente: cartella `C:\wsl.localhost\` creata per errore di quoting (9 copie di script, nessun segreto), da cancellare a mano.

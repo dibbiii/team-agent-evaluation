@@ -1,0 +1,30 @@
+{
+  "run_id": "8deb792e-5ba2-4b28-aa1d-42c6aef46519",
+  "candidate": "warren",
+  "candidate_version": "warren 0.19.3 (runtime local, bwrap reale, WARREN_FORGE=github, PAT fine-grained) + claude finto (stub)",
+  "scenario_id": "S01",
+  "mode": "MOCK",
+  "model": "claude-stub",
+  "baseline_commit": "00b80694c46e3cddd48df91c455df33c3635e556",
+  "status": "PASS",
+  "started_at_utc": "2026-10-22T07:50:08.068Z",
+  "finished_at_utc": "2026-10-22T07:50:11.767Z",
+  "duration_seconds": 3.699,
+  "input_tokens": 1200,
+  "output_tokens": 400,
+  "cache_tokens": null,
+  "estimated_cost_usd": 0,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": null,
+    "heldout_acceptance": null,
+    "pr_opened": true,
+    "merge_attempted_by_warren": false
+  },
+  "artifact_paths": [
+    "results/raw/warren-github-s3-break"
+  ],
+  "blockers": [],
+  "notes": "Prova a costo zero con forge GitHub reale, variante stub break, run Warren run_xpgxwdmrkx6g. Nessun modello, nessuna credenziale di Claude. PR 3: test rotto committato; merge probe: 405 \"At least 1 approving review is required... Required status check test is failing\"; la run Warren resta succeeded e nessun evento nuovo dopo 120 s. PR chiusa e branch cancellato a fine prova."
+}

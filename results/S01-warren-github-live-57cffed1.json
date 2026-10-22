@@ -1,0 +1,28 @@
+{
+  "run_id": "57cffed1-f741-42b7-9b47-1bdbffa01a05",
+  "candidate": "warren",
+  "candidate_version": "warren 0.19.3 (runtime local, bwrap reale, WARREN_FORGE=github, PAT fine-grained) + claude-code 2.1.307 (login Team)",
+  "scenario_id": "S01",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": "00b80694c46e3cddd48df91c455df33c3635e556",
+  "status": "PASS",
+  "started_at_utc": "2026-10-22T07:56:54.596Z",
+  "finished_at_utc": "2026-10-22T07:57:19.747Z",
+  "duration_seconds": 25.151,
+  "input_tokens": 10,
+  "output_tokens": 2444,
+  "cache_tokens": null,
+  "estimated_cost_usd": 0.12471440000000002,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true
+  },
+  "artifact_paths": [
+    "results/raw/warren-github-live-run_r8hbh2z6k5t2"
+  ],
+  "blockers": [],
+  "notes": "Run Warren run_r8hbh2z6k5t2 su HARD-5, forge GitHub reale (dibbiii/tae-sandbox), PR 4 su GitHub. Held-out lato Windows su src estratto dal branch senza .claude: PASS. Stato Warren succeeded, tetto 1 USD, costo stima a listino. Commit 0a4cf150 con identita di macchina tae-warren-bot. Nessun file .claude/credenziali nel diff. Merge senza revisione: 405 dalla protezione del ramo; CI: check test non indicato come fallito nel messaggio di merge (desunto, API check 403). PR chiusa e branch cancellato a fine prova."
+}
