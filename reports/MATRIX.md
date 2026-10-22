@@ -3,7 +3,7 @@
 > **Documento autorevole per i numeri.** Generato da `scripts/build-matrix.mjs` a partire da `results/*.json`, `results/budget-ledger.json` e `docs/matrix-annotations.json`. NON modificare a mano: rigenera con `node scripts/build-matrix.mjs`. In caso di conflitto con altri report, valgono i JSON e questa matrice.
 
 - Data di generazione: 2026-10-22
-- Commit: `6c0c18c` (con modifiche non committate nel working tree)
+- Commit: `22efe8a`
 - Spesa nel registro (`budget-ledger.json`): **11,36 USD** (stime a listino con abbonamento, non fatture)
 - Run valide lette: 107 (escluse `results/invalid-contaminated` e `results/raw`)
 
