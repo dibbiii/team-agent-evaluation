@@ -1,0 +1,10 @@
+{
+  "name": "seed-app-team",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Fixture di seconda generazione: noleggio di attrezzature, importi in centesimi interi, nessuna dipendenza.",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  }
+}

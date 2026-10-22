@@ -1,0 +1,52 @@
+{
+  "description": "Oracolo umano della fixture di squadra. Una domanda riceve la risposta della PRIMA voce il cui `match` (espressione regolare, senza distinzione di maiuscole) compare nel testo; se nessuna corrisponde riceve `default`. `expected: true` = domanda che un buon Analyst deve porre (il requisito è davvero incompleto o in conflitto con una ADR); `expected: false` = risposta già presente nel repository (domanda inutile). Il confronto è per parole chiave: è una euristica dichiarata, non un giudizio semantico.",
+  "default": {
+    "id": "default",
+    "expected": false,
+    "answer": "Non è importante: scegli l'opzione più semplice e coerente con il codice esistente e documentala."
+  },
+  "entries": [
+    {
+      "id": "Q1-after-start",
+      "expected": true,
+      "subtask": "TEAM-2",
+      "held_out_tag": "[Q1]",
+      "match": "(dopo|già|gia|oltre).{0,40}(inizio|iniziat|start|partenza|ritiro|consegna)|no.?show|in corso|noleggio.{0,20}(partito|avviato)|startDate.{0,30}(passat|superat)",
+      "answer": "Se si annulla a noleggio già iniziato (data di annullamento dopo startDate) la penale è il 100% della tariffa di noleggio (rentalCents). Il deposito si restituisce comunque per intero. Il tier si chiama 'started'."
+    },
+    {
+      "id": "Q2-rounding",
+      "expected": true,
+      "subtask": "TEAM-2",
+      "held_out_tag": "[Q2]",
+      "match": "arrotond|rounding|round|ceil|eccesso|difetto|frazion|centesim.{0,30}(penale|percent)|penale.{0,40}(non intera|decimal|virgola)",
+      "answer": "La penale si arrotonda per eccesso al centesimo (a favore dell'azienda): ceil(rentalCents * percent / 100). Esiste già l'helper ceilDiv in src/money.js."
+    },
+    {
+      "id": "Q3-credit-expiry",
+      "expected": true,
+      "subtask": "TEAM-4",
+      "held_out_tag": "[ADR-004]",
+      "match": "scad|expir|90 giorni|90 days|adr-?004|validit|non scade|data limite",
+      "answer": "Vale ADR-004: il credito cliente non scade mai. Il requisito della scadenza a 90 giorni va tolto: non implementarlo. Se il responsabile prodotto lo vuole, servirà una nuova ADR approvata dall'ufficio legale."
+    },
+    {
+      "id": "info-date-format",
+      "expected": false,
+      "match": "fus[oi] orar|timezone|time zone|formato.{0,20}data|ora legale|utc",
+      "answer": "Già nel repository: ADR-002 (date ISO YYYY-MM-DD, calendario UTC)."
+    },
+    {
+      "id": "info-deposit",
+      "expected": false,
+      "match": "deposit|cauzion",
+      "answer": "Già nei requisiti: il deposito si restituisce sempre per intero (REQ-1)."
+    },
+    {
+      "id": "info-notify-channel",
+      "expected": false,
+      "match": "email|mail|sms|canale|template|lingua|invio|spedi",
+      "answer": "Fuori ambito: basta il messaggio in outbox (ADR-003); la spedizione la fa un altro worker."
+    }
+  ]
+}

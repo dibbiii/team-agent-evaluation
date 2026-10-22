@@ -1,0 +1,11 @@
+{
+  "description": "Controlli della CI esterna. Gira dopo ogni consegna (non in locale); il runner non è in questa cartella.",
+  "rules": [
+    { "id": "tests-pass", "what": "`npm test` passa (tutti i test in test/*.test.js)." },
+    { "id": "no-console", "what": "Nessun `console.*` in src/." },
+    { "id": "money-helpers", "what": "Fuori da src/money.js: niente Math.round/ceil/floor/trunc, toFixed, parseFloat (ADR-001). Usare gli helper di money.js." },
+    { "id": "sorted-exports", "what": "Le righe `export ... from './x.js'` di src/index.js sono in ordine alfabetico per modulo." },
+    { "id": "tests-with-code", "what": "Se cambia un file di src/ (index.js escluso) deve esserci almeno un test nuovo o modificato in test/." },
+    { "id": "changelog", "what": "CHANGELOG.md contiene una riga `- TEAM-n: descrizione` per il ticket consegnato." }
+  ]
+}

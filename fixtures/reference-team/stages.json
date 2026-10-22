@@ -1,0 +1,25 @@
+{
+  "description": "Come si costruiscono gli alberi di riferimento: sovrapposizioni (cartelle di file che sostituiscono o aggiungono percorsi relativi alla radice di seed-app-team) applicate in ordine sul seed. Ogni sotto-compito è verificato sull'albero che contiene solo le sue dipendenze: stages/TEAM-6 e stages/TEAM-5 vengono da rami paralleli e modificano entrambi src/bookings.js, quindi si uniscono a mano in `merge`.",
+  "overlays": {
+    "TEAM-2": "stages/TEAM-2",
+    "TEAM-3": "stages/TEAM-3",
+    "TEAM-4": "stages/TEAM-4",
+    "TEAM-5": "stages/TEAM-5",
+    "TEAM-6": "stages/TEAM-6",
+    "merge": "merge",
+    "TEAM-8": "stages/TEAM-8"
+  },
+  "chains": {
+    "TEAM-2": ["TEAM-2"],
+    "TEAM-3": ["TEAM-2", "TEAM-3"],
+    "TEAM-4": ["TEAM-2", "TEAM-4"],
+    "TEAM-5": ["TEAM-2", "TEAM-3", "TEAM-4", "TEAM-5"],
+    "TEAM-6": ["TEAM-2", "TEAM-3", "TEAM-6"],
+    "MERGE": ["TEAM-2", "TEAM-3", "TEAM-4", "TEAM-5", "TEAM-6", "merge"],
+    "TEAM-8": ["TEAM-2", "TEAM-3", "TEAM-4", "TEAM-5", "TEAM-6", "merge", "TEAM-8"],
+    "FEATURE": ["TEAM-2", "TEAM-3", "TEAM-4", "TEAM-5", "TEAM-6", "merge", "TEAM-8"]
+  },
+  "parallel_conflicts": [
+    { "base": "TEAM-3", "ours": "TEAM-5", "theirs": "TEAM-6", "file": "src/bookings.js", "note": "TEAM-5 (credito) e TEAM-6 (avviso) partono dallo stesso stato dopo TEAM-3 e modificano la stessa parte di cancel()" }
+  ]
+}

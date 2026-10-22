@@ -1,0 +1,6 @@
+{
+  "name": "acceptance-team",
+  "private": true,
+  "type": "module",
+  "description": "Test held-out della fixture di squadra: eseguiti FUORI dal workspace dell'agente."
+}

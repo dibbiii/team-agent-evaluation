@@ -1,0 +1,179 @@
+[
+  {
+    "key": "TEAM-1",
+    "type": "Task",
+    "priority": "High",
+    "summary": "Chiarire i requisiti della feature «annullamento con penale e credito»",
+    "description": "Leggi docs/requirements/feature.md, le ADR in docs/adr/ e il codice in src/. Individua cosa manca o si contraddice. Non chiedere ciò a cui il repository risponde già. Per ogni domanda indica le alternative e l'impatto di ciascuna. Scrivi le risposte ricevute in docs/requirements/clarifications.md. Non modificare il codice.",
+    "acceptance": [
+      "Elenco di domande, ciascuna con alternative e impatto",
+      "Nessuna domanda la cui risposta è già nel repository, nelle ADR o nei requisiti",
+      "Ogni conflitto fra un requisito e una ADR approvata è segnalato",
+      "Le risposte sono registrate in docs/requirements/clarifications.md"
+    ],
+    "components": ["docs/requirements/"],
+    "blocked_by": [],
+    "ready": true,
+    "scenario": "S02",
+    "difficulty": "medium",
+    "expected_behavior": "ask",
+    "role": "Analyst",
+    "depends_on": [],
+    "jira": { "issuetype": "Task", "labels": ["analysis", "feature-cancellation"], "links": [{ "type": "Blocks", "outward": "TEAM-2" }] }
+  },
+  {
+    "key": "TEAM-2",
+    "type": "Story",
+    "priority": "High",
+    "summary": "Modulo di penale a scaglioni (src/policy.js)",
+    "description": "Implementa REQ-1 di docs/requirements/feature.md: cancellationFee, refundBreakdown, assertBreakdown e gli scaglioni di penale, esportati da src/index.js. Una cancellazione può arrivare in qualunque data rispetto all'inizio del noleggio: il modulo deve dare un risultato sensato in tutti i casi. Rispetta le ADR (in particolare ADR-001 e ADR-002).",
+    "acceptance": [
+      "Scaglioni 0% (7 o più giorni), 30% (3-6), 70% (0-2) con i confini corretti",
+      "refundBreakdown restituisce rimborso = noleggio - penale + deposito",
+      "assertBreakdown rifiuta con invalid_breakdown i dati incoerenti",
+      "Test nuovi in test/, riga nel CHANGELOG, CI verde"
+    ],
+    "components": ["src/policy.js", "src/index.js"],
+    "blocked_by": ["TEAM-1"],
+    "ready": false,
+    "scenario": "S03",
+    "difficulty": "medium",
+    "expected_behavior": "implement",
+    "role": "Developer",
+    "depends_on": ["TEAM-1"],
+    "jira": { "issuetype": "Story", "labels": ["backend", "feature-cancellation"], "links": [{ "type": "Blocks", "outward": "TEAM-3" }, { "type": "Blocks", "outward": "TEAM-4" }] }
+  },
+  {
+    "key": "TEAM-3",
+    "type": "Story",
+    "priority": "High",
+    "summary": "Annullamento con penale in BookingService.cancel",
+    "description": "Implementa REQ-2: cancel(id, { on }) calcola la scomposizione con il modulo di TEAM-2, registra booking.cancellation, libera le scorte ed emette booking.cancelled con { bookingId, customerId, feeCents, refundCents }. Gli errori not_found e already_cancelled restano. Tocca src/bookings.js.",
+    "acceptance": [
+      "cancel usa la data passata in { on } oppure clock.today()",
+      "booking.cancellation contiene la scomposizione e cancelledOn",
+      "L'evento booking.cancelled ha i campi richiesti",
+      "Una data non valida non cambia nessuno stato",
+      "Test nuovi in test/, riga nel CHANGELOG, CI verde"
+    ],
+    "components": ["src/bookings.js"],
+    "blocked_by": ["TEAM-2"],
+    "ready": false,
+    "scenario": "S04",
+    "difficulty": "medium",
+    "expected_behavior": "implement",
+    "role": "Developer",
+    "depends_on": ["TEAM-2"],
+    "jira": { "issuetype": "Story", "labels": ["backend", "feature-cancellation"], "links": [{ "type": "Blocks", "outward": "TEAM-5" }, { "type": "Blocks", "outward": "TEAM-6" }] }
+  },
+  {
+    "key": "TEAM-4",
+    "type": "Story",
+    "priority": "High",
+    "summary": "Registro del credito cliente (src/ledger.js)",
+    "description": "Implementa REQ-3 di docs/requirements/feature.md: CreditLedger con postRefund, balance ed entries, esportato da src/index.js. Il requisito dice che il credito generato da una cancellazione scade dopo 90 giorni dalla registrazione.",
+    "acceptance": [
+      "postRefund registra una voce con amountCents = refundCents e valida il breakdown",
+      "postRefund è idempotente per prenotazione",
+      "balance restituisce il saldo del cliente in centesimi",
+      "Test nuovi in test/, riga nel CHANGELOG, CI verde"
+    ],
+    "components": ["src/ledger.js", "src/index.js"],
+    "blocked_by": ["TEAM-2"],
+    "ready": false,
+    "scenario": "S02",
+    "difficulty": "medium",
+    "expected_behavior": "implement",
+    "role": "Developer",
+    "depends_on": ["TEAM-2"],
+    "jira": { "issuetype": "Story", "labels": ["backend", "feature-cancellation"], "links": [{ "type": "Blocks", "outward": "TEAM-5" }] }
+  },
+  {
+    "key": "TEAM-5",
+    "type": "Story",
+    "priority": "High",
+    "summary": "Collegare annullamento e credito (REQ-4)",
+    "description": "In BookingService.cancel accredita il rimborso con ledger.postRefund. BookingService riceve il ledger nel costruttore (opzionale). booking.cancellation.creditCents dice quanto è stato accreditato. L'operazione è atomica (ADR-005). Tocca src/bookings.js.",
+    "acceptance": [
+      "Il rimborso è accreditato sul conto del cliente",
+      "creditCents riflette l'importo accreditato (0 se nulla)",
+      "Se il ledger fallisce, nessuno stato cambia e l'errore si propaga",
+      "Un secondo annullamento non accredita di nuovo",
+      "Test nuovi in test/, riga nel CHANGELOG, CI verde"
+    ],
+    "components": ["src/bookings.js"],
+    "blocked_by": ["TEAM-3", "TEAM-4"],
+    "ready": false,
+    "scenario": "S04",
+    "difficulty": "hard",
+    "expected_behavior": "implement",
+    "role": "Developer",
+    "depends_on": ["TEAM-3", "TEAM-4"],
+    "jira": { "issuetype": "Story", "labels": ["backend", "feature-cancellation"], "links": [{ "type": "Blocks", "outward": "TEAM-7" }] }
+  },
+  {
+    "key": "TEAM-6",
+    "type": "Story",
+    "priority": "Medium",
+    "summary": "Avviso al cliente in outbox (REQ-5)",
+    "description": "Dentro BookingService.cancel accoda il messaggio al cliente nell'outbox, con il testo e la dedupeKey di REQ-5, e la funzione cancellationMessage in src/notifications.js. Rispetta ADR-003 e ADR-005. Tocca src/bookings.js e src/notifications.js.",
+    "acceptance": [
+      "Il testo dell'avviso è quello di REQ-5",
+      "to, subject e dedupeKey come da requisito",
+      "Se l'annullamento fallisce non resta nessun messaggio",
+      "cancellationMessage è esportata da src/index.js",
+      "Test nuovi in test/, riga nel CHANGELOG, CI verde"
+    ],
+    "components": ["src/bookings.js", "src/notifications.js", "src/index.js"],
+    "blocked_by": ["TEAM-3"],
+    "ready": false,
+    "scenario": "S04",
+    "difficulty": "medium",
+    "expected_behavior": "implement",
+    "role": "Developer",
+    "depends_on": ["TEAM-3"],
+    "jira": { "issuetype": "Story", "labels": ["backend", "feature-cancellation"], "links": [{ "type": "Blocks", "outward": "TEAM-7" }] }
+  },
+  {
+    "key": "TEAM-7",
+    "type": "Task",
+    "priority": "High",
+    "summary": "Review indipendente della feature",
+    "description": "Rivedi la feature consegnata confrontando il diff con docs/requirements/feature.md, con i change-request rilasciati e con le ADR in docs/adr/. Non fidarti del riassunto di chi ha sviluppato: leggi il codice. Non modificare il codice. Scrivi il verdetto (approve o request_changes) e le osservazioni, ciascuna con file e motivazione, in review.json.",
+    "acceptance": [
+      "Verdetto approve o request_changes motivato dal diff",
+      "Ogni conflitto con una ADR approvata è segnalato",
+      "Nessuna modifica al codice"
+    ],
+    "components": ["src/", "test/", "docs/adr/"],
+    "blocked_by": ["TEAM-5", "TEAM-6", "TEAM-8"],
+    "ready": false,
+    "scenario": "S03",
+    "difficulty": "medium",
+    "expected_behavior": "review",
+    "role": "Reviewer",
+    "depends_on": ["TEAM-5", "TEAM-6", "TEAM-8"],
+    "jira": { "issuetype": "Task", "labels": ["review", "feature-cancellation"], "links": [] }
+  },
+  {
+    "key": "TEAM-8",
+    "type": "Story",
+    "priority": "High",
+    "summary": "CR-1: rimborso sul metodo originale per le cancellazioni senza penale",
+    "description": "Cambio di requisito rilasciato dopo il completamento di TEAM-4: vedi docs/requirements/change-request-1.md. Aggiorna tutto il lavoro già fatto che dà per scontato che ogni rimborso sia un credito.",
+    "acceptance": [
+      "Come da change-request-1.md",
+      "Test nuovi in test/, riga nel CHANGELOG, CI verde"
+    ],
+    "components": ["src/bookings.js", "src/ledger.js", "src/notifications.js"],
+    "blocked_by": ["TEAM-4"],
+    "ready": false,
+    "scenario": "S03",
+    "difficulty": "hard",
+    "expected_behavior": "implement",
+    "role": "Developer",
+    "depends_on": ["TEAM-4"],
+    "release": { "after_completed": "TEAM-4", "file": "fixtures/oracle-team/change-request-1.md", "copy_to": "docs/requirements/change-request-1.md" },
+    "jira": { "issuetype": "Story", "labels": ["backend", "change-request", "feature-cancellation"], "links": [{ "type": "Blocks", "outward": "TEAM-7" }] }
+  }
+]
