@@ -50,3 +50,7 @@ Primo claim = issue a priorità più alta e non bloccata; claim concorrenti dist
 - Il controller (`fixtures/mock-integrations/queue-controller.mjs`) è codice nostro: 133 righe contate nel file (i report citano 131 o 97 a seconda della data), più 193 del finto REST e 145 dello script di creazione (`wc -l`). Non attribuisce la capacità ai prodotti.
 - Il test sul Jira reale ha **smentito due ipotesi del mock** (direzione dell'`issueLink`; `reconcile` poteva toccare ticket non del benchmark), corrette.
 - Non provati: webhook reali (serve un endpoint raggiungibile da Jira), riavvio del controller con persistenza reale (Postgres), qualunque candidato con Jira reale.
+
+
+## Aggiornamento 2026-10-22 — webhook reali
+Provati su Jira Cloud reale (progetto KAN): regola di Automation → richiesta web verso un ricevitore locale attraverso un tunnel temporaneo; 2 eventi di transizione ricevuti in circa 0,14 s, duplicato scartato (TESTED, n=1). Dettagli e limiti in `docs/jira-setup.md`; dati in `results/S05-jira-webhook-events.jsonl`. Resta non provato: webhook che comandano il controller, ritentativi reali, consegne fuori ordine, riavvio con persistenza reale, qualunque candidato con Jira reale.

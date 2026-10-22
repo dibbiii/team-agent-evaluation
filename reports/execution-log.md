@@ -203,3 +203,8 @@
 - 3 run con `claude` finto e **2 run LIVE** (HARD-5, HARD-6, entrambe PASS held-out lato Windows, 0,125 e 0,118 USD, `tae-warren-bot` come identità, nessun `.claude` o credenziale nel diff). Spesa 0,24 USD (ledger ~11,36 su 15). Report: `reports/s01-warren-github.md`.
 - Merge senza revisione rifiutato dalla protezione (HTTP 405, anche per il controllo `test` rosso); Warren non tenta il merge. Con `git add -A` (stub) `.claude/settings.local.json` finisce nel branch e nella PR (F27 su forge reale). Con CI rossa Warren non reagisce (PR aperta, nessun retry): non vede la CI con questo PAT (403 su check-runs); con l'agente vero non provato.
 - Pulizia: PR 1–5 chiuse, 5 branch cancellati, `main` invariato (`00b8069`); file token e copie di credenziali rimossi. **Il PAT va revocato dall'utente.** Il ping di rinnovo credenziali fuori da bwrap è stato negato dal controllo permessi e non aggirato. Incidente: cartella `C:\wsl.localhost\` creata per errore di quoting (9 copie di script, nessun segreto), da cancellare a mano.
+
+## 2026-10-22 — Webhook Jira reali (S05)
+
+- Ricevitore `scripts/jira-webhook-receiver.mjs` + tunnel temporaneo `cloudflared` (già installato, nessun download). Regola di Automation creata dall'utente nel progetto KAN (screenshot: trigger «Transizione ticket eseguita», azione «Invia richiesta Web»).
+- 2 eventi reali ricevuti (KAN-4 → In Progress → To Do), ~0,14 s di ritardo; duplicato scartato; richieste senza segreto → 404. Tunnel e ricevitore fermati (porta 8787 libera, `cloudflared` fermo, il vecchio URL non risponde più). **La regola in Jira va disattivata o cancellata dall'utente.** Dati: `results/S05-jira-webhook-events.jsonl`.
