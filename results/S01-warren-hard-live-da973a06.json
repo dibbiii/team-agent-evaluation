@@ -1,0 +1,31 @@
+{
+  "run_id": "da973a06-8549-4cbc-b107-361077fa0c53",
+  "candidate": "warren",
+  "candidate_version": "warren 0.19.3 @ ce088e8 (runtime local, bwrap reale, forge fake) + claude-code (login Team)",
+  "scenario_id": "S01",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": null,
+  "status": "PASS",
+  "started_at_utc": "2026-10-22T00:22:05.301Z",
+  "finished_at_utc": "2026-10-22T00:22:29.375Z",
+  "duration_seconds": 24.074,
+  "input_tokens": 12,
+  "output_tokens": 2757,
+  "cache_tokens": 189899,
+  "estimated_cost_usd": 0.1359095,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true,
+    "fixture": "hard",
+    "warren_run_id": "run_j1e3krg7qd2g",
+    "warren_state": "succeeded",
+    "num_turns": 6,
+    "raw_dir": "results/raw/warren-hard-p2-hard-6-3"
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "Lotto n=3 fixture difficile, Warren + Claude Code: HARD-6, run Warren run_j1e3krg7qd2g, stato succeeded, failureReason null, costUsd 0.1359095 (stima a listino), turni 6, modello init claude-sonnet-5-5. Durata = finestra startedAt-endedAt di Warren (comprende preparazione workspace e push, diversa dalla durata della baseline). Grezzi: results/raw/warren-hard-p2-hard-6-3"
+}

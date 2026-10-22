@@ -1,5 +1,5 @@
 {
-  "spent_usd": 8.040926,
+  "spent_usd": 11.113926,
   "runs": [
     {
       "issue": "ISSUE-1",
@@ -507,6 +507,16 @@
       "result_file": "reports/s09-s07-s04-warren-live.md",
       "at": "2026-10-21T23:28:04.901Z",
       "note": "8 run Warren LIVE (0,090-0,101 USD ciascuna)"
+    },
+    {
+      "issue": "HARD-4/5/6/9",
+      "scenario": "S01-hard-n3",
+      "cost_usd": 3.073,
+      "execution_error": false,
+      "status": "PASS",
+      "result_file": "reports/hard-n3.md",
+      "at": "2026-10-22T00:33:52.757Z",
+      "note": "n=3 fixture difficile: 7 run baseline (1,069) + 12 run Warren (2,003)"
     }
   ]
 }

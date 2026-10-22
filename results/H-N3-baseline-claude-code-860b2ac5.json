@@ -1,0 +1,40 @@
+{
+  "run_id": "860b2ac5-f9ba-4ab2-a6a5-44dc11bfe150",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.307 (Claude Code)",
+  "scenario_id": "H-N3",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": null,
+  "status": "PASS",
+  "started_at_utc": "2026-10-22T00:09:16.682Z",
+  "finished_at_utc": "2026-10-22T00:10:45.412Z",
+  "duration_seconds": 88.73,
+  "input_tokens": 10,
+  "output_tokens": 8525,
+  "cache_tokens": 78245,
+  "estimated_cost_usd": 0.1571949,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true,
+    "src_changed": true,
+    "changed_files": [
+      "src/shipping-table.js",
+      "src/shipping.js",
+      "test/shipping-table.test.js"
+    ],
+    "expected_behavior": "implement",
+    "fixture": "hard",
+    "preapplied_dependencies": [],
+    "ask_nudge": false,
+    "raw_dir": "results/raw/h-n3-baseline-HARD-9-1792627828707"
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "Lotto n=3 fixture difficile, baseline Claude Code, 8 turni, issue HARD-9. Costo = stima a listino (abbonamento). modelUsage: claude-sonnet-5-5. Grezzi: results/raw/h-n3-baseline-HARD-9-1792627828707/. Riassunto agente: Ho spostato le regole di spedizione in `src/shipping-table.js`, che esporta `SHIPPING_TABLE`: dati puri, con le soglie esclusive di extra e world e l'arrotondamento a 100 g. `zoneFor` e `shippingCost` in `src/shipping.js` ora leggono la tabella, con parametro `table` opzionale, e non la modificano. ",
+  "model_usage_keys": [
+    "claude-sonnet-5-5"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "run_id": "3196f1f5-b03a-4547-b4e7-ac618d2338a6",
+  "candidate": "baseline-claude-code",
+  "candidate_version": "claude-code 2.1.307 (Claude Code)",
+  "scenario_id": "H-N3",
+  "mode": "LIVE",
+  "model": "claude-sonnet-5-5",
+  "baseline_commit": null,
+  "status": "PASS",
+  "started_at_utc": "2026-10-22T00:00:33.462Z",
+  "finished_at_utc": "2026-10-22T00:02:32.960Z",
+  "duration_seconds": 119.498,
+  "input_tokens": 20,
+  "output_tokens": 12811,
+  "cache_tokens": 234795,
+  "estimated_cost_usd": 0.2699906,
+  "retries": 0,
+  "human_interventions": 0,
+  "checks": {
+    "visible_tests": true,
+    "heldout_acceptance": true,
+    "src_changed": true,
+    "changed_files": [
+      "src/money.js",
+      "src/orders.js",
+      "src/payments.js",
+      "src/reports.js",
+      "test/currency.test.js",
+      "test/helpers.js"
+    ],
+    "expected_behavior": "implement",
+    "fixture": "hard",
+    "preapplied_dependencies": [],
+    "ask_nudge": false,
+    "raw_dir": "results/raw/h-n3-baseline-HARD-4-1792627336246"
+  },
+  "artifact_paths": [],
+  "blockers": [],
+  "notes": "Lotto n=3 fixture difficile, baseline Claude Code, 22 turni, issue HARD-4. Costo = stima a listino (abbonamento). modelUsage: claude-sonnet-5-5. Grezzi: results/raw/h-n3-baseline-HARD-4-1792627336246/. Riassunto agente: USD e JPY sono supportati accanto a EUR, e `npm test` passa (98 test, 0 falliti). Il codice è in `src/money.js` (`CURRENCIES`, `formatMoney`, `convert` con BigInt e half-even), `src/orders.js` (`currency`, `fxRatePpm`, `payableCents`) e `src/payments.js`. Nell'ordine il cambio viene letto e converti",
+  "model_usage_keys": [
+    "claude-sonnet-5-5"
+  ]
+}

@@ -200,3 +200,7 @@ docker ps -a --filter label=tae=1 -q          # deve essere vuoto
 # I risultati in results/ sono evidenza versionata: non cancellarli. I cloni di terze parti stanno nello scratchpad (fuori dalla repo)
 # e si possono rimuovere con `rm -rf` sul percorso esatto di ciascun clone.
 ```
+
+## Aggiornamento 2026-10-22 — fixture difficile a n=3
+
+Baseline 11/12 PASS e Warren 12/12 PASS su HARD-4/5/6/9 (`reports/hard-n3.md`): anche la fixture difficile resta vicina al soffitto (23 prove su 24 passano) e non dimostra una differenza di qualità fra i due sistemi. Costo medio per run praticamente uguale (0,166 contro 0,167 USD, stime a listino). **La raccomandazione (B primaria, A seconda, C differita) non cambia**: i dati nuovi non distinguono B da A, e confermano che la scelta dipende da controllo, recupero e costi operativi, non dalla qualità del codice.
