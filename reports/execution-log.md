@@ -208,3 +208,8 @@
 
 - Ricevitore `scripts/jira-webhook-receiver.mjs` + tunnel temporaneo `cloudflared` (già installato, nessun download). Regola di Automation creata dall'utente nel progetto KAN (screenshot: trigger «Transizione ticket eseguita», azione «Invia richiesta Web»).
 - 2 eventi reali ricevuti (KAN-4 → In Progress → To Do), ~0,14 s di ritardo; duplicato scartato; richieste senza segreto → 404. Tunnel e ricevitore fermati (porta 8787 libera, `cloudflared` fermo, il vecchio URL non risponde più). **La regola in Jira va disattivata o cancellata dall'utente.** Dati: `results/S05-jira-webhook-events.jsonl`.
+
+## 2026-10-22 — Pulizia finale
+
+- `claude auth logout` eseguito nella distribuzione `Ubuntu-26.04` (file delle credenziali rimosso, `loggedIn false`), poi, con conferma esplicita dell'utente, `wsl --unregister Ubuntu-26.04` (nome esatto). `wsl -l -v` dopo: restano `Ubuntu` e `docker-desktop`, intatte. Le installazioni dei candidati nella distribuzione sono andate perse: si ricreano con gli script `scripts/live/*-install.sh` / `*-setup.sh`.
+- Restano a carico dell'utente: disattivare o cancellare in Jira la regola `tae-webhook-test`; cancellare a mano `C:\wsl.localhost\`; confermare la revoca del token API Atlassian e del PAT GitHub; revocare eventuali sessioni residue.
